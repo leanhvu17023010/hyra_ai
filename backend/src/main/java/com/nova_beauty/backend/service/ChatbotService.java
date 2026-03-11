@@ -691,10 +691,9 @@ public class ChatbotService {
         return cachedProductsContext;
     }
 
-    /**
-     * Extract keywords từ user message để filter sản phẩm
-     * Trả về array các keywords như: ["son", "kem", "nước hoa"]
-     */
+    
+     // Extract keywords từ user message để filter sản phẩm
+    // Trả về array các keywords như: ["son", "kem", "nước hoa"]
     private String[] extractProductKeywords(String message) {
         String lowerMessage = message.toLowerCase();
         java.util.List<String> keywords = new java.util.ArrayList<>();
@@ -780,9 +779,8 @@ public class ChatbotService {
         return null;
     }
 
-    /**
-     * Lấy context về sản phẩm theo thương hiệu
-     */
+    //Lấy context về sản phẩm theo thương hiệu
+     
     @Transactional(readOnly = true)
     private String getBrandProductsContext(String brandName) {
         try {
@@ -835,9 +833,9 @@ public class ChatbotService {
         }
     }
 
-    /**
-     * Lấy context sản phẩm đã filter theo keywords
-     */
+    
+     //Lấy context sản phẩm đã filter theo keywords
+     
     @Transactional(readOnly = true)
     private String getFilteredProductsContext(String[] keywords) {
         try {
