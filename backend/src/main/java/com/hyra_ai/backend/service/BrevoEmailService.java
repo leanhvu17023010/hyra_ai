@@ -45,16 +45,16 @@ public class BrevoEmailService {
 
             // Prepare request body
             Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put("sender", Map.of("email", senderEmail, "name", "NovaBeauty"));
+            requestBody.put("sender", Map.of("email", senderEmail, "name", "HyraTek"));
             requestBody.put("to", new Object[] {Map.of("email", toEmail, "name", "User")});
-            requestBody.put("subject", "Mã xác thực OTP - NovaBeauty");
+            requestBody.put("subject", "Mã xác thực OTP - HyraTek");
 
             String emailContent = String.format(
                     "Xin chào,\n\n" + "Mã xác thực OTP của bạn là: %s\n\n"
                             + "Mã này có hiệu lực trong 5 phút.\n"
                             + "Vui lòng không chia sẻ mã này với bất kỳ ai.\n\n"
                             + "Trân trọng,\n"
-                            + "Đội ngũ NovaBeauty",
+                            + "Đội ngũ HyraTek",
                     otpCode);
 
             requestBody.put("textContent", emailContent);
@@ -90,22 +90,22 @@ public class BrevoEmailService {
 
             // Prepare request body
             Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put("sender", Map.of("email", senderEmail, "name", "NovaBeauty Admin"));
+            requestBody.put("sender", Map.of("email", senderEmail, "name", "HyraTek Admin"));
             requestBody.put("to", new Object[] {Map.of("email", toEmail, "name", staffName)});
-            requestBody.put("subject", "Thông tin tài khoản nhân viên - NovaBeauty");
+            requestBody.put("subject", "Thông tin tài khoản nhân viên - HyraTek");
 
             String emailContent = String.format(
                     "Xin chào %s,\n\n"
-                            + "Chào mừng bạn đến với đội ngũ NovaBeauty!\n\n"
+                            + "Chào mừng bạn đến với đội ngũ HyraTek!\n\n"
                             + "Thông tin tài khoản của bạn:\n"
                             + "- Email: %s\n"
                             + "- Mật khẩu: %s\n"
                             + "- Vai trò: %s\n\n"
                             + "Vui lòng đăng nhập và thay đổi mật khẩu ngay lần đầu tiên để bảo mật tài khoản.\n"
-                            + "Địa chỉ đăng nhập: http://localhost:3000\n\n"
+                            + "Địa chỉ đăng nhập: http://localhost:5173\n\n"
                             + "Lưu ý: Vui lòng không chia sẻ thông tin này với bất kỳ ai.\n\n"
                             + "Trân trọng,\n"
-                            + "Đội ngũ NovaBeauty",
+                            + "Đội ngũ HyraTek",
                     staffName, toEmail, password, role);
 
             requestBody.put("textContent", emailContent);
@@ -142,9 +142,9 @@ public class BrevoEmailService {
 
             // Prepare request body
             Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put("sender", Map.of("email", senderEmail, "name", "NovaBeauty Admin"));
+            requestBody.put("sender", Map.of("email", senderEmail, "name", "HyraTek Admin"));
             requestBody.put("to", new Object[] {Map.of("email", toEmail, "name", userName != null ? userName : "User")});
-            requestBody.put("subject", "Thông báo: Tài khoản của bạn đã bị khóa - NovaBeauty");
+            requestBody.put("subject", "Thông báo: Tài khoản của bạn đã bị khóa - HyraTek");
 
             String roleDisplayName = "Khách hàng";
             if (roleName != null) {
@@ -164,7 +164,7 @@ public class BrevoEmailService {
 
             String emailContent = String.format(
                     "Xin chào %s,\n\n"
-                            + "Chúng tôi xin thông báo rằng tài khoản %s của bạn tại NovaBeauty đã bị khóa.\n\n"
+                            + "Chúng tôi xin thông báo rằng tài khoản %s của bạn tại HyraTek đã bị khóa.\n\n"
                             + "Thông tin tài khoản:\n"
                             + "- Email: %s\n"
                             + "- Vai trò: %s\n\n"
@@ -174,7 +174,7 @@ public class BrevoEmailService {
                             + "- Hoặc liên hệ qua hotline:  \n\n"
                             + "Chúng tôi sẽ xem xét và phản hồi yêu cầu của bạn trong thời gian sớm nhất.\n\n"
                             + "Trân trọng,\n"
-                            + "Đội ngũ NovaBeauty",
+                            + "Đội ngũ HyraTek",
                     userName != null ? userName : "Quý khách", roleDisplayName, toEmail, roleDisplayName, senderEmail);
 
             requestBody.put("textContent", emailContent);
@@ -232,17 +232,17 @@ public class BrevoEmailService {
 
             String emailContent = String.format(
                     "Xin chào %s,\n\n"
-                            + "Thông tin tài khoản %s của bạn tại NovaBeauty vừa được quản trị viên cập nhật.\n"
+                            + "Thông tin tài khoản %s của bạn tại HyraTek vừa được quản trị viên cập nhật.\n"
                             + "Nếu bạn không yêu cầu thay đổi này, vui lòng liên hệ với chúng tôi để được hỗ trợ.\n\n"
                             + "Trân trọng,\n"
-                            + "Đội ngũ NovaBeauty",
+                            + "Đội ngũ HyraTek",
                     userName != null && !userName.isBlank() ? userName : "Quý khách",
                     roleDisplayName);
 
             Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put("sender", Map.of("email", senderEmail, "name", "NovaBeauty Admin"));
+            requestBody.put("sender", Map.of("email", senderEmail, "name", "HyraTek Admin"));
             requestBody.put("to", new Object[] {Map.of("email", toEmail, "name", userName != null ? userName : "User")});
-            requestBody.put("subject", "Thông báo cập nhật tài khoản - NovaBeauty");
+            requestBody.put("subject", "Thông báo cập nhật tài khoản - HyraTek");
             requestBody.put("textContent", emailContent);
             requestBody.put("htmlContent", emailContent.replace("\n", "<br>"));
 

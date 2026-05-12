@@ -54,13 +54,12 @@ public class SecurityConfig {
                 .anyRequest()
                 .authenticated()); // Tất cả request khác đều buộc phải có JWT hợp lệ
 
-        // Báº­t cháº¿ Ä‘á»™ resource server theo chuáº©n OAuth2, xÃ¡c thá»±c request báº±ng JWT
         httpSecurity.oauth2ResourceServer(
                 oauth2 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer
-                                .decoder(customJwtDecoder) // DÃ¹ng jwtDecoder Ä‘á»ƒ giáº£i mÃ£ vÃ  xÃ¡c minh token
+                                .decoder(customJwtDecoder)
                                 .jwtAuthenticationConverter(jwtAuthenticationConverter()))
                         .authenticationEntryPoint(
-                                new JwtAuthenticationEntryPoint()) // Äiá»u hÆ°á»›ng user sau khi authentication fail
+                                new JwtAuthenticationEntryPoint())
                 );
 
         httpSecurity.csrf(

@@ -96,5 +96,5 @@ public class OtpController {
         }
     }
 
-    // reset-password endpoint moved to PasswordController
+
 }

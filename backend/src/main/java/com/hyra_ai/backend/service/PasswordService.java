@@ -59,18 +59,18 @@ public class PasswordService {
 
     /**
      * Set password for Google user
-     * 
+     *
      * QUAN TRỌNG: CHỈ CẬP NHẬT MẬT KHẨU, KHÔNG TẠO TÀI KHOẢN MỚI
-     * 
+     *
      * User đã tồn tại trong database (đã đăng nhập bằng Google trước đó)
      * Chỉ cần cập nhật password cho user hiện có
-     * 
+     *
      * LƯU Ý QUAN TRỌNG:
      * - KHÔNG TẠO USER MỚI: userRepository.save() sẽ UPDATE user hiện có (có id), không INSERT
      * - fullName sẽ được GIỮ NGUYÊN theo tên ban đầu từ Google login (KHÔNG THAY ĐỔI)
      * - Chỉ cập nhật password, không động vào các field khác (email, fullName, role, etc.)
      * - Nếu user không tồn tại → throw RuntimeException("User not found")
-     * 
+     *
      * @param email Email của user (PHẢI ĐÃ TỒN TẠI trong database)
      * @param otp OTP đã verify
      * @param newPassword Mật khẩu mới
@@ -78,15 +78,11 @@ public class PasswordService {
      */
     public void setPasswordForGoogleUser(String email, String otp, String newPassword) {
         otpService.consumeOtp(email, otp);
-        
-        // Tìm user HIỆN CÓ trong database (KHÔNG TẠO MỚI)
-        // Xử lý trường hợp duplicate email: lấy user mới nhất
-        // Nếu không tìm thấy → throw exception (KHÔNG tự động tạo user mới)
+
         User user = findUserByEmailSafe(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         
-        // ĐẢM BẢO user đã có id (đã tồn tại trong database)
-        // Nếu không có id → throw exception (KHÔNG được tạo mới)
+
         if (user.getId() == null || user.getId().isEmpty()) {
             throw new RuntimeException("User không hợp lệ: không có ID. Không thể cập nhật mật khẩu.");
         }
@@ -106,8 +102,7 @@ public class PasswordService {
         // ĐẢM BẢO fullName không bị thay đổi (phòng trường hợp có logic nào đó thay đổi)
         user.setFullName(originalFullName);
         
-        // userRepository.save() sẽ UPDATE user hiện có vì user đã có id (không phải null)
-        // JPA sẽ tự động phát hiện đây là UPDATE (user có id) chứ không phải INSERT (user không có id)
+
         User savedUser = userRepository.save(user); // UPDATE existing user, KHÔNG INSERT user mới
         
         // Verify: savedUser phải có cùng id với user ban đầu (không tạo mới)

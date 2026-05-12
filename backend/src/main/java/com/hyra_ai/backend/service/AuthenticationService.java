@@ -63,9 +63,7 @@ public class AuthenticationService {
     @Value("${jwt.refreshable-duration}")
     protected long REFRESHABLE_DURATION;
 
-    // =========================
-    // INTROSPECT
-    // =========================
+
     public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException {
         var token = request.getToken();
         boolean isValid = true;
@@ -94,9 +92,7 @@ public class AuthenticationService {
         }
     }
 
-    // =========================
-    // LOGIN EMAIL/PASSWORD
-    // =========================
+
     @Transactional(readOnly = true)
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
@@ -121,9 +117,7 @@ public class AuthenticationService {
                 .build();
     }
 
-    // =========================
-    // LOGOUT
-    // =========================
+
     public void logout(LogoutRequest request) throws ParseException, JOSEException {
         try {
             var signToken = verifyToken(request.getToken(), false); // access token logout
@@ -136,9 +130,7 @@ public class AuthenticationService {
         }
     }
 
-    // =========================
-    // REFRESH TOKEN
-    // =========================
+
     @Transactional
     public AuthenticationResponse refreshToken(RefreshRequest request) throws ParseException, JOSEException {
         // verify refresh token
@@ -164,9 +156,9 @@ public class AuthenticationService {
                 .build();
     }
 
-    // =========================
+
     // GOOGLE LOGIN
-    // =========================
+
     @Transactional
     public AuthenticationResponse authenticateWithGoogle(GoogleLoginRequest request) {
         if (request.getEmail() == null || request.getEmail().isEmpty()) {
@@ -217,9 +209,9 @@ public class AuthenticationService {
                 .build();
     }
 
-    // =========================
+
     // VERIFY TOKEN (CORE)
-    // =========================
+
     private SignedJWT verifyToken(String token, boolean isRefresh) throws JOSEException, ParseException {
         JWSVerifier verifier = new MACVerifier(getSignerKeyBytes());
         SignedJWT signedJWT = SignedJWT.parse(token);
@@ -260,9 +252,9 @@ public class AuthenticationService {
         return signedJWT;
     }
 
-    // =========================
+
     // TOKEN GENERATION
-    // =========================
+
     private String generateAccessToken(User user) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
 

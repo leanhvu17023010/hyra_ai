@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.hyra_ai.backend.entity.InvalidatedToken;
 
-// LÆ°u trá»¯ token háº¿t háº¡n
+
 @Repository
 public interface InvalidatedTokenRepository extends JpaRepository<InvalidatedToken, String> {
 

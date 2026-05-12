@@ -30,8 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-// Táº¡o 1 constructor cho táº¥t cáº£ cÃ¡c biáº¿n define lÃ  final -> Tá»± Ä‘á»™ng Ä‘Æ°a vÃ o
-// constructor vÃ  inject dependency
+
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class UserService {
@@ -72,17 +71,15 @@ public class UserService {
     public UserResponse createStaff(StaffCreationRequest request) {
         log.info("Creating staff account for email: {}", request.getEmail());
 
-        // Kiá»ƒm tra email Ä‘Ã£ tá»“n táº¡i chÆ°a
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
 
-        // Táº¡o máº­t kháº©u tá»± Ä‘á»™ng
+
         String generatedPassword = passwordGeneratorService.generateSecurePassword();
         log.info("Password for staff: {}", generatedPassword);
         log.info("Generated password for staff: {}", request.getEmail());
 
-        // Táº¡o user entity
         User user = User.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(generatedPassword))
@@ -93,7 +90,6 @@ public class UserService {
                 .isActive(request.isActive())
                 .build();
 
-        // Láº¥y role
         Role role = roleRepository
                 .findById(request.getRoleName())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
@@ -103,14 +99,12 @@ public class UserService {
             user = userRepository.save(user);
             log.info("Staff account created successfully with ID: {}", user.getId());
 
-            // Gá»­i email chá»©a máº­t kháº©u
             try {
                 brevoEmailService.sendStaffPasswordEmail(
                         request.getEmail(), request.getFullName(), generatedPassword, role.getName());
                 log.info("Password email sent successfully to: {}", request.getEmail());
             } catch (Exception e) {
                 log.error("Failed to send password email to: {} - Error: {}", request.getEmail(), e.getMessage());
-                // KhÃ´ng throw exception vÃ¬ tÃ i khoáº£n Ä‘Ã£ Ä‘Æ°á»£c táº¡o thÃ nh cÃ´ng
             }
 
         } catch (DataIntegrityViolationException exception) {
@@ -122,7 +116,6 @@ public class UserService {
     }
 
     public UserResponse getMyInfo() {
-        // SecurityContextHolder chá»©a thÃ´ng tin vá» user Ä‘ang Ä‘Äƒng nháº­p
         // Khi request được xác định thành công -> thông tin lưu trữ của user được lưu trong Security context holder
         var context = SecurityContextHolder.getContext();
         String name = context.getAuthentication().getName();
@@ -132,7 +125,6 @@ public class UserService {
         return userMapper.toUserResponse(user);
     }
 
-    // User cÃ³ thá»ƒ update chÃ­nh mÃ¬nh, hoáº·c ADMIN cÃ³ thá»ƒ update báº¥t ká»³ user nÃ o
     @Transactional
     public UserResponse updateUser(String userId, UserUpdateRequest request) {
         User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
@@ -140,13 +132,11 @@ public class UserService {
         // Check current user is ADMIN
         var context = SecurityContextHolder.getContext();
         String currentEmail = context.getAuthentication().getName();
-        
-        // Check ADMIN tá»« SecurityContext authorities trÆ°á»›c
+
         var authorities = context.getAuthentication().getAuthorities();
         boolean isAdminFromAuthorities = authorities.stream()
                 .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
-        
-        // Load user vá»›i role (cÃ³ thá»ƒ cáº§n fetch role vÃ¬ lazy loading)
+
         User currentUser = userRepository
                 .findByEmail(currentEmail)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
@@ -156,8 +146,7 @@ public class UserService {
         
         boolean isAdmin = isAdminFromAuthorities || isAdminFromRole;
         boolean isUpdatingOtherUser = isAdmin && !user.getEmail().equals(currentEmail);
-        
-        // Náº¿u khÃ´ng pháº£i ADMIN vÃ  khÃ´ng pháº£i update chÃ­nh mÃ¬nh â†’ tá»« chá»‘i
+
         if (!isAdmin && !user.getEmail().equals(currentEmail)) {
             log.warn("Access denied: User {} attempted to update user {}", currentEmail, userId);
             throw new AppException(ErrorCode.UNAUTHORIZED);
@@ -206,7 +195,6 @@ public class UserService {
             }
         }
 
-        // isActive - chá»‰ cáº­p nháº­t náº¿u isActive cÃ³ trong request vÃ  user lÃ  ADMIN
         if (request.getIsActive() != null) {
             if (isAdmin) {
                 boolean oldIsActiveValue = user.isActive();
@@ -239,13 +227,11 @@ public class UserService {
                 
                 user.setActive(newIsActiveValue);
             } else {
-                // Náº¿u khÃ´ng pháº£i ADMIN mÃ  cá»‘ gáº¯ng thay Ä‘á»•i isActive â†’ tá»« chá»‘i
                 log.warn("Non-admin user {} attempted to change isActive for user {}", currentEmail, userId);
                 throw new AppException(ErrorCode.UNAUTHORIZED);
             }
         }
 
-        // Save user vÃ o database
         User savedUser = userRepository.save(user);
 
         if (isUpdatingOtherUser && savedUser.getRole() != null) {
@@ -275,7 +261,7 @@ public class UserService {
     }
 
     // @EnableMethodSecurity trong SecurityConfig
-    @PreAuthorize("hasRole('ADMIN')") // Spring táº¡o ra 1 proxy ngay trÆ°á»›c khi táº¡o hÃ m. Sá»­ dá»¥ng Ä‘Æ°á»£c nhá» khai bÃ¡o
+    @PreAuthorize("hasRole('ADMIN')")
     public List<UserResponse> getUsers() {
 //        log.info("In method get Users");
         return userRepository.findAll().stream().map(userMapper::toUserResponse).toList();
