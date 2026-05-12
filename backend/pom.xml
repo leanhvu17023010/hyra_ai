@@ -52,8 +52,6 @@
     <mapstruct.version>1.5.5.Final</mapstruct.version>
     <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
     <spotless.version>2.43.0</spotless.version>
-    <!-- SPRING CLOUD -->
-    <spring-cloud.version>2023.0.0</spring-cloud.version>
 </properties>
 
 <!-- ===================================== -->
@@ -80,15 +78,6 @@
     <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-mail</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-webflux</artifactId>
-    </dependency>
-
-    <dependency>
-        <groupId>org.springframework.cloud</groupId>
-        <artifactId>spring-cloud-starter-openfeign</artifactId>
     </dependency>
 
     <!-- JSON support for Java Time (LocalDate, etc.) -->
@@ -121,20 +110,6 @@
         <groupId>org.mapstruct</groupId>
         <artifactId>mapstruct</artifactId>
         <version>${mapstruct.version}</version>
-    </dependency>
-
-    <!-- Cloudinary SDK -->
-    <!-- https://mvnrepository.com/artifact/com.cloudinary/cloudinary-http44 -->
-    <dependency>
-        <groupId>com.cloudinary</groupId>
-        <artifactId>cloudinary-http44</artifactId>
-        <version>1.38.0</version>
-    </dependency>
-    <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
-    <dependency>
-        <groupId>commons-io</groupId>
-        <artifactId>commons-io</artifactId>
-        <version>2.15.1</version>
     </dependency>
 
     <!-- TESTING -->
@@ -175,15 +150,6 @@
 <!-- ===================================== -->
 <dependencyManagement>
     <dependencies>
-        <!-- SPRING CLOUD BOM -->
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-dependencies</artifactId>
-            <version>${spring-cloud.version}</version>
-            <type>pom</type>
-            <scope>import</scope>
-        </dependency>
-
         <!-- BOM for Testcontainers (manage version consistency) -->
         <dependency>
             <groupId>org.testcontainers</groupId>
