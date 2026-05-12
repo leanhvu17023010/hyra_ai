@@ -38,7 +38,7 @@ function MainLayout(){
                     hover:bg-gray-300 
                     dark:hover:bg-gray-600 
                     transition-colors z-50
-                    ">
+                    cursor-pointer">
                     {darkMode ? <FiSun /> : <FiMoon />}
                 </button>
 

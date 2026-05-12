@@ -1,10 +1,15 @@
+import { useState } from "react"
+import { FcGoogle } from "react-icons/fc"
 import {
   FiX,
   FiMail,
-  FiLock
+  FiLock,
+  FiEye,
+  FiEyeOff
 } from "react-icons/fi"
 
 function LoginModal({ open, setOpen }) {
+  const [showPass, setShowPass] = useState(false)
 
   if (!open) return null
 
@@ -14,55 +19,38 @@ function LoginModal({ open, setOpen }) {
       className="
         fixed
         inset-0
-
         bg-black/50
         backdrop-blur-sm
-
         flex
         items-center
         justify-center
-
         z-50
       "
     >
 
-      {/* BOX */}
       <div
         className="
           w-140
-
           bg-white
           backdrop-blur-xl
-
           rounded-3xl
-
           p-10
-
           relative
-
           shadow-[0_20px_80px_rgba(0,0,0,0.25)]
           transition-all
           duration-300
         "
       >
-
-        {/* CLOSE */}
         <button
           onClick={() => setOpen(false)}
           className="
             absolute
             top-5
             right-5
-
             text-2xl
             text-zinc-400
-
             hover:text-black
             dark:hover:text-white
-
-            hover:rotate-90
-            hover:scale-110
-
             transition-all
             duration-300
           "
@@ -70,16 +58,8 @@ function LoginModal({ open, setOpen }) {
           <FiX />
         </button>
 
-        {/* TITLE */}
         <h2
-          className="
-            text-4xl
-            font-bold
-            text-center
-            py-5
-            mb-10
-          "
-        >
+          className="text-4xl font-bold text-center py-5 mb-10">
           Đăng nhập
         </h2>
 
@@ -104,29 +84,15 @@ function LoginModal({ open, setOpen }) {
           hover:bg-zinc-100
             transition-all
             duration-300
+            cursor-pointer
           "
         >
-
-          <img
-            src="https://www.google.com/favicon.ico"
-            alt="google"
-            className="w-6 h-6"
-          />
-
+          <FcGoogle className="w-6 h-6"></FcGoogle>
           Đăng nhập bằng Google
-
         </button>
 
-        {/* OR */}
-        <div
-          className="
-            flex
-            items-center
-            gap-4
+        <div className=" flex items-center gap-4 my-8 ">
 
-            my-8
-          "
-        >
           <div className="flex-1 h-px bg-zinc-300 dark:bg-zinc-700" />
           <span className="text-zinc-400 text-lg">
             hoặc
@@ -135,9 +101,7 @@ function LoginModal({ open, setOpen }) {
 
         </div>
 
-        {/* EMAIL */}
         <div className="relative mb-6 py-2">
-
           <FiMail
             className="
               absolute
@@ -152,7 +116,6 @@ function LoginModal({ open, setOpen }) {
           <input
             type="email"
             placeholder="Địa chỉ email của bạn"
-
             className="
               w-full
               pl-12
@@ -164,8 +127,8 @@ function LoginModal({ open, setOpen }) {
               dark:border-zinc-700
               bg-white
               outline-none
-              focus:ring-4
-              focus:ring-orange-200
+              focus:ring-2
+              focus:ring-indigo-300
               dark:focus:ring-orange-500/20
               transition-all
             "
@@ -173,8 +136,7 @@ function LoginModal({ open, setOpen }) {
 
         </div>
 
-        {/* PASSWORD */}
-        <div className="relative mb-8 py-5">
+          <div className="relative mb-8 py-5">
 
           <FiLock
             className="
@@ -182,39 +144,36 @@ function LoginModal({ open, setOpen }) {
               left-4
               top-1/2
               -translate-y-1/2
-
               text-xl
               text-zinc-400
             "
           />
 
           <input
-            type="password"
+            type= {showPass ? "text": "password"}
             placeholder="Mật khẩu của bạn"
 
             className="
               w-full
-
               pl-12
               pr-4
               py-4
-
               rounded-2xl
-
               border
               border-zinc-300
               dark:border-zinc-700
               bg-white
               outline-none
-
-              focus:ring-4
-              focus:ring-orange-200
-              dark:focus:ring-orange-500/20
-
+              focus:ring-2
+              focus:ring-indigo-300
+              dark:focus:ring-indigo-500/20
               transition-all
             "
           />
-
+          <button onClick={()=> setShowPass(!showPass)} 
+          className="absolute top-1/2 -translate-y-1/2 right-4 text-zinc-400 hover:text-zinc-600 transition-all">
+            {showPass ? <FiEyeOff /> : <FiEye />}
+          </button>
         </div>
 
         {/* OPTIONS */}
@@ -246,8 +205,9 @@ function LoginModal({ open, setOpen }) {
 
           <button
             className="
-              text-orange-500
+              text-blue-800
               hover:underline
+              cursor-pointer
             "
           >
             Quên mật khẩu?
@@ -264,15 +224,15 @@ function LoginModal({ open, setOpen }) {
 
             rounded-2xl
 
-            bg-orange-500
-            hover:bg-orange-600
+            bg-blue-800
+            hover:bg-blue-600
 
             text-white
             text-lg
             font-semibold
 
             hover:scale-[1.02]
-
+            cursor-pointer
             transition-all
             duration-300
           "
@@ -286,17 +246,17 @@ function LoginModal({ open, setOpen }) {
             text-center
             py-3
             text-zinc-500
+            mt-4
 
-            mt-8
           "
         >
           Chưa có tài khoản?
 
           <span
             className="
-              text-orange-500
+              text-blue-800
               font-semibold
-              ml-2
+              ml-5
               cursor-pointer
 
               hover:underline

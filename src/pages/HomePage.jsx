@@ -37,7 +37,7 @@ function HomePage(){
             hover:bg-[#4a5ce6] text-white 
             font-semibold py-3 px-12 
             rounded-lg text-lg mb-10 transition-colors
-            dark:bg-[#11229c] dark:hover:bg-[#1128b9]">
+            dark:bg-[#11229c] dark:hover:bg-[#1128b9] cursor-pointer"> 
                 Kết quả
             </button>
         </div>
