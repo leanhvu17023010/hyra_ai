@@ -14,10 +14,10 @@ function HomePage(){
         w-full 
         max-w-7xl ">
             <h1 className="
-            text-5xl font-extrabold mb-8 text-black ">
+            text-5xl font-extrabold mb-8 text-black dark:text-white">
                 Hoán đổi khuôn mặt AI Video & Ảnh trực tuyến 
             </h1>
-            <span className="py-5">Công cụ trực tuyến mạnh mẽ để hoán đổi khuôn mặt này sang khuôn mặt khác một cách liền mạch. 
+            <span className="py-5 dark:text-white">Công cụ trực tuyến mạnh mẽ để hoán đổi khuôn mặt này sang khuôn mặt khác một cách liền mạch. 
                 Ứng dụng hoán đổi khuôn mặt tốt nhất hiện có.</span>
             
             <div className="mb-8 py-5 ">
@@ -30,7 +30,14 @@ function HomePage(){
                  ? <ImageSwap/> 
                  : <VideoSwap/> }
             </div>
-            <button className="mt-8 bg-[#5b6ef7] hover:bg-[#4a5ce6] text-white font-semibold py-3 px-12 rounded-lg text-lg mb-10 transition-colors">
+            <button 
+            className="
+            mt-8 
+            bg-[#5b6ef7] 
+            hover:bg-[#4a5ce6] text-white 
+            font-semibold py-3 px-12 
+            rounded-lg text-lg mb-10 transition-colors
+            dark:bg-[#11229c] dark:hover:bg-[#1128b9]">
                 Kết quả
             </button>
         </div>
