@@ -2,9 +2,11 @@ import { Outlet } from "react-router-dom"
 import Navbar from "../components/Navbar"
 import { useState, useEffect } from "react";
 import { FiSun, FiMoon } from "react-icons/fi";
+import LoginModal from "../components/LoginModal";
 
 function MainLayout(){
     const [darkMode, setDarkMode] = useState(false);
+    const [openLogin, setOpenLogin] = useState(false);
     
     useEffect(()=>{
         if(darkMode){
@@ -40,7 +42,10 @@ function MainLayout(){
                     {darkMode ? <FiSun /> : <FiMoon />}
                 </button>
 
-            <Navbar/>
+            <Navbar setOpenLogin={setOpenLogin} />
+            <LoginModal
+            open={openLogin}
+            setOpen={setOpenLogin}/>
             <main className="flex-1 flex justify-center pt-10">
                 <Outlet/> 
             </main>
