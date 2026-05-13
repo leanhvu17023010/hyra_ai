@@ -2,6 +2,8 @@ import { useState } from "react";
 import SwapTabs from "../components/SwapTabs";
 import ImageSwap from "../components/ImageSwap";
 import VideoSwap from "../components/VideoSwap";
+import Introduction from "../components/Introduction";
+
 
 function HomePage(){
     const [tab, setTab] = useState('video'); 
@@ -35,11 +37,14 @@ function HomePage(){
             mt-8 
             bg-[#5b6ef7] 
             hover:bg-[#4a5ce6] text-white 
-            font-semibold py-3 px-12 
+            font-semibold py-3 px-12  
             rounded-lg text-lg mb-10 transition-colors
             dark:bg-[#11229c] dark:hover:bg-[#1128b9] cursor-pointer"> 
                 Kết quả
             </button>
+
+            {/* Phần Giới thiệu & Ưu điểm */}
+            <Introduction />
         </div>
     )
 }

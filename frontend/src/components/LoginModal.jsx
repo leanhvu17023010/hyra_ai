@@ -1,5 +1,8 @@
 import { useState } from "react"
 import { FcGoogle } from "react-icons/fc"
+import { useGoogleLogin } from "@react-oauth/google"
+import axios from "axios"
+import authService from "../services/authService"
 import {
   FiX,
   FiMail,
@@ -7,7 +10,6 @@ import {
   FiEye,
   FiEyeOff
 } from "react-icons/fi"
-import { login } from "../api/authApi"
 
 function LoginModal({ open, setOpen }) {
   const [showPass, setShowPass] = useState(false)
@@ -16,28 +18,52 @@ function LoginModal({ open, setOpen }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
+  const login = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      setLoading(true)
+      setError("")
+      try {
+        // Lấy thông tin user từ Google bằng access_token
+        const res = await axios.get("https://www.googleapis.com/oauth2/v3/userinfo", {
+          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+        })
+
+        const { email, name, sub } = res.data
+        const result = await authService.loginWithGoogle(sub, email, name)
+
+        if (result.result.authenticated) {
+          setOpen(false)
+          window.location.reload() // Hoặc chuyển hướng
+        }
+      } catch (err) {
+        console.error("Lỗi đăng nhập Google:", err)
+        setError("Đăng nhập Google thất bại. Vui lòng thử lại.")
+      } finally {
+        setLoading(false)
+      }
+    },
+    onError: () => {
+      setError("Đăng nhập Google thất bại.")
+    },
+  });
+
   const handleLogin = async () => {
     if (!email || !password) {
-      setError("Vui lòng nhập email và mật khẩu.")
+      setError("Vui lòng nhập đầy đủ email và mật khẩu.")
       return
     }
 
+    setLoading(true)
+    setError("")
     try {
-      setLoading(true)
-      setError("")
-      const response = await login({ email, password })
-      const auth = response?.result
-
-      if (auth?.token) {
-        localStorage.setItem("accessToken", auth.token)
+      const result = await authService.login(email, password)
+      if (result.result.authenticated) {
+        setOpen(false)
+        window.location.reload()
       }
-      if (auth?.refreshToken) {
-        localStorage.setItem("refreshToken", auth.refreshToken)
-      }
-
-      setOpen(false)
     } catch (err) {
-      setError(err.message || "Đăng nhập thất bại.")
+      console.error("Lỗi đăng nhập:", err)
+      setError(err.response?.data?.message || "Email hoặc mật khẩu không chính xác.")
     } finally {
       setLoading(false)
     }
@@ -98,6 +124,7 @@ function LoginModal({ open, setOpen }) {
 
         {/* GOOGLE */}
         <button
+          onClick={() => login()}
           className="
             w-full
             py-4
@@ -133,6 +160,12 @@ function LoginModal({ open, setOpen }) {
 
         </div>
 
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 text-red-600 rounded-xl text-sm text-center">
+            {error}
+          </div>
+        )}
+
         <div className="relative mb-6 py-2">
           <FiMail
             className="
@@ -147,9 +180,9 @@ function LoginModal({ open, setOpen }) {
 
           <input
             type="email"
-            placeholder="Địa chỉ email của bạn"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            placeholder="Địa chỉ email của bạn"
             className="
               w-full
               pl-12
@@ -185,9 +218,9 @@ function LoginModal({ open, setOpen }) {
 
           <input
             type= {showPass ? "text": "password"}
-            placeholder="Mật khẩu của bạn"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            placeholder="Mật khẩu của bạn"
 
             className="
               w-full
@@ -252,34 +285,26 @@ function LoginModal({ open, setOpen }) {
         </div>
 
         {/* LOGIN */}
-        {error ? (
-          <p className="text-red-500 text-sm mb-3">{error}</p>
-        ) : null}
-
         <button
           onClick={handleLogin}
           disabled={loading}
-          className="
+          className={`
             w-full
-
             py-4
-
             rounded-2xl
-
             bg-blue-800
             hover:bg-blue-600
-
             text-white
             text-lg
             font-semibold
-
             hover:scale-[1.02]
             cursor-pointer
             transition-all
             duration-300
-          "
+            ${loading ? "opacity-50 cursor-not-allowed" : ""}
+          `}
         >
-          {loading ? "Đang đăng nhập..." : "Đăng nhập"}
+          {loading ? "Đang xử lý..." : "Đăng nhập"}
         </button>
 
         {/* REGISTER */}
