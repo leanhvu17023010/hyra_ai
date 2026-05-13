@@ -36,11 +36,13 @@ public class SecurityConfig {
         "/auth/verify-otp",
         "/auth/reset-password",
         "/auth/set-password-google",
+        "/media/upload",
     };
 
     private static final String[] PUBLIC_GET_ENDPOINTS = {
         "/auth/check-google-user",
         "/error",
+        "/uploads/**",
     };
 
     private final CustomJwtDecoder customJwtDecoder;
