@@ -51,9 +51,7 @@ public class ApplicationInitConfig {
     ApplicationRunner applicationRunner(UserRepository userRepository, RoleRepository roleRepository) {
         log.info("Initializing  application.....");
         return args -> {
-            ensureRole(roleRepository, PredefinedRole.CUSTOMER_ROLE.getName(), PredefinedRole.CUSTOMER_ROLE.getDescription());
-            ensureRole(roleRepository, PredefinedRole.STAFF_ROLE.getName(), PredefinedRole.STAFF_ROLE.getDescription());
-            ensureRole(roleRepository, PredefinedRole.CS_ROLE.getName(), PredefinedRole.CS_ROLE.getDescription());
+            ensureRole(roleRepository, PredefinedRole.USER_ROLE.getName(), PredefinedRole.USER_ROLE.getDescription());
             Role adminRole = ensureRole(
                     roleRepository, PredefinedRole.ADMIN_ROLE.getName(), PredefinedRole.ADMIN_ROLE.getDescription());
 

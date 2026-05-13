@@ -70,30 +70,13 @@ public class OtpController {
 
     @PostMapping("/verify-otp")
     public ApiResponse<String> verifyOtp(@RequestBody @Valid OtpVerificationRequest request) {
-        try {
-            boolean isValid = otpService.isValidOtp(request.getEmail(), request.getOtp());
+        otpService.isValidOtp(request.getEmail(), request.getOtp());
 
-            if (isValid) {
-                return ApiResponse.<String>builder()
-                        .code(200)
-                        .message("OTP verified successfully")
-                        .result("OTP is valid")
-                        .build();
-            } else {
-                return ApiResponse.<String>builder()
-                        .code(400)
-                        .message("Invalid or expired OTP")
-                        .result(null)
-                        .build();
-            }
-        } catch (Exception e) {
-            log.error("Error verifying OTP for email: {}", request.getEmail(), e);
-            return ApiResponse.<String>builder()
-                    .code(500)
-                    .message("Failed to verify OTP")
-                    .result(null)
-                    .build();
-        }
+        return ApiResponse.<String>builder()
+                .code(200)
+                .message("OTP verified successfully")
+                .result("OTP is valid")
+                .build();
     }
 
 

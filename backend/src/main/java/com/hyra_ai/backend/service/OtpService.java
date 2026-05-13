@@ -46,7 +46,11 @@ public class OtpService {
                 .build();
 
         otpRepository.save(otp);
-        sendOtpEmail(email, otpCode);
+        try {
+            sendOtpEmail(email, otpCode);
+        } catch (Exception e) {
+            log.error("Failed to send OTP email to {}: {}", email, e.getMessage());
+        }
         return otpCode;
     }
 

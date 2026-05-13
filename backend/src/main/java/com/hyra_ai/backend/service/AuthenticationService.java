@@ -171,8 +171,9 @@ public class AuthenticationService {
         if (user == null) {
             log.info("Creating new user from Google login: {}", email);
 
-            Role customerRole = roleRepository.findById("CUSTOMER")
-                    .orElseThrow(() -> new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION, "Không tìm thấy role CUSTOMER"));
+            Role userRole = roleRepository
+                    .findById("USER")
+                    .orElseThrow(() -> new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION, "Không tìm thấy role USER"));
 
             user = User.builder()
                     .email(email)
@@ -180,9 +181,7 @@ public class AuthenticationService {
                     .password("")
                     .isActive(true)
                     .createAt(LocalDate.now())
-                    .role(customerRole)
-                    .phoneNumber("")
-                    .address("")
+                    .role(userRole)
                     .build();
 
             try {
@@ -260,7 +259,7 @@ public class AuthenticationService {
 
         JWTClaimsSet jwtClaimSet = new JWTClaimsSet.Builder()
                 .subject(user.getEmail())
-                .issuer("nova_beauty.com")
+                .issuer("hyra_ai.com")
                 .issueTime(new Date())
                 .expirationTime(new Date(Instant.now()
                         .plus(VALID_DURATION, ChronoUnit.SECONDS)
@@ -287,7 +286,7 @@ public class AuthenticationService {
 
         JWTClaimsSet jwtClaimSet = new JWTClaimsSet.Builder()
                 .subject(user.getEmail())
-                .issuer("nova_beauty.com")
+                .issuer("hyra_ai.com")
                 .issueTime(new Date())
                 .expirationTime(new Date(Instant.now()
                         .plus(REFRESHABLE_DURATION, ChronoUnit.SECONDS)

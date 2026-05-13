@@ -10,7 +10,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.hyra_ai.backend.dto.request.StaffCreationRequest;
 import com.hyra_ai.backend.dto.request.UserCreationRequest;
 import com.hyra_ai.backend.dto.request.UserUpdateRequest;
 import com.hyra_ai.backend.dto.response.UserResponse;
@@ -38,7 +37,6 @@ public class UserService {
     RoleRepository roleRepository;
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
-    PasswordGeneratorService passwordGeneratorService;
     BrevoEmailService brevoEmailService;
 
     @Transactional
@@ -46,69 +44,18 @@ public class UserService {
         User user = userMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setEmail(request.getEmail());
-        user.setPhoneNumber(request.getPhoneNumber() != null ? request.getPhoneNumber() : "");
         user.setFullName(request.getFullName());
-        user.setAddress(request.getAddress() != null ? request.getAddress() : "");
         user.setCreateAt(LocalDate.now());
 
         Role role = roleRepository
                 .findById(request.getRoleName())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        user.setActive(role.getName().equals("CUSTOMER"));
+        user.setActive(role.getName().equals("USER"));
         user.setRole(role);
 
         try {
             user = userRepository.save(user);
         } catch (DataIntegrityViolationException exception) {
-            throw new AppException(ErrorCode.USER_EXISTED);
-        }
-
-        return userMapper.toUserResponse(user);
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @Transactional
-    public UserResponse createStaff(StaffCreationRequest request) {
-        log.info("Creating staff account for email: {}", request.getEmail());
-
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new AppException(ErrorCode.USER_EXISTED);
-        }
-
-
-        String generatedPassword = passwordGeneratorService.generateSecurePassword();
-        log.info("Password for staff: {}", generatedPassword);
-        log.info("Generated password for staff: {}", request.getEmail());
-
-        User user = User.builder()
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(generatedPassword))
-                .fullName(request.getFullName())
-                .phoneNumber(request.getPhoneNumber() != null ? request.getPhoneNumber() : "")
-                .address(request.getAddress() != null ? request.getAddress() : "")
-                .createAt(LocalDate.now())
-                .isActive(request.isActive())
-                .build();
-
-        Role role = roleRepository
-                .findById(request.getRoleName())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        user.setRole(role);
-
-        try {
-            user = userRepository.save(user);
-            log.info("Staff account created successfully with ID: {}", user.getId());
-
-            try {
-                brevoEmailService.sendStaffPasswordEmail(
-                        request.getEmail(), request.getFullName(), generatedPassword, role.getName());
-                log.info("Password email sent successfully to: {}", request.getEmail());
-            } catch (Exception e) {
-                log.error("Failed to send password email to: {} - Error: {}", request.getEmail(), e.getMessage());
-            }
-
-        } catch (DataIntegrityViolationException exception) {
-            log.error("Data integrity violation when creating staff: {}", exception.getMessage());
             throw new AppException(ErrorCode.USER_EXISTED);
         }
 
@@ -140,10 +87,10 @@ public class UserService {
         User currentUser = userRepository
                 .findByEmail(currentEmail)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        
-        boolean isAdminFromRole = currentUser.getRole() != null && 
-                currentUser.getRole().getName().equals("ADMIN");
-        
+
+        boolean isAdminFromRole = currentUser.getRole() != null
+                && currentUser.getRole().getName().equals("ADMIN");
+
         boolean isAdmin = isAdminFromAuthorities || isAdminFromRole;
         boolean isUpdatingOtherUser = isAdmin && !user.getEmail().equals(currentEmail);
 
@@ -157,7 +104,7 @@ public class UserService {
         if (request.getPassword() != null && !request.getPassword().isEmpty()) {
             user.setPassword(passwordEncoder.encode(request.getPassword()));
             String roleName = currentUser.getRole().getName();
-            if (roleName.equals("STAFF") || roleName.equals("CUSTOMER_SUPPORT")) {
+            if ("USER".equals(roleName)) {
                 user.setActive(true);
             }
         }
@@ -169,18 +116,10 @@ public class UserService {
             }
         }
 
-        // PhoneNumber - cho phép cập nhật kể cả khi empty string (để có thể xóa)
-        if (request.getPhoneNumber() != null) {
-            user.setPhoneNumber(request.getPhoneNumber());
-        }
 
         // FullName
         if (request.getFullName() != null && !request.getFullName().isEmpty()) {
             user.setFullName(request.getFullName());
-        }
-        // Address - cho phép cập nhật kể cả khi empty string (để có thể xóa)
-        if (request.getAddress() != null) {
-            user.setAddress(request.getAddress());
         }
 
         // role
@@ -199,32 +138,29 @@ public class UserService {
             if (isAdmin) {
                 boolean oldIsActiveValue = user.isActive();
                 boolean newIsActiveValue = request.getIsActive();
-                
+
                 // Check if account is being locked (transition from active to inactive)
                 if (oldIsActiveValue && !newIsActiveValue) {
-                    // Account is being locked - send notification email
                     String userRoleName = user.getRole() != null ? user.getRole().getName() : null;
-                    
-                    // Only send email for CUSTOMER, STAFF, and CUSTOMER_SUPPORT (not ADMIN)
-                    if (userRoleName != null && 
-                        (userRoleName.equals("CUSTOMER") || 
-                         userRoleName.equals("STAFF") || 
-                         userRoleName.equals("CUSTOMER_SUPPORT"))) {
+
+                    if ("USER".equals(userRoleName)) {
                         try {
                             brevoEmailService.sendAccountLockedEmail(
-                                user.getEmail(),
-                                user.getFullName(),
-                                userRoleName
-                            );
-                            log.info("Account locked notification email sent to: {} (Role: {})", user.getEmail(), userRoleName);
+                                    user.getEmail(), user.getFullName(), userRoleName);
+                            log.info(
+                                    "Account locked notification email sent to: {} (Role: {})",
+                                    user.getEmail(),
+                                    userRoleName);
                         } catch (Exception e) {
-                            // Log error but don't fail the account lock operation
-                            log.error("Failed to send account locked email to: {} - Error: {}", 
-                                user.getEmail(), e.getMessage(), e);
+                            log.error(
+                                    "Failed to send account locked email to: {} - Error: {}",
+                                    user.getEmail(),
+                                    e.getMessage(),
+                                    e);
                         }
                     }
                 }
-                
+
                 user.setActive(newIsActiveValue);
             } else {
                 log.warn("Non-admin user {} attempted to change isActive for user {}", currentEmail, userId);
@@ -236,9 +172,7 @@ public class UserService {
 
         if (isUpdatingOtherUser && savedUser.getRole() != null) {
             String targetRole = savedUser.getRole().getName();
-            if ("CUSTOMER".equalsIgnoreCase(targetRole)
-                    || "STAFF".equalsIgnoreCase(targetRole)
-                    || "CUSTOMER_SUPPORT".equalsIgnoreCase(targetRole)) {
+            if ("USER".equalsIgnoreCase(targetRole)) {
                 try {
                     brevoEmailService.sendProfileUpdatedEmail(
                             savedUser.getEmail(), savedUser.getFullName(), targetRole);
@@ -250,7 +184,7 @@ public class UserService {
                 }
             }
         }
-        
+
         return userMapper.toUserResponse(savedUser);
     }
 
@@ -263,7 +197,7 @@ public class UserService {
     // @EnableMethodSecurity trong SecurityConfig
     @PreAuthorize("hasRole('ADMIN')")
     public List<UserResponse> getUsers() {
-//        log.info("In method get Users");
+        //        log.info("In method get Users");
         return userRepository.findAll().stream().map(userMapper::toUserResponse).toList();
     }
 

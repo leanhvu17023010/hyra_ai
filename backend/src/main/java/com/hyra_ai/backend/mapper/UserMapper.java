@@ -16,9 +16,7 @@ public interface UserMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "password", ignore = true)
     @Mapping(target = "email", ignore = true)
-    @Mapping(target = "phoneNumber", ignore = true)
     @Mapping(target = "fullName", ignore = true)
-    @Mapping(target = "address", ignore = true)
     @Mapping(target = "createAt", ignore = true)
     @Mapping(target = "role", ignore = true)
     User toUser(UserCreationRequest request);
@@ -32,9 +30,7 @@ public interface UserMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "password", ignore = true)
     @Mapping(target = "email", ignore = true)
-    @Mapping(target = "phoneNumber", ignore = true)
     @Mapping(target = "fullName", ignore = true)
-    @Mapping(target = "address", ignore = true)
     @Mapping(target = "createAt", ignore = true)
     @Mapping(target = "role", ignore = true)
     void updateUser(@MappingTarget User user, UserUpdateRequest request);

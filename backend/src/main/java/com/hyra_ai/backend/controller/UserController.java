@@ -1,5 +1,6 @@
 package com.hyra_ai.backend.controller;
 
+import java.util.Comparator;
 import java.util.List;
 
 import jakarta.validation.Valid;
@@ -7,7 +8,6 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import com.hyra_ai.backend.dto.request.ApiResponse;
-import com.hyra_ai.backend.dto.request.StaffCreationRequest;
 import com.hyra_ai.backend.dto.request.UserCreationRequest;
 import com.hyra_ai.backend.dto.request.UserUpdateRequest;
 import com.hyra_ai.backend.dto.response.UserResponse;
@@ -26,6 +26,8 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 class UserController {
+    private static final List<String> APP_ROLE_ORDER = List.of("ADMIN", "USER");
+
     UserService userService;
     RoleRepository roleRepository;
 
@@ -34,14 +36,6 @@ class UserController {
         log.info("Controller: create User");
         return ApiResponse.<UserResponse>builder()
                 .result(userService.createUser(request))
-                .build();
-    }
-
-    @PostMapping("/staff")
-    ApiResponse<UserResponse> createStaff(@RequestBody @Valid StaffCreationRequest request) {
-        log.info("Controller: create Staff");
-        return ApiResponse.<UserResponse>builder()
-                .result(userService.createStaff(request))
                 .build();
     }
 
@@ -88,9 +82,11 @@ class UserController {
 
     @GetMapping("/roles")
     ApiResponse<List<Role>> getRoles() {
-        log.info("Controller: get all roles");
-        return ApiResponse.<List<Role>>builder()
-                .result(roleRepository.findAll())
-                .build();
+        log.info("Controller: get application roles (ADMIN, USER)");
+        List<Role> roles = roleRepository.findAll().stream()
+                .filter(r -> APP_ROLE_ORDER.contains(r.getName()))
+                .sorted(Comparator.comparingInt(r -> APP_ROLE_ORDER.indexOf(r.getName())))
+                .toList();
+        return ApiResponse.<List<Role>>builder().result(roles).build();
     }
 }

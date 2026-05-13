@@ -23,7 +23,7 @@ spring:
 
 brevo:
   api:
-    key: ${BREVO_API_KEY:change-me}
+    key: ${BREVO_API_KEY}
   sender:
     email: ${BREVO_EMAIL}
 

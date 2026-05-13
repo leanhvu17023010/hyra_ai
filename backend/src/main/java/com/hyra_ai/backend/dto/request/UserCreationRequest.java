@@ -30,7 +30,7 @@ public class UserCreationRequest {
     String email;
 
     @Builder.Default
-    String roleName = PredefinedRole.CUSTOMER_ROLE.getName();
+    String roleName = PredefinedRole.USER_ROLE.getName();
 
     @Builder.Default
     boolean isActive = true;

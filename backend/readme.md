@@ -1,10 +1,10 @@
-# Identity Service - Cosmetics Website
+# Hyra AI Backend
 
 ## Yêu cầu hệ thống
 
 ### Java Development Kit (JDK)
-- **Khuyến nghị**: JDK 17 hoặc JDK 21
-- **Tối thiểu**: JDK 17
+- **Khuyến nghị**: JDK 21 (dự án được build mặc định với Java 21)
+- **Tối thiểu**: JDK 17 (có profile hỗ trợ trong pom.xml)
 - **Kiểm tra version**: `java -version`
 
 ### Maven
@@ -17,136 +17,106 @@
 
 ## Cài đặt và chạy
 
-### 1. Clone repository
-```bash
-git clone <repository-url>
-cd lumina-books
-```
-
-### 2. Cấu hình database
+### 1. Cấu hình database
 Tạo database MySQL:
 ```sql
-CREATE DATABASE cosmetics_db;
-CREATE USER 'cosmetics_user'@'localhost' IDENTIFIED BY 'password';
-GRANT ALL PRIVILEGES ON cosmetics_db.* TO 'cosmetics_user'@'localhost';
-FLUSH PRIVILEGES;
+CREATE DATABASE hyra_ai;
+-- Lưu ý: Application mặc định sử dụng user 'root' và password 'root'
 ```
 
-### 3. Cấu hình application
-Cập nhật file `src/main/resources/application.yml`:
+### 2. Cấu hình application
+Mặc định project sử dụng thông tin trong `src/main/resources/application.yaml`:
 ```yaml
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/cosmetics_db
-    username: cosmetics_user
-    password: password
+    url: jdbc:mysql://localhost:3306/hyra_ai?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: root
 ```
 
-### 4. Chạy ứng dụng
+*Nếu bạn có thông tin đăng nhập database khác, vui lòng cấu hình lại file yaml này hoặc set biến môi trường tương ứng.*
+
+### 3. Chạy ứng dụng
 ```bash
-# Với JDK 17
+# Chạy trực tiếp bằng Maven
 mvn spring-boot:run
 
 # Hoặc build và chạy JAR
 mvn clean package
-java -jar target/lumina-books-0.0.1-SNAPSHOT.jar
+java -jar target/backend-0.0.1.jar
 ```
 
-## Tương thích JDK
+## API Endpoints Overview
 
-### JDK 17 (Khuyến nghị)
-```bash
-# Kiểm tra version
-java -version
-# Output: openjdk version "17.0.x"
+**Lưu ý quan trọng**: Server có `context-path: /hyra_ai`. Nghĩa là base URL của tất cả các API khi chạy local sẽ là:
+`http://localhost:8080/hyra_ai`
 
-# Chạy ứng dụng
-mvn spring-boot:run
-```
+Chi tiết các tham số, payload và định dạng response chuẩn có thể xem tại thư mục `docs/` (`docs/api-overview.md` và `docs/api-endpoints.json`).
 
-### JDK 21 (Tương thích)
-```bash
-# Kiểm tra version
-java -version
-# Output: openjdk version "21.0.x"
-
-# Chạy ứng dụng (tự động compile với target 17)
-mvn spring-boot:run
-```
-
-### JDK 24 (Tương thích)
-```bash
-# Kiểm tra version
-java -version
-# Output: openjdk version "24.0.x"
-
-# Chạy ứng dụng (tự động compile với target 17)
-mvn spring-boot:run
-```
-
-## API Endpoints
-
-### Authentication
-- `POST /auth/token` - Đăng nhập
+### Authentication (`/auth`)
+- `POST /auth/token` - Đăng nhập bằng Email/Password
+- `POST /auth/google` - Đăng nhập qua Google
+- `POST /auth/introspect` - Kiểm tra tính hợp lệ của token
 - `POST /auth/refresh` - Refresh token
 - `POST /auth/logout` - Đăng xuất
-- `POST /auth/introspect` - Kiểm tra token
-- `POST /auth/send-otp` - Gửi mã OTP
-- `POST /auth/verify-otp` - Xác định mã OTP
-- `POST /auth/reset-password` - Quên mật khẩu
-- `POST /auth/change-password` - Đổi mật khẩu
+- `POST /auth/send-otp` - Gửi mã OTP xác nhận (lưu ý: cần truyền query param `?email=...&mode=...`)
+- `POST /auth/verify-otp` - Xác nhận mã OTP
+- `POST /auth/reset-password` - Đặt lại mật khẩu (khi quên)
+- `POST /auth/set-password-google` - Đặt mật khẩu cho tài khoản Google lần đầu
+- `GET /auth/check-google-user` - Kiểm tra email có liên kết Google không (lưu ý: cần truyền query param `?email=...`)
+- `POST /auth/change-password` - Đổi mật khẩu tài khoản (cần gửi kèm Header Authorization token)
 
-### User Management
-- `POST /users` - Tạo user mới
+### User Management (`/users`)
+- `POST /users` - Đăng ký user mới (Khách hàng)
+- `POST /users/staff` - Tạo tài khoản Staff (cần quyền hệ thống)
 - `GET /users` - Lấy danh sách users
-- `GET /users/my-info` - Lấy thông tin user hiện tại
+- `GET /users/my-info` - Lấy thông tin user hiện tại đang đăng nhập
+- `GET /users/{userId}` - Lấy thông tin chi tiết một user
+- `PUT /users/{userId}` - Cập nhật thông tin user
+- `DELETE /users/{userId}` - Xóa user
+- `GET /users/roles` - Lấy danh sách các vai trò (roles) hiện có của module user
 
-## Troubleshooting
+### Role Management (`/roles`)
+- `POST /roles` - Tạo vai trò mới
+- `GET /roles` - Lấy danh sách vai trò
+- `DELETE /roles/{role}` - Xóa một vai trò
+
+### Permission Management (`/permissions`)
+- `POST /permissions` - Tạo quyền (permission) mới
+- `GET /permissions` - Lấy danh sách quyền
+- `DELETE /permissions/{permission}` - Xóa một quyền
+
+## Troubleshooting & Development
 
 ### Lỗi JDK version
-Nếu gặp lỗi về JDK version:
+Nếu gặp lỗi về JDK version khi chạy:
 ```bash
 # Kiểm tra JAVA_HOME
 echo $JAVA_HOME
 
-# Set JAVA_HOME cho JDK 17
-export JAVA_HOME=/path/to/jdk17
+# Set JAVA_HOME cho JDK 21 hoặc 17
+export JAVA_HOME=/path/to/jdk21
 ```
-
-### Lỗi database connection
-Kiểm tra:
-1. MySQL service đang chạy
-2. Database và user đã được tạo
-3. Connection string trong application.yml đúng
-
-## Development
 
 ### Chạy tests
 ```bash
 mvn test
 ```
 
-### Build production
+## Docker Guideline
+
+Build Docker image:
 ```bash
-mvn clean package -Pprod
+docker build -t hyra-ai-backend:latest .
 ```
 
-## License
-MIT License
+Tạo network và chạy MySQL container:
+```bash
+docker network create hyra-network
+docker run --network hyra-network --name mysql-db -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=hyra_ai -d mysql:8.0.43-debian
+```
 
-
-## Docker guideline
-`docker build -t <account>/lumina-books:0.9.0 .`
-`docker build -t linhdev610/lumina-books:0.9.0 .`
-### Push docker image to Docker Hub
-`docker image push <account>/lumina-books:0.9.0`
-`docker image push linhdev610/lumina-books:0.9.0`
-
-### Create network:
-`docker network create devteria-network`
-### Show network list:
-`docker network ls`
-### Start MySQL in devteria-network
-`docker run --network devteria-network --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -d mysql:8.0.43-debian`
-### Run your application in devteria-network
-`docker run --name lumina-books --network devteria-network -p 8080:8080 -e DBMS_CONNECTION=jdbc:mysql://mysql:3306/identity_service lumina-books:0.9.0`
+Chạy backend app:
+```bash
+docker run --name hyra-backend --network hyra-network -p 8080:8080 -e spring.datasource.url=jdbc:mysql://mysql-db:3306/hyra_ai -e spring.datasource.username=root -e spring.datasource.password=root hyra-ai-backend:latest
+```
