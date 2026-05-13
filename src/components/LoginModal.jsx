@@ -7,9 +7,41 @@ import {
   FiEye,
   FiEyeOff
 } from "react-icons/fi"
+import { login } from "../api/authApi"
 
 function LoginModal({ open, setOpen }) {
   const [showPass, setShowPass] = useState(false)
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      setError("Vui lòng nhập email và mật khẩu.")
+      return
+    }
+
+    try {
+      setLoading(true)
+      setError("")
+      const response = await login({ email, password })
+      const auth = response?.result
+
+      if (auth?.token) {
+        localStorage.setItem("accessToken", auth.token)
+      }
+      if (auth?.refreshToken) {
+        localStorage.setItem("refreshToken", auth.refreshToken)
+      }
+
+      setOpen(false)
+    } catch (err) {
+      setError(err.message || "Đăng nhập thất bại.")
+    } finally {
+      setLoading(false)
+    }
+  }
 
   if (!open) return null
 
@@ -116,6 +148,8 @@ function LoginModal({ open, setOpen }) {
           <input
             type="email"
             placeholder="Địa chỉ email của bạn"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             className="
               w-full
               pl-12
@@ -152,6 +186,8 @@ function LoginModal({ open, setOpen }) {
           <input
             type= {showPass ? "text": "password"}
             placeholder="Mật khẩu của bạn"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
 
             className="
               w-full
@@ -216,7 +252,13 @@ function LoginModal({ open, setOpen }) {
         </div>
 
         {/* LOGIN */}
+        {error ? (
+          <p className="text-red-500 text-sm mb-3">{error}</p>
+        ) : null}
+
         <button
+          onClick={handleLogin}
+          disabled={loading}
           className="
             w-full
 
@@ -237,7 +279,7 @@ function LoginModal({ open, setOpen }) {
             duration-300
           "
         >
-          Đăng nhập
+          {loading ? "Đang đăng nhập..." : "Đăng nhập"}
         </button>
 
         {/* REGISTER */}
