@@ -27,9 +27,9 @@ spring:
 
 brevo:
   api:
-    key: ${BREVO_API_KEY}
+    key: ${BREVO_API_KEY:}
   sender:
-    email: ${BREVO_EMAIL}
+    email: ${BREVO_EMAIL:}
 
 jwt:
   signerKey: "/nvphzRqEgduNfnKy2ztU3XBeojbmK8jzDivxOxLIGnl+D5GfkjyXdLq15xz9af/\n"

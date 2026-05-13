@@ -1,6 +1,5 @@
 import { useEffect } from "react"
-import axios from "axios"
-
+import authService from "../services/authService"
 import { FcGoogle } from "react-icons/fc"
 
 function GoogleLogin() {
@@ -37,43 +36,34 @@ function GoogleLogin() {
 
     try {
 
-      console.log(response)
+      const idToken = response.credential;
 
-      /*
-        response.credential
-        là Google token
-      */
+      // Decode JWT payload để lấy email và fullName (hỗ trợ Unicode cho tiếng Việt)
+      const base64Url = idToken.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
 
-      // GỬI BACKEND
+      const payload = JSON.parse(jsonPayload);
+      
+      console.log("Google User Data:", payload);
 
-      const res = await axios.post(
+      // Gửi về Backend thông qua authService
+      await authService.loginWithGoogle(
+        idToken,
+        payload.email,
+        payload.name
+      );
 
-        "http://localhost:8080/auth/google",
-
-        {
-          token: response.credential
-        }
-
-      )
-
-      console.log(res.data)
-
-      // LƯU JWT
-
-      localStorage.setItem(
-        "token",
-        res.data.token
-      )
-
-      // reload hoặc redirect
-
-      window.location.reload()
+      // Thành công thì reload lại trang để cập nhật trạng thái login
+      window.location.reload();
 
     }
 
     catch (error) {
 
-      console.log(error)
+      console.error("Lỗi đăng nhập Google:", error);
 
     }
 
@@ -95,7 +85,7 @@ function GoogleLogin() {
             py-4
             
             rounded-2xl
-
+ 
             border
             border-zinc-300
             dark:border-zinc-700
