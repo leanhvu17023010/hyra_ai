@@ -2,6 +2,7 @@ package com.hyra_ai.backend.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -20,6 +21,9 @@ import org.springframework.web.filter.CorsFilter;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
+    @Value("${app.frontend.base-url:http://localhost:5173}")
+    private String frontendBaseUrl;
+
     // API không cần xác thực (ai cũng có thể gọi được).
     private static final String[] PUBLIC_POST_ENDPOINTS = {
         "/users",
@@ -75,9 +79,10 @@ public class SecurityConfig {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
 
         // Cấu hình core
-        corsConfiguration.addAllowedOriginPattern("*"); // Cho web truy cập API này vào những trang web nào
+        corsConfiguration.addAllowedOrigin(frontendBaseUrl); // Cho phép FE local gọi API
         corsConfiguration.addAllowedMethod("*"); // Cho phép method nào được gọi từ origin này
         corsConfiguration.addAllowedHeader("*"); // Cho phép tất cả header được truy cập
+        corsConfiguration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
         urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration);

@@ -1,0 +1,165 @@
+{
+  "baseUrl": "http://localhost:8080/hyra_ai",
+  "auth": {
+    "public": [
+      {
+        "method": "POST",
+        "path": "/auth/token",
+        "requestBody": {
+          "email": "string",
+          "password": "string"
+        },
+        "responseResult": {
+          "token": "string",
+          "refreshToken": "string",
+          "authenticated": true
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/auth/google",
+        "requestBody": {
+          "idToken": "string",
+          "email": "string",
+          "fullName": "string"
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/auth/introspect",
+        "requestBody": {
+          "token": "string"
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "requestBody": {
+          "token": "string"
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/auth/logout",
+        "requestBody": {
+          "token": "string"
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/auth/send-otp",
+        "queryParams": {
+          "email": "string",
+          "mode": "register|forgot"
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/auth/verify-otp",
+        "requestBody": {
+          "email": "string",
+          "otp": "string(6 digits)"
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/auth/reset-password",
+        "requestBody": {
+          "email": "string",
+          "otp": "string",
+          "newPassword": "string"
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/auth/set-password-google",
+        "requestBody": {
+          "email": "string",
+          "otp": "string",
+          "newPassword": "string"
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/auth/check-google-user",
+        "queryParams": {
+          "email": "string"
+        }
+      }
+    ],
+    "protected": [
+      {
+        "method": "POST",
+        "path": "/auth/change-password",
+        "requestBody": {
+          "currentPassword": "string",
+          "newPassword": "string"
+        }
+      }
+    ]
+  },
+  "users": {
+    "public": [
+      {
+        "method": "POST",
+        "path": "/users",
+        "requestBody": {
+          "email": "string",
+          "password": "string",
+          "fullName": "string",
+          "phoneNumber": "string",
+          "address": "string"
+        }
+      }
+    ],
+    "protected": [
+      {
+        "method": "POST",
+        "path": "/users/staff"
+      },
+      {
+        "method": "GET",
+        "path": "/users"
+      },
+      {
+        "method": "GET",
+        "path": "/users/my-info"
+      },
+      {
+        "method": "GET",
+        "path": "/users/{userId}"
+      },
+      {
+        "method": "PUT",
+        "path": "/users/{userId}"
+      },
+      {
+        "method": "DELETE",
+        "path": "/users/{userId}"
+      },
+      {
+        "method": "GET",
+        "path": "/users/roles"
+      }
+    ]
+  },
+  "roles": {
+    "protected": [
+      { "method": "POST", "path": "/roles" },
+      { "method": "GET", "path": "/roles" },
+      { "method": "DELETE", "path": "/roles/{role}" }
+    ]
+  },
+  "permissions": {
+    "protected": [
+      { "method": "POST", "path": "/permissions" },
+      { "method": "GET", "path": "/permissions" },
+      { "method": "DELETE", "path": "/permissions/{permission}" }
+    ]
+  },
+  "notes": [
+    "Protected endpoints require Authorization: Bearer <token>",
+    "All paths are relative to /hyra_ai context path",
+    "Standard response format uses {code, message, result}"
+  ]
+}

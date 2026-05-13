@@ -1,11 +1,12 @@
 @import "tailwindcss";
+@custom-variant dark (&:is(.dark *));
 
 *{
     margin:0;
     box-sizing:border-box;
-
 }
+
 body {
     font-family: 'Inter', sans-serif;
-    background: #DBF1FF;
+    /* Loại bỏ background cứng để Tailwind có thể ghi đè màu nền ở các thẻ con */
 }
