@@ -3,10 +3,14 @@ import Navbar from "../components/Navbar"
 import { useState, useEffect } from "react";
 import { FiSun, FiMoon } from "react-icons/fi";
 import LoginModal from "../components/LoginModal";
+import RegisterModal from "../components/RegisterModal";
+import ForgotModal from "../components/ForgotModal";
+import VerifyModal from "../components/VerifyModal";
 
 function MainLayout(){
     const [darkMode, setDarkMode] = useState(false);
-    const [openLogin, setOpenLogin] = useState(false);
+    const [activeModal, setActiveModal] = useState(null);
+
     
     useEffect(()=>{
         if(darkMode){
@@ -42,11 +46,36 @@ function MainLayout(){
                     {darkMode ? <FiSun /> : <FiMoon />}
                 </button>
 
-            <Navbar setOpenLogin={setOpenLogin} />
-            <LoginModal
-            open={openLogin}
-            setOpen={setOpenLogin}/>
-            <main className="flex-1 flex justify-center pt-10">
+            <Navbar setActiveModal={setActiveModal} />
+            
+            {activeModal === 'login' && (
+                <LoginModal 
+                    onClose={() => setActiveModal(null)} 
+                    onSwitch={(mode) => setActiveModal(mode)} 
+                />
+            )}
+            
+            {activeModal === 'register' && (
+                <RegisterModal 
+                    onClose={() => setActiveModal(null)} 
+                    onSwitch={(mode) => setActiveModal(mode)} 
+                />
+            )}
+
+            {activeModal === 'forgot' && (
+                <ForgotModal 
+                    onClose={() => setActiveModal(null)} 
+                    onSwitch={(mode) => setActiveModal(mode)} 
+                />
+            )}
+
+            {activeModal === 'verify' && (
+                <VerifyModal 
+                    onClose={() => setActiveModal(null)} 
+                    onSwitch={(mode) => setActiveModal(mode)} 
+                />
+            )}
++            <main className="flex-1 flex justify-center pt-10">
                 <Outlet/> 
             </main>
         </div>

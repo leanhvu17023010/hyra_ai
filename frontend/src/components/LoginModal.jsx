@@ -11,12 +11,13 @@ import {
   FiEyeOff
 } from "react-icons/fi"
 
-function LoginModal({ open, setOpen }) {
+function LoginModal({ onClose, onSwitch }) {
   const [showPass, setShowPass] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+
 
   const login = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
@@ -32,7 +33,7 @@ function LoginModal({ open, setOpen }) {
         const result = await authService.loginWithGoogle(sub, email, name)
 
         if (result.result.authenticated) {
-          setOpen(false)
+          onClose()
           window.location.reload() // Hoặc chuyển hướng
         }
       } catch (err) {
@@ -58,7 +59,7 @@ function LoginModal({ open, setOpen }) {
     try {
       const result = await authService.login(email, password)
       if (result.result.authenticated) {
-        setOpen(false)
+        onClose()
         window.location.reload()
       }
     } catch (err) {
@@ -69,7 +70,7 @@ function LoginModal({ open, setOpen }) {
     }
   }
 
-  if (!open) return null
+  // Không cần kiểm tra !open ở đây vì modal được render có điều kiện từ MainLayout
 
   return (
 
@@ -100,7 +101,7 @@ function LoginModal({ open, setOpen }) {
         "
       >
         <button
-          onClick={() => setOpen(false)}
+          onClick={onClose}
           className="
             absolute
             top-5
@@ -273,6 +274,7 @@ function LoginModal({ open, setOpen }) {
           </label>
 
           <button
+            onClick={() => onSwitch('forgot')}
             className="
               text-blue-800
               hover:underline
@@ -320,6 +322,7 @@ function LoginModal({ open, setOpen }) {
           Chưa có tài khoản?
 
           <span
+            onClick={() => onSwitch('register')}
             className="
               text-blue-800
               font-semibold

@@ -1,5 +1,5 @@
 
-function Navbar({ setOpenLogin }) {
+function Navbar({ setActiveModal }) {
     return(
         <nav className="
         flex justify-between items-center 
@@ -8,8 +8,8 @@ function Navbar({ setOpenLogin }) {
             <h1 className="text-2xl font-bold">Example AI</h1>
             <div className="flex gap-4 text-base font-medium">
                 <button 
-                    className="bg-[#5b6ef7] hover:bg-[#4a5ce6] text-white px-6 py-2 rounded-lg transition-colors dark:bg-[#11229c] dark:hover:bg-[#1128b9]"
-                    onClick={() => setOpenLogin(true)}
+                    className="bg-[#5b6ef7] hover:bg-[#4a5ce6] text-white px-6 py-2 rounded-lg transition-colors dark:bg-[#11229c] dark:hover:bg-[#1128b9] cursor-pointer"
+                    onClick={() => setActiveModal('login')}
                 >
                     Đăng nhập
                 </button>
