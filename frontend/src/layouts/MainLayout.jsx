@@ -6,11 +6,12 @@ import LoginModal from "../components/LoginModal";
 import RegisterModal from "../components/RegisterModal";
 import ForgotModal from "../components/ForgotModal";
 import VerifyModal from "../components/VerifyModal";
+import ResetPasswordModal from "../components/ResetPasswordModal";
 
 function MainLayout(){
     const [darkMode, setDarkMode] = useState(false);
     const [activeModal, setActiveModal] = useState(null);
-    const [modalData, setModalData] = useState({ email: '', mode: '' });
+    const [modalData, setModalData] = useState({ email: '', mode: '', otp: '' });
 
     const handleSwitchModal = (modal, data = {}) => {
         setModalData(prev => ({ ...prev, ...data }));
@@ -80,6 +81,15 @@ function MainLayout(){
                     otpMode={modalData.mode}
                     username={modalData.username}
                     password={modalData.password}
+                    onClose={() => setActiveModal(null)} 
+                    onSwitch={handleSwitchModal} 
+                />
+            )}
+
+            {activeModal === 'reset-password' && (
+                <ResetPasswordModal 
+                    email={modalData.email}
+                    otp={modalData.otp}
                     onClose={() => setActiveModal(null)} 
                     onSwitch={handleSwitchModal} 
                 />

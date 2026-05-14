@@ -157,10 +157,10 @@ function ForgotModal({ onClose, onSwitch }) {
           </>
         )}
 
-        <div className="text-center mt-8">
+        <div className="text-center mt-8 py-2">
             <span
                 onClick={() => onSwitch('login')}
-                className="text-blue-800 font-semibold cursor-pointer hover:underline"
+                className="text-blue-800 font-semibold cursor-pointer hover:underline "
             >
                 Quay lại Đăng nhập
             </span>

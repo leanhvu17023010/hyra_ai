@@ -39,6 +39,15 @@ const authService = {
             roleName: 'USER'
         });
         return response.data;
+    },
+
+    resetPassword: async (email, otp, newPassword) => {
+        const response = await api.post('/auth/reset-password', {
+            email,
+            otp,
+            newPassword
+        });
+        return response.data;
     }
 };
 

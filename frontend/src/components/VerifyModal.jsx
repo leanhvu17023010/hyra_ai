@@ -55,8 +55,11 @@ function VerifyModal({ email, otpMode, username, password, onClose, onSwitch }) 
           } else {
             setError(registerRes.message || "Đăng ký thất bại");
           }
+        } else if (otpMode === 'forgot') {
+          // Mode quên mật khẩu -> chuyển sang màn hình đặt lại mật khẩu mới
+          onSwitch('reset-password', { otp: fullCode });
         } else {
-          // Mode khác (ví dụ: quên mật khẩu)
+          // Mode khác
           alert("Xác thực thành công!");
           onClose();
         }
@@ -171,7 +174,7 @@ function VerifyModal({ email, otpMode, username, password, onClose, onSwitch }) 
           </div>
         )}
 
-        <div className="flex justify-between gap-2 mb-10">
+        <div className="flex justify-between gap-2 mb-10 py-5">
           {code.map((digit, index) => (
             <input
               key={index}
@@ -195,6 +198,7 @@ function VerifyModal({ email, otpMode, username, password, onClose, onSwitch }) 
                 focus:ring-blue-100
                 outline-none
                 transition-all
+              
               "
             />
           ))}
@@ -208,7 +212,7 @@ function VerifyModal({ email, otpMode, username, password, onClose, onSwitch }) 
           {loading ? "Đang kiểm tra..." : "Xác nhận"}
         </button>
 
-        <div className="text-center mt-8">
+        <div className="text-center mt-8 py-2">
             <p className="text-zinc-500">
                 Không nhận được mã?{" "}
                 <button
