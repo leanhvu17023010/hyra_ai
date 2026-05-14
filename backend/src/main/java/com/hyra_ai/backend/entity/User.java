@@ -25,6 +25,7 @@ public class User {
     @Column(name = "full_name", columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     String fullName;
 
+    @Column(unique = true)
     String email;
     boolean isActive;
     LocalDate createAt;

@@ -76,7 +76,6 @@ public class UserService {
     public UserResponse updateUser(String userId, UserUpdateRequest request) {
         User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        // Check current user is ADMIN
         var context = SecurityContextHolder.getContext();
         String currentEmail = context.getAuthentication().getName();
 
@@ -109,7 +108,7 @@ public class UserService {
             }
         }
 
-        // Change Email
+        // change Email
         if (request.getEmail() != null && !request.getEmail().isEmpty()) {
             if (isAdmin) {
                 user.setEmail(request.getEmail());
@@ -117,7 +116,7 @@ public class UserService {
         }
 
 
-        // FullName
+        // fullName
         if (request.getFullName() != null && !request.getFullName().isEmpty()) {
             user.setFullName(request.getFullName());
         }
@@ -139,7 +138,6 @@ public class UserService {
                 boolean oldIsActiveValue = user.isActive();
                 boolean newIsActiveValue = request.getIsActive();
 
-                // Check if account is being locked (transition from active to inactive)
                 if (oldIsActiveValue && !newIsActiveValue) {
                     String userRoleName = user.getRole() != null ? user.getRole().getName() : null;
 
