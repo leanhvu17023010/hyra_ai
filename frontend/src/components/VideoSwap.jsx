@@ -53,13 +53,48 @@ function VideoSwap() {
 
             setMessage('Tải lên thành công! Đang xử lý bằng AI... Vui lòng đợi.');
             
+            // Bắt đầu polling trạng thái từ BE
+            pollTaskStatus(taskId);
 
         } catch (error) {
             console.error('Lỗi khi swap:', error);
             setMessage(error.response?.data?.message || 'Có lỗi xảy ra trong quá trình xử lý.');
             setIsLoading(false);
         }
-        // Xóa block finally để giữ trạng thái loading khi đang chờ setTimeout
+    };
+
+    const pollTaskStatus = async (taskId) => {
+        let attempts = 0;
+        const maxAttempts = 120; // Thử tối đa 10 phút (5s * 120)
+
+        const intervalId = setInterval(async () => {
+            attempts++;
+            if (attempts > maxAttempts) {
+                clearInterval(intervalId);
+                setMessage('Quá thời gian chờ AI xử lý. Vui lòng thử lại sau.');
+                setIsLoading(false);
+                return;
+            }
+
+            try {
+                // Ping trực tiếp file video kèm Token JWT (để không bị 401 Unauthorized)
+                const isReady = await swapService.pingResultVideo(taskId);
+                
+                if (isReady) {
+                    clearInterval(intervalId);
+                    
+                    // Tải video dưới dạng Blob và tạo URL an toàn để trình duyệt phát được (bỏ qua Auth của thẻ video gốc)
+                    const blobUrl = await swapService.getResultVideoBlobUrl(taskId);
+                    
+                    setResultVideoSrc(blobUrl);
+                    setMessage('Xử lý thành công!');
+                    setIsLoading(false);
+                }
+            } catch (error) {
+                // Lỗi 404 (chưa render xong), tiếp tục chờ...
+                console.log("Video chưa sẵn sàng, tiếp tục chờ...");
+            }
+        }, 5000);
     };
 
     return (

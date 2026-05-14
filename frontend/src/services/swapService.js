@@ -21,6 +21,20 @@ const swapService = {
             },
         });
         return response.data;
+    },
+
+    // Kiểm tra xem video kết quả đã tồn tại chưa (kèm token)
+    pingResultVideo: async (taskId) => {
+        const response = await api.head(`/uploads/results/final_result_${taskId}.mp4`);
+        return response.status === 200;
+    },
+
+
+    getResultVideoBlobUrl: async (taskId) => {
+        const response = await api.get(`/uploads/results/final_result_${taskId}.mp4`, {
+            responseType: 'blob'
+        });
+        return URL.createObjectURL(response.data);
     }
 };
 
