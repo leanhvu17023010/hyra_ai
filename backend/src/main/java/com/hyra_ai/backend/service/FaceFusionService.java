@@ -77,22 +77,26 @@ public class FaceFusionService {
     }
 
     private void waitUntilCompleted(String remoteTaskId) throws InterruptedException {
-        int maxAttempts = 120; // 10 phút (5s * 120)
+        int maxAttempts = 240; // 10 phút (5s * 120)
         for (int i = 0; i < maxAttempts; i++) {
             Thread.sleep(5000);
-            
-            TaskStatusResponse status = faceFusionWebClient.get()
-                    .uri("/api/status/{taskId}", remoteTaskId)
-                    .retrieve()
-                    .bodyToMono(TaskStatusResponse.class)
-                    .block(Duration.ofSeconds(30));
 
-            String s = (status != null) ? status.getStatus() : "unknown";
-            log.info("Trạng thái Task bên máy AI: {}", s);
+            try {
+                TaskStatusResponse status = faceFusionWebClient.get()
+                        .uri("/api/status/{taskId}", remoteTaskId)
+                        .retrieve()
+                        .bodyToMono(TaskStatusResponse.class)
+                        .block(Duration.ofSeconds(60));
 
-            if ("completed".equalsIgnoreCase(s)) return;
-            if (s.startsWith("failed") || s.startsWith("error")) {
-                throw new IllegalStateException("Máy AI báo lỗi xử lý: " + s);
+                String s = (status != null) ? status.getStatus() : "unknown";
+                log.info("Trạng thái Task bên Facefusion: {}", s);
+
+                if ("completed".equalsIgnoreCase(s)) return;
+                if (s.startsWith("failed") || s.startsWith("error")) {
+                    throw new IllegalStateException("Facefusion báo lỗi xử lý: " + s);
+                }
+            } catch (Exception e){
+//                log.warn("Đang đợi FaceFusion trả kết quả ", i ,e.getMessage());
             }
         }
         throw new IllegalStateException("Hết thời gian chờ xử lý từ máy AI");
