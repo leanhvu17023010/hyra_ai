@@ -12,7 +12,7 @@ public enum ErrorCode {
     USER_EXISTED(1002, "User existed", HttpStatus.BAD_REQUEST),
     INVALID_PASSWORD(1003, "Mật khẩu không chính xác", HttpStatus.BAD_REQUEST),
     USER_NOT_EXISTED(1004, "User không tồn tại", HttpStatus.NOT_FOUND),
-    UNAUTHENTICATED(1005, "Sao ", HttpStatus.UNAUTHORIZED),
+    UNAUTHENTICATED(1005, "Yêu cầu đăng nhập trước khi sử dụng", HttpStatus.UNAUTHORIZED),
     ACCOUNT_LOCKED(1006, "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ hỗ trợ.", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED(1007, "You do not have permission", HttpStatus.FORBIDDEN),
     EMAIL_SEND_FAILED(1008, "Failed to send email", HttpStatus.INTERNAL_SERVER_ERROR),
