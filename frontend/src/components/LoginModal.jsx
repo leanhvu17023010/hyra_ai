@@ -3,6 +3,7 @@ import { FcGoogle } from "react-icons/fc"
 import { useGoogleLogin } from "@react-oauth/google"
 import axios from "axios"
 import authService from "../services/authService"
+import { loginSchema, validate } from "../utils/validation"
 import {
   FiX,
   FiMail,
@@ -16,13 +17,15 @@ function LoginModal({ onClose, onSwitch }) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
+  const [errors, setErrors] = useState({})
+  const [globalError, setGlobalError] = useState("")
 
 
   const login = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       setLoading(true)
-      setError("")
+      setGlobalError("")
+      setErrors({})
       try {
         // Lấy thông tin user từ Google bằng access_token
         const res = await axios.get("https://www.googleapis.com/oauth2/v3/userinfo", {
@@ -38,24 +41,27 @@ function LoginModal({ onClose, onSwitch }) {
         }
       } catch (err) {
         console.error("Lỗi đăng nhập Google:", err)
-        setError("Đăng nhập Google thất bại. Vui lòng thử lại.")
+        setGlobalError("Đăng nhập Google thất bại. Vui lòng thử lại.")
       } finally {
         setLoading(false)
       }
     },
     onError: () => {
-      setError("Đăng nhập Google thất bại.")
+      setGlobalError("Đăng nhập Google thất bại.")
     },
   });
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      setError("Vui lòng nhập đầy đủ email và mật khẩu.")
+    setErrors({})
+    setGlobalError("")
+
+    const validation = await validate(loginSchema, { email, password })
+    if (!validation.isValid) {
+      setErrors(validation.errors)
       return
     }
 
     setLoading(true)
-    setError("")
     try {
       const result = await authService.login(email, password)
       if (result.result.authenticated) {
@@ -64,7 +70,7 @@ function LoginModal({ onClose, onSwitch }) {
       }
     } catch (err) {
       console.error("Lỗi đăng nhập:", err)
-      setError(err.response?.data?.message || "Email hoặc mật khẩu không chính xác.")
+      setGlobalError(err.response?.data?.message || "Email hoặc mật khẩu không chính xác.")
     } finally {
       setLoading(false)
     }
@@ -161,9 +167,9 @@ function LoginModal({ onClose, onSwitch }) {
 
         </div>
 
-        {error && (
+        {globalError && (
           <div className="mb-4 p-3 bg-red-100 text-red-600 rounded-xl text-sm text-center">
-            {error}
+            {globalError}
           </div>
         )}
 
@@ -184,14 +190,14 @@ function LoginModal({ onClose, onSwitch }) {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Địa chỉ email của bạn"
-            className="
+            className={`
               w-full
               pl-12
               pr-4
               py-4
               rounded-2xl
               border
-              border-zinc-300
+              ${errors.email ? 'border-red-500' : 'border-zinc-300'}
               dark:border-zinc-700
               bg-white
               outline-none
@@ -199,9 +205,11 @@ function LoginModal({ onClose, onSwitch }) {
               focus:ring-indigo-300
               dark:focus:ring-orange-500/20
               transition-all
-            "
+            `}
           />
-
+          {errors.email && (
+            <p className="text-red-500 text-sm mt-2">{errors.email}</p>
+          )}
         </div>
 
           <div className="relative mb-8 py-5">
@@ -222,15 +230,14 @@ function LoginModal({ onClose, onSwitch }) {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Mật khẩu của bạn"
-
-            className="
+            className={`
               w-full
               pl-12
               pr-4
               py-4
               rounded-2xl
               border
-              border-zinc-300
+              ${errors.password ? 'border-red-500' : 'border-zinc-300'}
               dark:border-zinc-700
               bg-white
               outline-none
@@ -238,12 +245,15 @@ function LoginModal({ onClose, onSwitch }) {
               focus:ring-indigo-300
               dark:focus:ring-indigo-500/20
               transition-all
-            "
+            `}
           />
           <button onClick={()=> setShowPass(!showPass)} 
           className="absolute top-1/2 -translate-y-1/2 right-4 text-zinc-400 hover:text-zinc-600 transition-all">
             {showPass ? <FiEyeOff /> : <FiEye />}
           </button>
+          {errors.password && (
+            <p className="text-red-500 text-sm mt-2">{errors.password}</p>
+          )}
         </div>
 
         {/* OPTIONS */}

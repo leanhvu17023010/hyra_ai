@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react"
 import { FiX, FiArrowLeft, FiShield } from "react-icons/fi"
+import authService from "../services/authService"
 
-function VerifyModal({ onClose, onSwitch }) {
+function VerifyModal({ email, otpMode, username, password, onClose, onSwitch }) {
   const [code, setCode] = useState(["", "", "", "", "", ""])
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
@@ -42,19 +43,51 @@ function VerifyModal({ onClose, onSwitch }) {
     setLoading(true)
     setError("")
     
-    // Giả lập xác thực mã
-    setTimeout(() => {
+    try {
+      const response = await authService.verifyOtp(email, fullCode)
+      if (response.code === 200) {
+
+        if (otpMode === 'register') {
+          const registerRes = await authService.register(email, password, username);
+          if (registerRes.code === 200 || registerRes.result) {
+            alert("Đăng ký tài khoản thành công! Vui lòng đăng nhập.");
+            onSwitch('login');
+          } else {
+            setError(registerRes.message || "Đăng ký thất bại");
+          }
+        } else {
+          // Mode khác (ví dụ: quên mật khẩu)
+          alert("Xác thực thành công!");
+          onClose();
+        }
+      } else {
+        setError(response.message || "Mã xác thực không chính xác")
+      }
+    } catch (err) {
+      setError("Đã có lỗi xảy ra. Vui lòng thử lại sau.")
+      console.error(err)
+    } finally {
       setLoading(false)
-      // Logic sau khi xác thực thành công
-      alert("Xác thực thành công!")
-      onClose()
-    }, 1500)
+    }
   }
 
-  const handleResend = () => {
+  const handleResend = async () => {
     if (timer > 0) return
-    setTimer(60)
-    // Logic gửi lại mã
+    setLoading(true)
+    setError("")
+    try {
+      const response = await authService.sendOtp(email, otpMode)
+      if (response.code === 200) {
+        setTimer(60)
+        alert("Mã mới đã được gửi!")
+      } else {
+        setError(response.message || "Không thể gửi lại mã")
+      }
+    } catch (err) {
+      setError("Đã có lỗi xảy ra.")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
