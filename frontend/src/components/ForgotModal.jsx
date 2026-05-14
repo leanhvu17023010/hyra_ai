@@ -1,25 +1,39 @@
 import { useState } from "react"
 import { FiMail, FiX, FiArrowLeft } from "react-icons/fi"
+import authService from "../services/authService"
+import { forgotSchema, validate } from "../utils/validation"
 
 function ForgotModal({ onClose, onSwitch }) {
   const [email, setEmail] = useState("")
-  const [error, setError] = useState("")
+  const [errors, setErrors] = useState({})
+  const [globalError, setGlobalError] = useState("")
   const [message, setMessage] = useState("")
   const [loading, setLoading] = useState(false)
 
   const handleResetPassword = async () => {
-    if (!email) {
-      setError("Vui lòng nhập email của bạn.")
+    setErrors({})
+    setGlobalError("")
+
+    const validation = await validate(forgotSchema, { email })
+    if (!validation.isValid) {
+      setErrors(validation.errors)
       return
     }
     
     setLoading(true)
-    setError("")
-    // Giả lập gửi email reset mật khẩu
-    setTimeout(() => {
-      setMessage("Nếu email tồn tại trong hệ thống, bạn sẽ nhận được hướng dẫn đặt lại mật khẩu.")
+    try {
+      const response = await authService.sendOtp(email, 'forgot')
+      if (response.code === 200) {
+        onSwitch('verify', { email, mode: 'forgot' })
+      } else {
+        setGlobalError(response.message || "Không thể gửi mã OTP")
+      }
+    } catch (err) {
+      setGlobalError("Đã có lỗi xảy ra. Vui lòng thử lại sau.")
+      console.error(err)
+    } finally {
       setLoading(false)
-    }, 1500)
+    }
   }
 
   return (
@@ -91,9 +105,9 @@ function ForgotModal({ onClose, onSwitch }) {
           Nhập email của bạn và chúng tôi sẽ gửi hướng dẫn đặt lại mật khẩu.
         </p>
 
-        {error && (
+        {globalError && (
           <div className="mb-4 p-3 bg-red-100 text-red-600 rounded-xl text-sm text-center">
-            {error}
+            {globalError}
           </div>
         )}
 
@@ -112,8 +126,25 @@ function ForgotModal({ onClose, onSwitch }) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Địa chỉ email của bạn"
-                className="w-full pl-12 pr-4 py-4 rounded-2xl border border-zinc-300 dark:border-zinc-700 bg-white outline-none focus:ring-2 focus:ring-indigo-300 transition-all"
+                className={`
+                  w-full
+                  pl-12
+                  pr-4
+                  py-4
+                  rounded-2xl
+                  border
+                  ${errors.email ? 'border-red-500' : 'border-zinc-300'}
+                  dark:border-zinc-700
+                  bg-white
+                  outline-none
+                  focus:ring-2
+                  focus:ring-indigo-300
+                  transition-all
+                `}
               />
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-2">{errors.email}</p>
+              )}
             </div>
 
             <button

@@ -10,8 +10,13 @@ import VerifyModal from "../components/VerifyModal";
 function MainLayout(){
     const [darkMode, setDarkMode] = useState(false);
     const [activeModal, setActiveModal] = useState(null);
+    const [modalData, setModalData] = useState({ email: '', mode: '' });
 
-    
+    const handleSwitchModal = (modal, data = {}) => {
+        setModalData(prev => ({ ...prev, ...data }));
+        setActiveModal(modal);
+    };
+
     useEffect(()=>{
         if(darkMode){
             document.documentElement.classList.add("dark");
@@ -51,28 +56,32 @@ function MainLayout(){
             {activeModal === 'login' && (
                 <LoginModal 
                     onClose={() => setActiveModal(null)} 
-                    onSwitch={(mode) => setActiveModal(mode)} 
+                    onSwitch={handleSwitchModal} 
                 />
             )}
             
             {activeModal === 'register' && (
                 <RegisterModal 
                     onClose={() => setActiveModal(null)} 
-                    onSwitch={(mode) => setActiveModal(mode)} 
+                    onSwitch={handleSwitchModal} 
                 />
             )}
 
             {activeModal === 'forgot' && (
                 <ForgotModal 
                     onClose={() => setActiveModal(null)} 
-                    onSwitch={(mode) => setActiveModal(mode)} 
+                    onSwitch={handleSwitchModal} 
                 />
             )}
 
             {activeModal === 'verify' && (
                 <VerifyModal 
+                    email={modalData.email}
+                    otpMode={modalData.mode}
+                    username={modalData.username}
+                    password={modalData.password}
                     onClose={() => setActiveModal(null)} 
-                    onSwitch={(mode) => setActiveModal(mode)} 
+                    onSwitch={handleSwitchModal} 
                 />
             )}
 +            <main className="flex-1 flex justify-center pt-10">

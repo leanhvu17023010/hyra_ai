@@ -19,6 +19,26 @@ const authService = {
 
     logout: () => {
         localStorage.removeItem('token');
+    },
+
+    sendOtp: async (email, mode = '') => {
+        const response = await api.post(`/auth/send-otp?email=${email}&mode=${mode}`);
+        return response.data;
+    },
+
+    verifyOtp: async (email, otp) => {
+        const response = await api.post('/auth/verify-otp', { email, otp });
+        return response.data;
+    },
+
+    register: async (email, password, username) => {
+        const response = await api.post('/users', {
+            email,
+            password,
+            fullName: username,
+            roleName: 'USER'
+        });
+        return response.data;
     }
 };
 
