@@ -1,5 +1,6 @@
 package com.hyra_ai.backend.controller;
 
+import com.hyra_ai.backend.service.SwapTaskService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,10 +23,11 @@ public class MediaController {
 
     StorageService storageService;
     MediaRepository mediaRepository;
+    private final SwapTaskService swapTaskService;
 
     @PostMapping("/upload")
-    public ApiResponse<Media> uploadFile(@RequestParam("file") MultipartFile file) {
-        
+    public ApiResponse<Media> uploadFile(@RequestParam("file") MultipartFile file, @RequestParam(value = "taskId", required = false) String taskId) {
+
         try {
             String contentType = file.getContentType();
             String type = "IMAGE";
@@ -58,6 +60,10 @@ public class MediaController {
                     .build();
             
             Media savedMedia = mediaRepository.save(media);
+
+            if(taskId != null && !taskId.isEmpty()){
+                swapTaskService.addMediaToTask(taskId, savedMedia);
+            }
             
             return ApiResponse.<Media>builder()
                     .code(200)

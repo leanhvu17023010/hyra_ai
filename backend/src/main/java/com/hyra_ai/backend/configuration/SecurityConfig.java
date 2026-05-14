@@ -36,7 +36,8 @@ public class SecurityConfig {
         "/auth/verify-otp",
         "/auth/reset-password",
         "/auth/set-password-google",
-        "/media/upload",
+//        "/media/upload",
+//            "/swap/tasks",
     };
 
     private static final String[] PUBLIC_GET_ENDPOINTS = {
