@@ -149,6 +149,7 @@ function Navbar({ setActiveModal }) {
                                 className="
                                     font-semibold
                                     text-lg
+                                    cursor-pointer
                                 "
                             >
                                 {user.userName || user.email}
@@ -215,7 +216,7 @@ function Navbar({ setActiveModal }) {
 
                                         hover:bg-gray-100
                                         dark:hover:bg-gray-800
-
+                                        cursor-pointer
                                         transition-all
                                     "
                                 >
@@ -247,7 +248,7 @@ function Navbar({ setActiveModal }) {
 
                                         hover:bg-red-50
                                         dark:hover:bg-red-500/10
-
+                                        cursor-pointer
                                         transition-all
                                     "
                                 >

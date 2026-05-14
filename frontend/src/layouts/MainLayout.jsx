@@ -36,8 +36,8 @@ function MainLayout(){
         ">
                 <button onClick={()=> setDarkMode(!darkMode)}
                     className="fixed 
-                    top-5 
-                    right-50 
+                    top-6
+                    left-50
                     p-2 
                     rounded-full 
                     bg-gray-200 
@@ -94,7 +94,7 @@ function MainLayout(){
                     onSwitch={handleSwitchModal} 
                 />
             )}
-+            <main className="flex-1 flex justify-center pt-10">
+            <main className="flex-1 flex justify-center pt-10">
                 <Outlet/> 
             </main>
         </div>
