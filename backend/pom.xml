@@ -132,6 +132,13 @@
         <scope>runtime</scope>
     </dependency>
 
+    <!-- webflux for fastapi -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-webflux</artifactId>
+    </dependency>
+
+
     <!-- Testcontainers (integration testing with containers) -->
     <dependency>
         <groupId>org.testcontainers</groupId>

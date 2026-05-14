@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 public class SwapTaskService {
 
     SwapTaskRepository swapTaskRepository;
-
+    final FaceFusionService faceFusionService;
 
     public void addMediaToTask(String taskId, Media media){
 
@@ -37,6 +37,11 @@ public class SwapTaskService {
             swapTask.setSourceVideo(media);
         }
         swapTaskRepository.save(swapTask);
+
+        if(swapTask.getSourceImage() != null && swapTask.getSourceVideo() != null){
+            faceFusionService.sendtoFaceFusion(swapTask);
+        }
+
     }
 
 }
