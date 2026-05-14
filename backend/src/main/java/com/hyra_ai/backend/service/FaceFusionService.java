@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -64,7 +65,7 @@ public class FaceFusionService {
             swapTaskRepository.save(swapTask);
 
             // 3. Đợi cho đến khi hoàn thành (Polling)
-            waitUntilCompleted(remoteTaskId);
+            waitUntilCompleted(remoteTaskId, swapTask);
 
             // 4. Tải và lưu kết quả vào thư mục "results" riêng biệt
             saveResult(remoteTaskId, swapTask);
@@ -76,30 +77,128 @@ public class FaceFusionService {
         }
     }
 
-    private void waitUntilCompleted(String remoteTaskId) throws InterruptedException {
-        int maxAttempts = 240; // 10 phút (5s * 120)
+    private void waitUntilCompleted(String remoteTaskId, SwapTask swapTask) throws InterruptedException {
+        final int maxAttempts = 600; // ~20 phút @ 2s
+        int lastLoggedProgress = -1;
+
         for (int i = 0; i < maxAttempts; i++) {
-            Thread.sleep(5000);
+            Thread.sleep(2000);
 
-            try {
-                TaskStatusResponse status = faceFusionWebClient.get()
-                        .uri("/api/status/{taskId}", remoteTaskId)
-                        .retrieve()
-                        .bodyToMono(TaskStatusResponse.class)
-                        .block(Duration.ofSeconds(60));
+            TaskStatusResponse statusResponse = pollStatusWithRetry(remoteTaskId);
+            if (statusResponse == null) {
+                log.debug("Chưa lấy được /api/status (lỗi mạng tạm thời), sẽ poll tiếp.");
+                continue;
+            }
 
-                String s = (status != null) ? status.getStatus() : "unknown";
-                log.info("Trạng thái Task bên Facefusion: {}", s);
+            Integer currentProgress = extractProgressPercent(statusResponse);
+            if (currentProgress != null && !currentProgress.equals(lastLoggedProgress)) {
+                lastLoggedProgress = currentProgress;
+                swapTask.setProgress(currentProgress);
+                swapTaskRepository.save(swapTask);
+                log.info("Tiến độ FaceFusion: {}%", currentProgress);
+            }
 
-                if ("completed".equalsIgnoreCase(s)) return;
-                if (s.startsWith("failed") || s.startsWith("error")) {
-                    throw new IllegalStateException("Facefusion báo lỗi xử lý: " + s);
-                }
-            } catch (Exception e){
-//                log.warn("Đang đợi FaceFusion trả kết quả ", i ,e.getMessage());
+            if ("complete".equalsIgnoreCase(statusResponse.getStatus())) {
+                return;
+            }
+            if ("failed".equalsIgnoreCase(statusResponse.getStatus())
+                    || "error".equalsIgnoreCase(statusResponse.getStatus())) {
+                throw new IllegalStateException("FaceFusion báo lỗi: " + statusResponse.getStatus());
             }
         }
         throw new IllegalStateException("Hết thời gian chờ xử lý từ máy AI");
+    }
+
+    /**
+     * Gọi /api/status có retry nhẹ — lỗi "Connection reset by peer" thường gặp khi pool tái dùng socket đã đóng.
+     */
+    private TaskStatusResponse pollStatusWithRetry(String remoteTaskId) {
+        final int maxRetries = 4;
+        for (int r = 0; r < maxRetries; r++) {
+            try {
+                return faceFusionWebClient
+                        .get()
+                        .uri("/api/status/{taskId}", remoteTaskId)
+                        .retrieve()
+                        .bodyToMono(TaskStatusResponse.class)
+                        .block(Duration.ofSeconds(45));
+            } catch (Exception e) {
+                if (!isTransientClientFailure(e)) {
+                    log.error("Lỗi không phục hồi được khi gọi FaceFusion /api/status: {}", rootMessage(e));
+                    throw new IllegalStateException("Không đọc được trạng thái từ FaceFusion", e);
+                }
+                if (r == maxRetries - 1) {
+                    log.debug(
+                            "FaceFusion /api/status lỗi mạng tạm thời sau {} lần ({}), sẽ thử lại ở vòng poll sau.",
+                            maxRetries,
+                            rootMessage(e));
+                    return null;
+                }
+                try {
+                    Thread.sleep(150L * (r + 1));
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+
+    private static Integer extractProgressPercent(TaskStatusResponse statusResponse) {
+        if (statusResponse == null) {
+            return null;
+        }
+        if (statusResponse.getProgress() != null) {
+            return Math.max(0, Math.min(100, statusResponse.getProgress()));
+        }
+        if (statusResponse.getExtra() == null) {
+            return null;
+        }
+        Map<String, Object> extra = statusResponse.getExtra();
+        Object pct = extra.get("percentage");
+        if (pct == null) {
+            pct = extra.get("progress");
+        }
+        if (pct instanceof Number n) {
+            return Math.max(0, Math.min(100, n.intValue()));
+        }
+        if (pct instanceof String s && !s.isBlank()) {
+            try {
+                return Math.max(0, Math.min(100, Integer.parseInt(s.trim())));
+            } catch (NumberFormatException ignored) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    private static boolean isTransientClientFailure(Throwable e) {
+        for (Throwable t = e; t != null; t = t.getCause()) {
+            String name = t.getClass().getName();
+            if (name.contains("PrematureCloseException")) {
+                return true;
+            }
+            String msg = t.getMessage();
+            if (msg != null) {
+                String m = msg.toLowerCase();
+                if (m.contains("connection reset by peer")
+                        || m.contains("connection reset")
+                        || m.contains("broken pipe")
+                        || m.contains("recvaddress")) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static String rootMessage(Throwable e) {
+        Throwable t = e;
+        while (t.getCause() != null) {
+            t = t.getCause();
+        }
+        return t.getClass().getSimpleName() + ": " + t.getMessage();
     }
 
     private void saveResult(String remoteTaskId, SwapTask swapTask) throws Exception {

@@ -13,6 +13,7 @@ import reactor.netty.http.client.HttpClient;
 import reactor.netty.resources.ConnectionProvider;
 
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 @Configuration
 public class FaceFusionClientConfig {
@@ -20,17 +21,21 @@ public class FaceFusionClientConfig {
     public WebClient faceFusionWebClient(@Value("${facefusion.base-url}") String baseUrl){
 
         ConnectionProvider provider = ConnectionProvider.builder("facefusion-pool")
-                            .maxConnections(50)
+                .maxConnections(50)
                 .pendingAcquireTimeout(Duration.ofSeconds(60))
+                // Tránh tái sử dụng socket đã bị FaceFusion / proxy đóng (Connection reset by peer).
+                .maxIdleTime(Duration.ofSeconds(15))
+                .maxLifeTime(Duration.ofMinutes(3))
                 .evictInBackground(Duration.ofSeconds(30))
                 .build();
 
         HttpClient httpClient = HttpClient.create(provider)
-                .responseTimeout(Duration.ofMinutes(20)) // Tăng lên 20 phút
-                .option(ChannelOption.SO_KEEPALIVE, true) // Giữ kết nối luôn sống
+                .responseTimeout(Duration.ofMinutes(20))
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 15_000)
+                .option(ChannelOption.SO_KEEPALIVE, true)
                 .doOnConnected(conn -> conn
-                        .addHandlerLast(new ReadTimeoutHandler(500)) // Chờ đọc dữ liệu 5 phút
-                        .addHandlerLast(new WriteTimeoutHandler(500)));
+                        .addHandlerLast(new ReadTimeoutHandler(120, TimeUnit.SECONDS))
+                        .addHandlerLast(new WriteTimeoutHandler(120, TimeUnit.SECONDS)));
 
         return WebClient.builder()
                 .baseUrl(baseUrl)
