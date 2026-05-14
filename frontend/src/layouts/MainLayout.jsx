@@ -1,16 +1,17 @@
 import { Outlet } from "react-router-dom"
 import Navbar from "../components/Navbar"
 import { useState, useEffect } from "react";
-import { FiSun, FiMoon } from "react-icons/fi";
+
 import LoginModal from "../components/LoginModal";
 import RegisterModal from "../components/RegisterModal";
 import ForgotModal from "../components/ForgotModal";
 import VerifyModal from "../components/VerifyModal";
+import ResetPasswordModal from "../components/ResetPasswordModal";
 
 function MainLayout(){
     const [darkMode, setDarkMode] = useState(false);
     const [activeModal, setActiveModal] = useState(null);
-    const [modalData, setModalData] = useState({ email: '', mode: '' });
+    const [modalData, setModalData] = useState({ email: '', mode: '', otp: '' });
 
     const handleSwitchModal = (modal, data = {}) => {
         setModalData(prev => ({ ...prev, ...data }));
@@ -33,25 +34,11 @@ function MainLayout(){
         transition-colors
         duration-300
         ">
-                <button onClick={()=> setDarkMode(!darkMode)}
-                    className="fixed 
-                    top-5 
-                    right-50 
-                    p-2 
-                    rounded-full 
-                    bg-gray-200 
-                    dark:bg-gray-700 
-                    text-gray-800 
-                    dark:text-gray-200 
-                    shadow-md 
-                    hover:bg-gray-300 
-                    dark:hover:bg-gray-600 
-                    transition-colors z-50
-                    cursor-pointer">
-                    {darkMode ? <FiSun /> : <FiMoon />}
-                </button>
-
-            <Navbar setActiveModal={setActiveModal} />
+            <Navbar 
+                setActiveModal={setActiveModal} 
+                darkMode={darkMode} 
+                setDarkMode={setDarkMode} 
+            />
             
             {activeModal === 'login' && (
                 <LoginModal 
@@ -78,13 +65,22 @@ function MainLayout(){
                 <VerifyModal 
                     email={modalData.email}
                     otpMode={modalData.mode}
-                    username={modalData.username}
+                    userName={modalData.userName}
                     password={modalData.password}
                     onClose={() => setActiveModal(null)} 
                     onSwitch={handleSwitchModal} 
                 />
             )}
-+            <main className="flex-1 flex justify-center pt-10">
+
+            {activeModal === 'reset-password' && (
+                <ResetPasswordModal 
+                    email={modalData.email}
+                    otp={modalData.otp}
+                    onClose={() => setActiveModal(null)} 
+                    onSwitch={handleSwitchModal} 
+                />
+            )}
+            <main className="flex-1 flex justify-center pt-10">
                 <Outlet/> 
             </main>
         </div>

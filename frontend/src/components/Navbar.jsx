@@ -2,13 +2,14 @@ import { useState, useEffect } from "react";
 
 import {
     FiUser,
-    FiClock,
-    FiLogOut
+    FiLogOut,
+    FiSun,
+    FiMoon
 } from "react-icons/fi";
 
 import userService from "../services/userService";
 
-function Navbar({ setActiveModal }) {
+function Navbar({ setActiveModal, darkMode, setDarkMode }) {
 
     const [user, setUser] = useState(null);
 
@@ -31,9 +32,7 @@ function Navbar({ setActiveModal }) {
                         await userService.getMyInfo();
 
                     if (response.result) {
-
                         setUser(response.result);
-
                     }
 
                 }
@@ -94,15 +93,36 @@ function Navbar({ setActiveModal }) {
             "
         >
 
-            {/* LOGO */}
-            <h1
-                className="
-                    text-2xl
-                    font-bold
-                "
-            >
-                Example AI
-            </h1>
+            {/* LEFT: LOGO + DARK MODE */}
+            <div className="flex items-center gap-3">
+
+                {/* LOGO */}
+                <h1
+                    className="
+                        text-2xl
+                        font-bold
+                    "
+                >
+                    Example AI
+                </h1>
+
+                {/* DARK MODE TOGGLE */}
+                <button
+                    onClick={() => setDarkMode(!darkMode)}
+                    className="
+                        p-2
+                        rounded-xl
+                        hover:bg-gray-100
+                        dark:hover:bg-gray-800
+                        transition-all
+                        cursor-pointer
+                        text-xl
+                    "
+                >
+                    {darkMode ? <FiSun /> : <FiMoon />}
+                </button>
+
+            </div>
 
             {/* RIGHT */}
             <div
@@ -112,6 +132,7 @@ function Navbar({ setActiveModal }) {
                     gap-4
                 "
             >
+
 
                 {user ? (
 
@@ -152,9 +173,10 @@ function Navbar({ setActiveModal }) {
                                 className="
                                     font-semibold
                                     text-lg
+                                    cursor-pointer
                                 "
                             >
-                                {user.fullName || user.email}
+                                {user.userName || user.email}
                             </span>
 
                         </button>
@@ -218,7 +240,7 @@ function Navbar({ setActiveModal }) {
 
                                         hover:bg-gray-100
                                         dark:hover:bg-gray-800
-
+                                        cursor-pointer
                                         transition-all
                                     "
                                 >
@@ -250,7 +272,7 @@ function Navbar({ setActiveModal }) {
 
                                         hover:bg-red-50
                                         dark:hover:bg-red-500/10
-
+                                        cursor-pointer
                                         transition-all
                                     "
                                 >

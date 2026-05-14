@@ -9,8 +9,8 @@ const authService = {
         return response.data;
     },
 
-    loginWithGoogle: async (idToken, email, fullName) => {
-        const response = await api.post('/auth/google', { idToken, email, fullName });
+    loginWithGoogle: async (idToken, email, userName) => {
+        const response = await api.post('/auth/google', { idToken, email, userName });
         if (response.data.result.token) {
             localStorage.setItem('token', response.data.result.token);
         }
@@ -31,12 +31,21 @@ const authService = {
         return response.data;
     },
 
-    register: async (email, password, username) => {
+    register: async (email, password, userName) => {
         const response = await api.post('/users', {
             email,
             password,
-            fullName: username,
+            userName,
             roleName: 'USER'
+        });
+        return response.data;
+    },
+
+    resetPassword: async (email, otp, newPassword) => {
+        const response = await api.post('/auth/reset-password', {
+            email,
+            otp,
+            newPassword
         });
         return response.data;
     }

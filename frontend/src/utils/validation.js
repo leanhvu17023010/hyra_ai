@@ -2,7 +2,7 @@ import * as yup from 'yup';
 
 
 export const registerSchema = yup.object().shape({
-  username: yup
+  userName: yup
     .string()
     .required("Vui lòng nhập tên hiển thị"),
   email: yup
@@ -37,6 +37,17 @@ export const forgotSchema = yup.object().shape({
     .string()
     .email("Email không đúng định dạng")
     .required("Vui lòng nhập email")
+});
+
+export const resetPasswordSchema = yup.object().shape({
+  newPassword: yup
+    .string()
+    .min(6, "Mật khẩu tối thiểu 6 ký tự")
+    .required("Vui lòng nhập mật khẩu mới"),
+  confirmPassword: yup
+    .string()
+    .oneOf([yup.ref('newPassword'), null], "Mật khẩu xác nhận không khớp")
+    .required("Vui lòng xác nhận mật khẩu")
 });
 
 
