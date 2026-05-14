@@ -48,3 +48,7 @@ logging:
   level:
     root: INFO
     com.hyra_ai.backend: INFO
+    # Giảm stack trace Netty (Connection reset) in ra console khi poll FaceFusion.
+    reactor.netty.http.client: WARN
+    reactor.netty.channel: WARN
+    io.netty.channel: WARN

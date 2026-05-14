@@ -12,8 +12,11 @@ public class TaskStatusResponse {
 
     String status;
 
-    /** Một số bản FaceFusion trả trực tiếp ở root (song song với extra). */
-    Integer progress;
+    /**
+     * FaceFusion có thể trả {@code 45}, {@code 45.2}, phân số {@code 0.45}, chuỗi {@code "45"}, hoặc object
+     * dạng {@code {"current":1,"total":4}} — dùng {@code Object} để Jackson bind được, rồi chuẩn hoá ở service.
+     */
+    Object progress;
 
     Map<String, Object> extra = new HashMap<>();
 }

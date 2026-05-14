@@ -20,14 +20,8 @@ public class FaceFusionClientConfig {
     @Bean
     public WebClient faceFusionWebClient(@Value("${facefusion.base-url}") String baseUrl){
 
-        ConnectionProvider provider = ConnectionProvider.builder("facefusion-pool")
-                .maxConnections(50)
-                .pendingAcquireTimeout(Duration.ofSeconds(60))
-                // Tránh tái sử dụng socket đã bị FaceFusion / proxy đóng (Connection reset by peer).
-                .maxIdleTime(Duration.ofSeconds(15))
-                .maxLifeTime(Duration.ofMinutes(3))
-                .evictInBackground(Duration.ofSeconds(30))
-                .build();
+        // Mỗi request dùng connection mới — tránh tái sử dụng socket đã bị server đóng (NativeIoException / reset by peer).
+        ConnectionProvider provider = ConnectionProvider.newConnection();
 
         HttpClient httpClient = HttpClient.create(provider)
                 .responseTimeout(Duration.ofMinutes(20))

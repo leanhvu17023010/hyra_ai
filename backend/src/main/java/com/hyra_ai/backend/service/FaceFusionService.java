@@ -98,7 +98,8 @@ public class FaceFusionService {
                 log.info("Tiến độ FaceFusion: {}%", currentProgress);
             }
 
-            if ("complete".equalsIgnoreCase(statusResponse.getStatus())) {
+            String remoteStatus = statusResponse.getStatus();
+            if ("complete".equalsIgnoreCase(remoteStatus) || "completed".equalsIgnoreCase(remoteStatus)) {
                 return;
             }
             if ("failed".equalsIgnoreCase(statusResponse.getStatus())
@@ -149,25 +150,73 @@ public class FaceFusionService {
         if (statusResponse == null) {
             return null;
         }
-        if (statusResponse.getProgress() != null) {
-            return Math.max(0, Math.min(100, statusResponse.getProgress()));
+        Integer fromRoot = normalizeProgressValue(statusResponse.getProgress());
+        if (fromRoot != null) {
+            return fromRoot;
         }
         if (statusResponse.getExtra() == null) {
             return null;
         }
         Map<String, Object> extra = statusResponse.getExtra();
-        Object pct = extra.get("percentage");
+        Integer v = normalizeProgressValue(extra.get("percentage"));
+        if (v != null) {
+            return v;
+        }
+        v = normalizeProgressValue(extra.get("progress"));
+        if (v != null) {
+            return v;
+        }
+        return normalizeProgressValue(extra.get("percent"));
+    }
+
+    /**
+     * Chuẩn hoá tiến độ về 0–100: hỗ trợ phân số 0–1, số thực, chuỗi có %, hoặc map current/total.
+     */
+    private static Integer normalizeProgressValue(Object pct) {
         if (pct == null) {
-            pct = extra.get("progress");
+            return null;
         }
         if (pct instanceof Number n) {
-            return Math.max(0, Math.min(100, n.intValue()));
+            // JSON số nguyên: coi là phần trăm 0–100. JSON số thực: thường là phân số 0–1.
+            if (pct instanceof Double || pct instanceof Float) {
+                double v = n.doubleValue();
+                if (v >= 0 && v <= 1.0) {
+                    v *= 100.0;
+                }
+                if (Double.isNaN(v) || v < 0) {
+                    return null;
+                }
+                return Math.max(0, Math.min(100, (int) Math.round(v)));
+            }
+            long v = n.longValue();
+            if (v < 0) {
+                return null;
+            }
+            return Math.max(0, Math.min(100, (int) v));
         }
         if (pct instanceof String s && !s.isBlank()) {
+            String t = s.trim().replace("%", "");
             try {
-                return Math.max(0, Math.min(100, Integer.parseInt(s.trim())));
+                boolean likelyFraction = t.contains(".") || t.contains(",");
+                double v = Double.parseDouble(t.replace(',', '.'));
+                if (likelyFraction && v >= 0 && v <= 1.0) {
+                    v *= 100.0;
+                }
+                return Math.max(0, Math.min(100, (int) Math.round(v)));
             } catch (NumberFormatException ignored) {
                 return null;
+            }
+        }
+        if (pct instanceof Map<?, ?> m) {
+            Object cur = m.get("current");
+            Object tot = m.get("total");
+            if (cur instanceof Number c && tot instanceof Number totN && totN.doubleValue() > 0) {
+                double v = 100.0 * c.doubleValue() / totN.doubleValue();
+                return Math.max(0, Math.min(100, (int) Math.round(v)));
+            }
+            Integer nested = normalizeProgressValue(m.get("value"));
+            if (nested != null) {
+                return nested;
             }
         }
         return null;
@@ -176,7 +225,9 @@ public class FaceFusionService {
     private static boolean isTransientClientFailure(Throwable e) {
         for (Throwable t = e; t != null; t = t.getCause()) {
             String name = t.getClass().getName();
-            if (name.contains("PrematureCloseException")) {
+            if (name.contains("PrematureCloseException")
+                    || name.contains("NativeIoException")
+                    || name.contains("AbortedException")) {
                 return true;
             }
             String msg = t.getMessage();
@@ -185,9 +236,14 @@ public class FaceFusionService {
                 if (m.contains("connection reset by peer")
                         || m.contains("connection reset")
                         || m.contains("broken pipe")
-                        || m.contains("recvaddress")) {
+                        || m.contains("recvaddress")
+                        || m.contains("connection timed out")) {
                     return true;
                 }
+            }
+            String asString = t.toString().toLowerCase();
+            if (asString.contains("connection reset") || asString.contains("recvaddress")) {
+                return true;
             }
         }
         return false;
