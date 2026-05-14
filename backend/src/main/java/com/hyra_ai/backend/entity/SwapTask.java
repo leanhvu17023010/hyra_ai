@@ -30,6 +30,8 @@ public class SwapTask {
 
     String status; // thể hiện các trạng thái peding, processing,complete
 
+    String resultUrl;
+
     LocalDateTime createAt;
 
 
