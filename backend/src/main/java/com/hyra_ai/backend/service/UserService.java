@@ -44,7 +44,7 @@ public class UserService {
         User user = userMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setEmail(request.getEmail());
-        user.setFullName(request.getFullName());
+        user.setUserName(request.getUserName());
         user.setCreateAt(LocalDate.now());
 
         Role role = roleRepository
@@ -117,8 +117,8 @@ public class UserService {
 
 
         // fullName
-        if (request.getFullName() != null && !request.getFullName().isEmpty()) {
-            user.setFullName(request.getFullName());
+        if (request.getUserName() != null && !request.getUserName().isEmpty()) {
+            user.setUserName(request.getUserName());
         }
 
         // role
@@ -144,7 +144,7 @@ public class UserService {
                     if ("USER".equals(userRoleName)) {
                         try {
                             brevoEmailService.sendAccountLockedEmail(
-                                    user.getEmail(), user.getFullName(), userRoleName);
+                                    user.getEmail(), user.getUserName(), userRoleName);
                             log.info(
                                     "Account locked notification email sent to: {} (Role: {})",
                                     user.getEmail(),
@@ -173,7 +173,7 @@ public class UserService {
             if ("USER".equalsIgnoreCase(targetRole)) {
                 try {
                     brevoEmailService.sendProfileUpdatedEmail(
-                            savedUser.getEmail(), savedUser.getFullName(), targetRole);
+                            savedUser.getEmail(), savedUser.getUserName(), targetRole);
                 } catch (Exception e) {
                     log.error(
                             "Failed to send profile updated email to {} - Error: {}",

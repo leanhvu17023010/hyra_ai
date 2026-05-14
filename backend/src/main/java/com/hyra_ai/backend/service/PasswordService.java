@@ -88,7 +88,7 @@ public class PasswordService {
         }
         
         // Lưu fullName ban đầu để đảm bảo không thay đổi
-        String originalFullName = user.getFullName();
+        String originalUserName = user.getUserName();
         
         // Kiểm tra user có phải Google user không (password rỗng)
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
@@ -100,7 +100,7 @@ public class PasswordService {
         user.setPassword(passwordEncoder.encode(newPassword));
         
         // ĐẢM BẢO fullName không bị thay đổi (phòng trường hợp có logic nào đó thay đổi)
-        user.setFullName(originalFullName);
+        user.setUserName(originalUserName);
         
 
         User savedUser = userRepository.save(user); // UPDATE existing user, KHÔNG INSERT user mới

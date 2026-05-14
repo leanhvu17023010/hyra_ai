@@ -15,11 +15,9 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-// 1 sá»‘ annotation khÃ¡c: @Email, @NotNull, @NotBlack, @NotEmpty
+
 public class UserCreationRequest {
-    String phoneNumber;
-    String fullName;
-    String address;
+    String userName;
 
     @NotNull(message = "PASSWORD_REQUIRED")
     @PasswordConstraint

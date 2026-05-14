@@ -18,9 +18,7 @@ public class UserUpdateRequest {
     @EmailConstraint
     String email;
 
-    String phoneNumber;
-    String fullName;
-    String address;
+    String userName;
     Boolean isActive;
 
     String role;
