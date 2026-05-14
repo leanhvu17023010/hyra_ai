@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 
 import {
     FiUser,
-    FiLogOut
+    FiLogOut,
+    FiSun,
+    FiMoon
 } from "react-icons/fi";
 
 import userService from "../services/userService";
 
-function Navbar({ setActiveModal }) {
+function Navbar({ setActiveModal, darkMode, setDarkMode }) {
 
     const [user, setUser] = useState(null);
 
@@ -91,15 +93,36 @@ function Navbar({ setActiveModal }) {
             "
         >
 
-            {/* LOGO */}
-            <h1
-                className="
-                    text-2xl
-                    font-bold
-                "
-            >
-                Example AI
-            </h1>
+            {/* LEFT: LOGO + DARK MODE */}
+            <div className="flex items-center gap-3">
+
+                {/* LOGO */}
+                <h1
+                    className="
+                        text-2xl
+                        font-bold
+                    "
+                >
+                    Example AI
+                </h1>
+
+                {/* DARK MODE TOGGLE */}
+                <button
+                    onClick={() => setDarkMode(!darkMode)}
+                    className="
+                        p-2
+                        rounded-xl
+                        hover:bg-gray-100
+                        dark:hover:bg-gray-800
+                        transition-all
+                        cursor-pointer
+                        text-xl
+                    "
+                >
+                    {darkMode ? <FiSun /> : <FiMoon />}
+                </button>
+
+            </div>
 
             {/* RIGHT */}
             <div
@@ -109,6 +132,7 @@ function Navbar({ setActiveModal }) {
                     gap-4
                 "
             >
+
 
                 {user ? (
 

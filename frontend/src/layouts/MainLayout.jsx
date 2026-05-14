@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom"
 import Navbar from "../components/Navbar"
 import { useState, useEffect } from "react";
-import { FiSun, FiMoon } from "react-icons/fi";
+
 import LoginModal from "../components/LoginModal";
 import RegisterModal from "../components/RegisterModal";
 import ForgotModal from "../components/ForgotModal";
@@ -34,25 +34,11 @@ function MainLayout(){
         transition-colors
         duration-300
         ">
-                <button onClick={()=> setDarkMode(!darkMode)}
-                    className="fixed 
-                    top-6
-                    left-50
-                    p-2 
-                    rounded-full 
-                    bg-gray-200 
-                    dark:bg-gray-700 
-                    text-gray-800 
-                    dark:text-gray-200 
-                    shadow-md 
-                    hover:bg-gray-300 
-                    dark:hover:bg-gray-600 
-                    transition-colors z-50
-                    cursor-pointer">
-                    {darkMode ? <FiSun /> : <FiMoon />}
-                </button>
-
-            <Navbar setActiveModal={setActiveModal} />
+            <Navbar 
+                setActiveModal={setActiveModal} 
+                darkMode={darkMode} 
+                setDarkMode={setDarkMode} 
+            />
             
             {activeModal === 'login' && (
                 <LoginModal 
