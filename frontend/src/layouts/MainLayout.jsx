@@ -79,7 +79,7 @@ function MainLayout(){
                 <VerifyModal 
                     email={modalData.email}
                     otpMode={modalData.mode}
-                    username={modalData.username}
+                    userName={modalData.userName}
                     password={modalData.password}
                     onClose={() => setActiveModal(null)} 
                     onSwitch={handleSwitchModal} 

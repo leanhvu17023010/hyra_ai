@@ -25,11 +25,19 @@ function ForgotModal({ onClose, onSwitch }) {
       const response = await authService.sendOtp(email, 'forgot')
       if (response.code === 200) {
         onSwitch('verify', { email, mode: 'forgot' })
+      } else if (response.code === 400 && response.message?.includes("không tồn tại")) {
+        // Email không tồn tại -> hiện ngay dưới ô email
+        setErrors({ email: response.message })
       } else {
         setGlobalError(response.message || "Không thể gửi mã OTP")
       }
     } catch (err) {
-      setGlobalError("Đã có lỗi xảy ra. Vui lòng thử lại sau.")
+      const errorMsg = err.response?.data?.message
+      if (errorMsg?.includes("không tồn tại")) {
+        setErrors({ email: errorMsg })
+      } else {
+        setGlobalError(errorMsg || "Đã có lỗi xảy ra. Vui lòng thử lại sau.")
+      }
       console.error(err)
     } finally {
       setLoading(false)

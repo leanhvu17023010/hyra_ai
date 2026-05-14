@@ -13,7 +13,7 @@ import { registerSchema, validate } from "../utils/validation"
 
 function RegisterModal({ onClose, onSwitch }) {
 
-  const [username, setUsername] = useState("")
+  const [userName, setUserName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -36,7 +36,7 @@ function RegisterModal({ onClose, onSwitch }) {
 
     // VALIDATION - Sử dụng logic đã tách ra file riêng
     const validation = await validate(registerSchema, {
-      username,
+      userName,
       email,
       password,
       confirmPassword,
@@ -56,7 +56,7 @@ function RegisterModal({ onClose, onSwitch }) {
       if (response.code === 200) {
         onSwitch("verify", {
           email,
-          username,
+          userName,
           password,
           mode: "register"
         })
@@ -65,7 +65,13 @@ function RegisterModal({ onClose, onSwitch }) {
       }
     } catch (err) {
       console.error(err)
-      setGlobalError("Đã có lỗi xảy ra. Vui lòng thử lại sau.")
+      const errorResponse = err.response?.data
+      if (errorResponse?.code === 1002) {
+        // Email đã tồn tại -> hiện lỗi dưới ô email
+        setErrors({ email: errorResponse.message })
+      } else {
+        setGlobalError(errorResponse?.message || "Đã có lỗi xảy ra. Vui lòng thử lại sau.")
+      }
     } finally {
       setLoading(false)
     }
@@ -160,8 +166,8 @@ function RegisterModal({ onClose, onSwitch }) {
 
           <input
             type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            value={userName}
+            onChange={(e) => setUserName(e.target.value)}
             placeholder="Tên hiển thị"
             className={`
               w-full
@@ -170,7 +176,7 @@ function RegisterModal({ onClose, onSwitch }) {
               py-4
               rounded-2xl
               border
-              ${errors.username ? 'border-red-500' : 'border-zinc-300'}
+              ${errors.userName ? 'border-red-500' : 'border-zinc-300'}
               dark:border-zinc-700
               bg-white
               outline-none
@@ -180,8 +186,8 @@ function RegisterModal({ onClose, onSwitch }) {
             `}
           />
 
-          {errors.username && (
-            <p className="text-red-500 text-sm mt-2">{errors.username}</p>
+          {errors.userName && (
+            <p className="text-red-500 text-sm mt-2">{errors.userName}</p>
           )}
         </div>
 

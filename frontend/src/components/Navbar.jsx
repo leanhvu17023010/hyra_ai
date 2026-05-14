@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 
 import {
     FiUser,
-    FiClock,
     FiLogOut
 } from "react-icons/fi";
 
@@ -31,9 +30,7 @@ function Navbar({ setActiveModal }) {
                         await userService.getMyInfo();
 
                     if (response.result) {
-
                         setUser(response.result);
-
                     }
 
                 }
@@ -154,7 +151,7 @@ function Navbar({ setActiveModal }) {
                                     text-lg
                                 "
                             >
-                                {user.fullName || user.email}
+                                {user.userName || user.email}
                             </span>
 
                         </button>

@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react"
 import { FiX, FiArrowLeft, FiShield } from "react-icons/fi"
 import authService from "../services/authService"
 
-function VerifyModal({ email, otpMode, username, password, onClose, onSwitch }) {
+function VerifyModal({ email, otpMode, userName, password, onClose, onSwitch }) {
   const [code, setCode] = useState(["", "", "", "", "", ""])
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
@@ -48,7 +48,7 @@ function VerifyModal({ email, otpMode, username, password, onClose, onSwitch }) 
       if (response.code === 200) {
 
         if (otpMode === 'register') {
-          const registerRes = await authService.register(email, password, username);
+          const registerRes = await authService.register(email, password, userName);
           if (registerRes.code === 200 || registerRes.result) {
             alert("Đăng ký tài khoản thành công! Vui lòng đăng nhập.");
             onSwitch('login');

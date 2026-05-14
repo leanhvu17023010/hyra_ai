@@ -2,7 +2,7 @@ import * as yup from 'yup';
 
 
 export const registerSchema = yup.object().shape({
-  username: yup
+  userName: yup
     .string()
     .required("Vui lòng nhập tên hiển thị"),
   email: yup
