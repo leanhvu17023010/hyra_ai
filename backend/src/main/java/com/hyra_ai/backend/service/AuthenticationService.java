@@ -177,7 +177,7 @@ public class AuthenticationService {
 
             user = User.builder()
                     .email(email)
-                    .fullName(request.getFullName() != null ? request.getFullName() : email.split("@")[0])
+                    .userName(request.getUserName() != null ? request.getUserName() : email.split("@")[0])
                     .password("")
                     .isActive(true)
                     .createAt(LocalDate.now())

@@ -11,7 +11,7 @@ import lombok.experimental.FieldDefaults;
 public class GoogleLoginRequest {
     String idToken; // Google ID token từ client
     String email; // Email từ Google (backup)
-    String fullName; // Tên từ Google
+    String userName; // Tên từ Google
 }
 
 
