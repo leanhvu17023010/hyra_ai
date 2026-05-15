@@ -28,14 +28,18 @@ const swapService = {
         const response = await api.head(`/uploads/results/final_result_${taskId}.mp4`);
         return response.status === 200;
     },
+    //polling để kiểm tra kết quả video đã sẵn sàng chưa
 
-
+    // tải video kết quả về dưới dạng Blob URL (kèm token)
     getResultVideoBlobUrl: async (taskId) => {
         const response = await api.get(`/uploads/results/final_result_${taskId}.mp4`, {
             responseType: 'blob'
+            // blob: dữ liệu nhị phân: ảnh, video
         });
         return URL.createObjectURL(response.data);
-    }
+    },
+
+
 };
 
 export default swapService;

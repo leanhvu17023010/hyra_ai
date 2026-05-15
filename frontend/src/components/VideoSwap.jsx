@@ -98,9 +98,9 @@ function VideoSwap() {
     };
 
     return (
-        <div className="flex flex-col lg:flex-row w-full gap-6">
+        <div className="flex flex-col lg:flex-row w-full gap-8 justify-center items-start">
             
-            <div className="flex flex-col flex-1 gap-6">
+            <div className="flex flex-col w-full lg:w-[350px] shrink-0 gap-6">
                 {/* Box 1 */}
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 dark:bg-gray-700 dark:text-white">
                     <h2 className="font-medium">1. Tải ảnh gốc có khuôn mặt</h2>
@@ -200,14 +200,14 @@ function VideoSwap() {
 
             </div>
 
-            <div className="flex-1 bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col dark:bg-gray-700">
-                <div className="flex-1 rounded-xl bg-gray-100 overflow-hidden relative group flex items-center justify-center">
+            <div className="w-full bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col dark:bg-gray-700">
+                <div className="flex-1 rounded-xl bg-gray-100 overflow-hidden relative group flex items-center justify-center ">
                     {resultVideoSrc ? (
                         <video 
                             src={resultVideoSrc} 
                             controls 
                             autoPlay
-                            className="w-full h-full object-contain bg-black"
+                            className="max-w-full max-h-full object-contain"
                         />
                     ) : (
                         <>

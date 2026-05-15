@@ -8,6 +8,7 @@ import {
 } from "react-icons/fi";
 
 import userService from "../services/userService";
+import { Link } from "react-router-dom";
 
 function Navbar({ setActiveModal, darkMode, setDarkMode }) {
 
@@ -225,16 +226,16 @@ function Navbar({ setActiveModal, darkMode, setDarkMode }) {
                                 </div>
 
                                 {/* ACCOUNT */}
-                                <button
+
+
+                                    <Link  to="/profile"
                                     className="
                                         w-full
 
                                         flex
                                         items-center
                                         gap-3
-
                                         text-left
-
                                         px-5
                                         py-3
 
@@ -244,12 +245,11 @@ function Navbar({ setActiveModal, darkMode, setDarkMode }) {
                                         transition-all
                                     "
                                 >
+                                    
 
                                     <FiUser className="text-lg" />
+                                    Thông tin tài khoản</Link>
 
-                                    Thông tin tài khoản
-
-                                </button>
 
                                 {/* LOGOUT */}
                                 <button
