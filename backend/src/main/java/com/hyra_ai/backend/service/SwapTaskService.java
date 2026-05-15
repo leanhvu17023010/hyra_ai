@@ -21,27 +21,35 @@ public class SwapTaskService {
     SwapTaskRepository swapTaskRepository;
     final FaceFusionService faceFusionService;
 
-    public void addMediaToTask(String taskId, Media media){
+    public void addMediaToTask(String taskId, Media media, String role){
 
         SwapTask swapTask = swapTaskRepository.findById(taskId)
                 .orElseThrow(()-> new RuntimeException("Không tìm thấy phiên làm việc với ID: "+ taskId ));
 
         String currentEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         if(swapTask.getUser() == null || !swapTask.getUser().getEmail().equals(currentEmail)){
-             throw new AppException(ErrorCode.UNAUTHENTICATED);
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
 
-        if("IMAGE".equalsIgnoreCase(media.getFileType())){
+        if ("source".equalsIgnoreCase(role)) {
             swapTask.setSourceImage(media);
-        } else if( "VIDEO".equalsIgnoreCase(media.getFileType())){
-            swapTask.setSourceVideo(media);
+        } else if ("target".equalsIgnoreCase(role)) {
+            swapTask.setTargetMedia(media);
+        } else if ("audio".equalsIgnoreCase(role)) {
+            swapTask.setAudioMedia(media); // Nhận file Voice
+        } else {
+            // Tương thích ngược nếu không truyền role
+            if("IMAGE".equalsIgnoreCase(media.getFileType())){
+                swapTask.setSourceImage(media);
+            } else if( "VIDEO".equalsIgnoreCase(media.getFileType())){
+                swapTask.setTargetMedia(media);
+            }
         }
         swapTaskRepository.save(swapTask);
 
-        if(swapTask.getSourceImage() != null && swapTask.getSourceVideo() != null){
+        if(swapTask.getSourceImage() != null && swapTask.getTargetMedia() != null){
             faceFusionService.sendtoFaceFusion(swapTask);
         }
 
     }
-
 }

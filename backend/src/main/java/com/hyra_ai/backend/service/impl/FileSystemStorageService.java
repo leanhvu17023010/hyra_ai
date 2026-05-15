@@ -1,5 +1,6 @@
 package com.hyra_ai.backend.service.impl;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -56,6 +57,7 @@ public class FileSystemStorageService implements StorageService {
                 // This is a security check
                 throw new RuntimeException("Cannot store file outside current directory.");
             }
+            Files.createDirectories(destinationFile.getParent());
             
             file.transferTo(destinationFile);
             

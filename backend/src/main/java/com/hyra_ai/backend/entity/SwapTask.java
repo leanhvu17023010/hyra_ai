@@ -26,7 +26,10 @@ public class SwapTask {
     Media sourceImage;
 
     @OneToOne
-    Media sourceVideo;
+    Media targetMedia;
+
+    @OneToOne
+    Media audioMedia;
 
     String status; // thể hiện các trạng thái peding, processing,complete
 
@@ -36,6 +39,7 @@ public class SwapTask {
     String resultUrl;
 
     LocalDateTime createAt;
+
 
 
 }

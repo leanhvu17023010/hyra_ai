@@ -6,6 +6,7 @@ import com.hyra_ai.backend.entity.SwapTask;
 import com.hyra_ai.backend.repository.SwapTaskRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.ssl.SslProperties;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -34,7 +36,7 @@ public class FaceFusionService {
 
             // 1. Lấy đường dẫn file vật lý
             String sourceRelativePath = swapTask.getSourceImage().getUrl().substring(9);
-            String targetRelativePath = swapTask.getSourceVideo().getUrl().substring(9);
+            String targetRelativePath = swapTask.getTargetMedia().getUrl().substring(9);
 
             Path sourceFile = Paths.get("uploads", sourceRelativePath);
             Path targetFile = Paths.get("uploads", targetRelativePath);
@@ -268,22 +270,25 @@ public class FaceFusionService {
             throw new IllegalStateException("Dữ liệu video tải về bị trống");
         }
 
-        // Tạo thư mục "results" chuyên biệt
-        Path resultsDir = Paths.get("uploads", "results");
+        String userId = swapTask.getUser().getId();
+        String taskId = swapTask.getId();
+
+        Path resultsDir = Paths.get("uploads", userId, taskId);
         if (!Files.exists(resultsDir)) {
             Files.createDirectories(resultsDir);
         }
 
         // Lưu file kết quả
-        String resultFileName = "final_result_" + swapTask.getId() + ".mp4";
+        String extension = swapTask.getTargetMedia().getFileType().equalsIgnoreCase("IMAGE") ? ".jpg" : ".mp4";
+        String resultFileName = "final_result_" + taskId + extension;
         Path resultPath = resultsDir.resolve(resultFileName);
         Files.write(resultPath, bytes);
 
-        // Cập nhật thông tin vào DB
-        swapTask.setResultUrl("/uploads/results/" + resultFileName);
-        swapTask.setStatus("COMPLETED");
+        // Cập nhật thông tin đường dẫn mới vào DB
+        swapTask.setResultUrl("/uploads/" + userId + "/" + taskId + "/" + resultFileName);
+        swapTask.setStatus("Complete");
         swapTaskRepository.save(swapTask);
 
-        log.info("==> TẤT CẢ HOÀN TẤT! Kết quả lưu tại: {}", swapTask.getResultUrl());
+        log.info("==> FaceFusion hoàn tất, kết quả lưu tại: {}", swapTask.getResultUrl());
     }
 }
