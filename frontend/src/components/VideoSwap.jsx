@@ -2,11 +2,14 @@ import { useState, useRef } from 'react';
 import videoAI from '../assets/Images/videoAI.webp';
 import { FiCamera, FiVideo } from 'react-icons/fi';
 import swapService from '../services/swapService';
+import SwapProcessingOverlay from './SwapProcessingOverlay';
+import { isTaskComplete, isTaskFailed, parseProgressPercent } from '../utils/taskProgress';
 
 function VideoSwap() {
     const [sourceImage, setSourceImage] = useState(null);
     const [targetVideo, setTargetVideo] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [progress, setProgress] = useState(0);
     const [message, setMessage] = useState('');
     const [resultVideoSrc, setResultVideoSrc] = useState(null)
 
@@ -33,6 +36,7 @@ function VideoSwap() {
 
         try {
             setIsLoading(true);
+            setProgress(0);
             setMessage('Đang khởi tạo phiên...');
             
             // 1. Tạo session SwapTask
@@ -63,9 +67,19 @@ function VideoSwap() {
         }
     };
 
-    const pollTaskStatus = async (taskId) => {
+    const loadResultVideo = async (taskId, resultUrl) => {
+        const blobUrl = resultUrl
+            ? await swapService.getResultBlobUrlFromPath(resultUrl)
+            : await swapService.getResultVideoBlobUrl(taskId);
+        setResultVideoSrc(blobUrl);
+        setProgress(100);
+        setMessage('Xử lý thành công!');
+        setIsLoading(false);
+    };
+
+    const pollTaskStatus = (taskId) => {
         let attempts = 0;
-        const maxAttempts = 120; // Thử tối đa 10 phút (5s * 120)
+        const maxAttempts = 300; // ~10 phút @ 2s
 
         const intervalId = setInterval(async () => {
             attempts++;
@@ -77,24 +91,34 @@ function VideoSwap() {
             }
 
             try {
-                // Ping trực tiếp file video kèm Token JWT (để không bị 401 Unauthorized)
+                const { result: task } = await swapService.getTaskStatus(taskId);
+                const pct = parseProgressPercent(task?.progress);
+                if (pct != null) {
+                    setProgress(pct);
+                }
+
+                if (isTaskFailed(task?.status)) {
+                    clearInterval(intervalId);
+                    setMessage('AI xử lý thất bại. Vui lòng thử lại.');
+                    setIsLoading(false);
+                    return;
+                }
+
+                if (isTaskComplete(task?.status)) {
+                    clearInterval(intervalId);
+                    await loadResultVideo(taskId, task?.resultUrl);
+                    return;
+                }
+
                 const isReady = await swapService.pingResultVideo(taskId);
-                
                 if (isReady) {
                     clearInterval(intervalId);
-                    
-                    // Tải video dưới dạng Blob và tạo URL an toàn để trình duyệt phát được (bỏ qua Auth của thẻ video gốc)
-                    const blobUrl = await swapService.getResultVideoBlobUrl(taskId);
-                    
-                    setResultVideoSrc(blobUrl);
-                    setMessage('Xử lý thành công!');
-                    setIsLoading(false);
+                    await loadResultVideo(taskId, task?.resultUrl);
                 }
             } catch (error) {
-                // Lỗi 404 (chưa render xong), tiếp tục chờ...
-                console.log("Video chưa sẵn sàng, tiếp tục chờ...");
+                console.log('Đang chờ AI xử lý...', error?.response?.status ?? error?.message);
             }
-        }, 5000);
+        }, 2000);
     };
 
     return (
@@ -216,13 +240,11 @@ function VideoSwap() {
                                 alt="Ảnh mẫu" 
                                 className={`w-full h-full object-cover transition-opacity duration-300 ${isLoading ? 'opacity-50' : ''}`}
                             />
-                            {isLoading && message.includes('Đang xử lý') && (
-                                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                    <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                                    <p className="mt-4 font-medium text-blue-600 bg-white/80 px-4 py-2 rounded-lg backdrop-blur-sm shadow-sm dark:bg-gray-800/80 dark:text-blue-400">
-                                        AI đang xử lý video...
-                                    </p>
-                                </div>
+                            {isLoading && !resultVideoSrc && (
+                                <SwapProcessingOverlay
+                                    progress={progress}
+                                    label="AI đang xử lý video..."
+                                />
                             )}
                         </>
                     )}
