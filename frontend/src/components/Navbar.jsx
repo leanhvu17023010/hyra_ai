@@ -228,7 +228,7 @@ function Navbar({ setActiveModal, darkMode, setDarkMode }) {
                                 {/* ACCOUNT */}
 
 
-                                    <Link  to="/profile"
+                                <Link to="/profile"
                                     className="
                                         w-full
 
@@ -245,7 +245,7 @@ function Navbar({ setActiveModal, darkMode, setDarkMode }) {
                                         transition-all
                                     "
                                 >
-                                    
+
 
                                     <FiUser className="text-lg" />
                                     Thông tin tài khoản</Link>

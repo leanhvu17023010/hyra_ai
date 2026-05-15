@@ -11,7 +11,7 @@ const authService = {
 
     loginWithGoogle: async (idToken, email, userName) => {
         const response = await api.post('/auth/google', { idToken, email, userName });
-        if (response.data.result.token) {
+        if (response.data.resslt.token) {
             localStorage.setItem('token', response.data.result.token);
         }
         return response.data;

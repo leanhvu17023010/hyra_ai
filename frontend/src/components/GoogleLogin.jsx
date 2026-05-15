@@ -38,7 +38,7 @@ function GoogleLogin() {
 
       const idToken = response.credential;
 
-      // Decode JWT payload để lấy email và fullName (hỗ trợ Unicode cho tiếng Việt)
+      // Decode JWT payload để lấy email và userName (hỗ trợ Unicode cho tiếng Việt)
       const base64Url = idToken.split('.')[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
       const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
