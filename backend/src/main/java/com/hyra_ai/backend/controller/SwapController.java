@@ -10,6 +10,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -49,6 +50,33 @@ public class SwapController {
                 .result(savedTask.getId())
                 .build();
     }
+    @GetMapping("/tasks/{taskId}/status")
+    public ApiResponse<com.hyra_ai.backend.dto.response.SwapTaskResponse> getTaskStatus(
+            @org.springframework.web.bind.annotation.PathVariable("taskId") String taskId) {
 
+        String currentEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(currentEmail)
+                .orElseThrow(() -> new com.hyra_ai.backend.exception.AppException(com.hyra_ai.backend.exception.ErrorCode.UNAUTHENTICATED));
+
+        SwapTask swapTask = swapTaskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy phiên làm việc với ID: " + taskId));
+
+        if (swapTask.getUser() == null || !swapTask.getUser().getId().equals(user.getId())) {
+            throw new com.hyra_ai.backend.exception.AppException(com.hyra_ai.backend.exception.ErrorCode.UNAUTHENTICATED);
+        }
+
+        com.hyra_ai.backend.dto.response.SwapTaskResponse response = com.hyra_ai.backend.dto.response.SwapTaskResponse.builder()
+                .id(swapTask.getId())
+                .status(swapTask.getStatus())
+                .progress(swapTask.getProgress() != null ? swapTask.getProgress() : 0)
+                .resultUrl(swapTask.getResultUrl())
+                .build();
+
+        return ApiResponse.<com.hyra_ai.backend.dto.response.SwapTaskResponse>builder()
+                .code(200)
+                .message("Lấy trạng thái thành công")
+                .result(response)
+                .build();
+    }
 
 }
