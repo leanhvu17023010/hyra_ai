@@ -70,23 +70,13 @@ function LoginModal({ onClose, onSwitch }) {
       }
     } catch (err) {
       console.error("Lỗi đăng nhập:", err)
-      const errorResponse = err.response?.data
-      
-      if (errorResponse?.code === 1003) {
-        // Sai mật khẩu -> hiện lỗi dưới ô mật khẩu
-        setErrors({ password: errorResponse.message })
-      } else if (errorResponse?.code === 1004) {
-        // Email không tồn tại -> hiện lỗi dưới ô email
-        setErrors({ email: errorResponse.message })
-      } else {
-        // Các lỗi khác (khóa tài khoản, server...) -> hiện ở banner chung
-        setGlobalError(errorResponse?.message || "Đã có lỗi xảy ra. Vui lòng thử lại sau.")
-      }
+      setGlobalError(err.response?.data?.message || "Email hoặc mật khẩu không chính xác.")
     } finally {
       setLoading(false)
     }
   }
 
+  // Không cần kiểm tra !open ở đây vì modal được render có điều kiện từ MainLayout
 
   return (
 
@@ -183,88 +173,84 @@ function LoginModal({ onClose, onSwitch }) {
           </div>
         )}
 
-        <div className="mb-6 py-4">
-          <div className="relative">
-            <FiMail
-              className="
-                absolute
-                left-4
-                top-1/2
-                -translate-y-1/2
-                text-xl
-                text-zinc-400
-              "
-            />
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Địa chỉ email của bạn"
-              className={`
-                w-full
-                pl-12
-                pr-4
-                py-4
-                rounded-2xl
-                border
-                ${errors.email ? 'border-red-500' : 'border-zinc-300'}
-                dark:border-zinc-700
-                bg-white
-                outline-none
-                focus:ring-2
-                focus:ring-indigo-300
-                dark:focus:ring-orange-500/20
-                transition-all
-              `}
-            />
-          </div>
+        <div className="relative mb-6 py-2">
+          <FiMail
+            className="
+              absolute
+              left-4
+              top-1/2
+              -translate-y-1/2
+              text-xl
+              text-zinc-400
+            "
+          />
+
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Địa chỉ email của bạn"
+            className={`
+              w-full
+              pl-12
+              pr-4
+              py-4
+              rounded-2xl
+              border
+              ${errors.email ? 'border-red-500' : 'border-zinc-300'}
+              dark:border-zinc-700
+              bg-white
+              outline-none
+              focus:ring-2
+              focus:ring-indigo-300
+              dark:focus:ring-orange-500/20
+              transition-all
+            `}
+          />
           {errors.email && (
             <p className="text-red-500 text-sm mt-2">{errors.email}</p>
           )}
         </div>
 
-        <div className="mb-8">
-          <div className="relative">
-            <FiLock
-              className="
-                absolute
-                left-4
-                top-1/2
-                -translate-y-1/2
-                text-xl
-                text-zinc-400
-              "
-            />
-            <input
-              type={showPass ? "text" : "password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Mật khẩu của bạn"
-              className={`
-                w-full
-                pl-12
-                pr-4
-                py-4
-                rounded-2xl
-                border
-                ${errors.password ? 'border-red-500' : 'border-zinc-300'}
-                dark:border-zinc-700
-                bg-white
-                outline-none
-                focus:ring-2
-                focus:ring-indigo-300
-                dark:focus:ring-indigo-500/20
-                transition-all
-              `}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPass(!showPass)}
-              className="absolute top-1/2 -translate-y-1/2 right-4 text-zinc-400 hover:text-zinc-600 transition-all"
-            >
-              {showPass ? <FiEyeOff /> : <FiEye />}
-            </button>
-          </div>
+          <div className="relative mb-8 py-5">
+
+          <FiLock
+            className="
+              absolute
+              left-4
+              top-1/2
+              -translate-y-1/2
+              text-xl
+              text-zinc-400
+            "
+          />
+
+          <input
+            type= {showPass ? "text": "password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Mật khẩu của bạn"
+            className={`
+              w-full
+              pl-12
+              pr-4
+              py-4
+              rounded-2xl
+              border
+              ${errors.password ? 'border-red-500' : 'border-zinc-300'}
+              dark:border-zinc-700
+              bg-white
+              outline-none
+              focus:ring-2
+              focus:ring-indigo-300
+              dark:focus:ring-indigo-500/20
+              transition-all
+            `}
+          />
+          <button onClick={()=> setShowPass(!showPass)} 
+          className="absolute top-1/2 -translate-y-1/2 right-4 text-zinc-400 hover:text-zinc-600 transition-all">
+            {showPass ? <FiEyeOff /> : <FiEye />}
+          </button>
           {errors.password && (
             <p className="text-red-500 text-sm mt-2">{errors.password}</p>
           )}
