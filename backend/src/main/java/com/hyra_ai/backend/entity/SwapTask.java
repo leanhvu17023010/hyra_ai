@@ -26,13 +26,20 @@ public class SwapTask {
     Media sourceImage;
 
     @OneToOne
-    Media sourceVideo;
+    Media targetMedia;
+
+    @OneToOne
+    Media audioMedia;
 
     String status; // thể hiện các trạng thái peding, processing,complete
+
+    /** Tiến độ 0–100 từ FaceFusion (cập nhật khi poll /api/status). */
+    Integer progress;
 
     String resultUrl;
 
     LocalDateTime createAt;
+
 
 
 }
