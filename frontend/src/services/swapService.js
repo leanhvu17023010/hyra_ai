@@ -30,36 +30,8 @@ const swapService = {
      * @returns {Promise<{ result?: SwapTaskStatus }>}
      */
     getTaskStatus: async (taskId) => {
-        const response = await api.get(`/swap/tasks/${taskId}`);
+        const response = await api.get(`/swap/tasks/${taskId}/status`);
         return response.data;
-    },
-
-    // Kiểm tra xem video kết quả đã tồn tại chưa (kèm token)
-    pingResultVideo: async (taskId) => {
-        const response = await api.head(`/uploads/results/final_result_${taskId}.mp4`);
-        return response.status === 200;
-    },
-    //polling để kiểm tra kết quả video đã sẵn sàng chưa
-
-    // tải video kết quả về dưới dạng Blob URL (kèm token)
-    getResultVideoBlobUrl: async (taskId) => {
-        const response = await api.get(`/uploads/results/final_result_${taskId}.mp4`, {
-            responseType: 'blob'
-            // blob: dữ liệu nhị phân: ảnh, video
-        });
-        return URL.createObjectURL(response.data);
-    },
-
-    pingResultImage: async (taskId) => {
-        const response = await api.head(`/uploads/results/final_result_${taskId}.jpg`);
-        return response.status === 200;
-    },
-
-    getResultImageBlobUrl: async (taskId) => {
-        const response = await api.get(`/uploads/results/final_result_${taskId}.jpg`, {
-            responseType: 'blob',
-        });
-        return URL.createObjectURL(response.data);
     },
 
     getResultBlobUrlFromPath: async (resultUrl) => {
