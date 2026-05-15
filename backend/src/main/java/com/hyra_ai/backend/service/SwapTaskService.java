@@ -40,7 +40,11 @@ public class SwapTaskService {
         } else {
             // Tương thích ngược nếu không truyền role
             if("IMAGE".equalsIgnoreCase(media.getFileType())){
-                swapTask.setSourceImage(media);
+                if (swapTask.getSourceImage() == null) {
+                    swapTask.setSourceImage(media);
+                } else {
+                    swapTask.setTargetMedia(media);
+                }
             } else if( "VIDEO".equalsIgnoreCase(media.getFileType())){
                 swapTask.setTargetMedia(media);
             }
