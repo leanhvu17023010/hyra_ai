@@ -16,9 +16,7 @@ public class UserResponse {
     String id;
     String userName;
     String email;
-    String phoneNumber;
-    String address;
-    
+
     @JsonProperty("isActive")
     boolean active;
     
