@@ -30,8 +30,6 @@ public class FileSystemStorageService implements StorageService {
     public void init() {
         try {
             Files.createDirectories(rootLocation);
-            Files.createDirectories(rootLocation.resolve("img"));
-            Files.createDirectories(rootLocation.resolve("video"));
         } catch (IOException e) {
             log.error("Could not initialize storage", e);
             throw new RuntimeException("Could not initialize storage", e);
