@@ -3,7 +3,7 @@ import api from './api';
 const authService = {
     login: async (email, password) => {
         const response = await api.post('/auth/token', { email, password });
-        if (response.data.result.token) {
+        if (response.data?.result?.token) {
             localStorage.setItem('token', response.data.result.token);
         }
         return response.data;
@@ -11,7 +11,7 @@ const authService = {
 
     loginWithGoogle: async (idToken, email, userName) => {
         const response = await api.post('/auth/google', { idToken, email, userName });
-        if (response.data.resslt.token) {
+        if (response.data?.result?.token) {
             localStorage.setItem('token', response.data.result.token);
         }
         return response.data;
