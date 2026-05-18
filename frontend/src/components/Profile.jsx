@@ -167,8 +167,8 @@ function Profile() {
                         Hồ sơ của bạn
                     </h2>
                 </div>
-                <div className="flex flex-col gap-8 lg:flex-row items-start">
-                    <div className="w-full shrink-0 lg:w-100 sticky top-10">
+                <div className="flex flex-col gap-9 lg:flex-row items-start">
+                    <div className="w-full shrink-0 lg:w-120 sticky top-30">
                         <div className="overflow-hidden rounded-3xl bg-white shadow-xl shadow-blue-500/5 border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
                             <div className="p-3">
                                 {menuItems.map((item) => (
@@ -183,9 +183,9 @@ function Profile() {
                                                 : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700/50'
                                         }`}
                                     >
-                                        <div className="flex items-center gap-3">
-                                            <span className="text-lg">{item.icon}</span>
-                                            <span className="font-bold text-[15px]">{item.label}</span>
+                                        <div className="flex items-center gap-5">
+                                            <span className="text-2xl">{item.icon}</span>
+                                            <span className="font-bold text-2xl">{item.label}</span>
                                         </div>
                                         <FiChevronRight
                                             className={`transition-transform duration-300 ${activeSection === item.id ? 'rotate-90' : 'opacity-0 group-hover:opacity-100'}`}
@@ -200,8 +200,8 @@ function Profile() {
                                     onClick={handleLogout}
                                     className="flex w-full items-center gap-3 rounded-2xl px-5 py-4 text-red-500 hover:bg-red-50 transition-all dark:hover:bg-red-900/10 font-bold"
                                 >
-                                    <FiLogOut className="text-lg" />
-                                    <span>Đăng xuất</span>
+                                    <FiLogOut className="text-2xl" />
+                                    <span className="text-2xl ">Đăng xuất</span>
                                 </button>
                             </div>
                         </div>
@@ -213,18 +213,18 @@ function Profile() {
                                 <div className="space-y-8">
                                     <div className="grid gap-8 md:grid-cols-2">
                                         <div className="space-y-3">
-                                            <label className="text-xs font-black uppercase text-gray-400 tracking-wider">
+                                            <label className="text-xl font-black uppercase text-gray-400 tracking-wider">
                                                 Họ và tên hiển thị
                                             </label>
-                                            <div className="rounded-2xl bg-gray-50 p-5 font-bold text-gray-700 dark:bg-gray-700/50 dark:text-white border border-gray-100 dark:border-gray-600">
+                                            <div className="text-2xl rounded-2xl font-bold py-5 text-gray-700 dark:bg-gray-700/50 dark:text-white border border-gray-100 dark:border-gray-600">
                                                 {user?.userName}
                                             </div>
                                         </div>
                                         <div className="space-y-3">
-                                            <label className="text-xs font-black uppercase text-gray-400 tracking-wider">
+                                            <label className="text-xl font-black uppercase text-gray-400 tracking-wider">
                                                 Email đăng ký
                                             </label>
-                                            <div className="rounded-2xl bg-gray-50 p-5 font-bold text-gray-700 dark:bg-gray-700/50 dark:text-white border border-gray-100 dark:border-gray-600">
+                                            <div className="text-2xl rounded-2xl font-bold py-5 text-gray-700 dark:bg-gray-700/50 dark:text-white border border-gray-100 dark:border-gray-600">
                                                 {user?.email}
                                             </div>
                                         </div>
@@ -233,8 +233,8 @@ function Profile() {
                                     <div className="grid gap-4 sm:grid-cols-2">
                                         <div className="rounded-2xl border border-blue-100 bg-blue-50/80 p-6 dark:border-blue-900 dark:bg-blue-950/40">
                                             <div className="flex items-center gap-3 text-blue-600 dark:text-blue-400">
-                                                <FiImage className="text-xl" />
-                                                <span className="text-sm font-bold uppercase tracking-wide">Swap ảnh</span>
+                                                <FiImage className="text-2xl" />
+                                                <span className="text-2xl font-bold uppercase tracking-wide">Swap ảnh</span>
                                             </div>
                                             <p className="mt-3 text-4xl font-black text-gray-800 dark:text-white">
                                                 {stats.imageSwapCount}
@@ -242,8 +242,8 @@ function Profile() {
                                         </div>
                                         <div className="rounded-2xl border border-indigo-100 bg-indigo-50/80 p-6 dark:border-indigo-900 dark:bg-indigo-950/40">
                                             <div className="flex items-center gap-3 text-indigo-600 dark:text-indigo-400">
-                                                <FiVideo className="text-xl" />
-                                                <span className="text-sm font-bold uppercase tracking-wide">Swap video</span>
+                                                <FiVideo className="text-2xl" />
+                                                <span className="text-2xl font-bold uppercase tracking-wide">Swap video</span>
                                             </div>
                                             <p className="mt-3 text-4xl font-black text-gray-800 dark:text-white">
                                                 {stats.videoSwapCount}
@@ -256,24 +256,24 @@ function Profile() {
                             {activeSection === 'password' && (
                                 <div>
                                     <div className="flex items-center gap-4 mb-10">
-                                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30">
-                                            <FiShield className="text-xl" />
+                                        <div className="flex h-15 w-15 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30">
+                                            <FiShield className="text-2xl" />
                                         </div>
                                         <div>
                                             <h2 className="text-2xl font-black text-gray-800 dark:text-white">Đổi mật khẩu</h2>
-                                            <p className="text-sm text-gray-400 mt-0.5">
+                                            <p className="text-xl text-gray-400 mt-0.5">
                                                 Cập nhật mật khẩu để bảo vệ tài khoản của bạn
                                             </p>
                                         </div>
                                     </div>
 
                                     <form onSubmit={handlePasswordChange} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                        <div className="space-y-2 py-5">
-                                            <label className="text-xs font-black uppercase tracking-wider text-gray-400">
+                                        <div className="space-y-2 py-10">
+                                            <label className="text-2xl font-black uppercase tracking-wider text-gray-400">
                                                 Mật khẩu hiện tại
                                             </label>
                                             <div className="relative">
-                                                <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                                                <FiLock className="text-xl absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                                                 <input
                                                     type={showPw.old ? 'text' : 'password'}
                                                     placeholder="Nhập mật khẩu hiện tại"
@@ -281,24 +281,24 @@ function Profile() {
                                                     onChange={(e) =>
                                                         setPasswords((p) => ({ ...p, oldPassword: e.target.value }))
                                                     }
-                                                    className="w-full rounded-2xl border border-gray-100 bg-gray-50 pl-11 pr-12 py-4 font-semibold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:bg-gray-700/60 dark:text-white dark:border-gray-600"
+                                                    className="text-xl w-full rounded-2xl border border-gray-100 bg-gray-50 pl-11 pr-12 py-4 font-semibold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:bg-gray-700/60 dark:text-white dark:border-gray-600"
                                                 />
                                                 <button
                                                     type="button"
                                                     onClick={() => setShowPw((p) => ({ ...p, old: !p.old }))}
-                                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
+                                                    className="text-2xl absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
                                                 >
                                                     {showPw.old ? <FiEyeOff /> : <FiEye />}
                                                 </button>
                                             </div>
                                         </div>
 
-                                        <div className="space-y-2 py-5.0" >
-                                            <label className="text-xs font-black uppercase tracking-wider text-gray-400">
+                                        <div className="space-y-2 py-10" >
+                                            <label className="text-2xl font-black uppercase tracking-wider text-gray-400">
                                                 Mật khẩu mới
                                             </label>
                                             <div className="relative">
-                                                <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                                                <FiLock className="text-2xl absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                                                 <input
                                                     type={showPw.new ? 'text' : 'password'}
                                                     placeholder="Nhập mật khẩu mới"
@@ -306,12 +306,12 @@ function Profile() {
                                                     onChange={(e) =>
                                                         setPasswords((p) => ({ ...p, newPassword: e.target.value }))
                                                     }
-                                                    className="w-full rounded-2xl border border-gray-100 bg-gray-50 pl-11 pr-12 py-4 font-semibold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:bg-gray-700/60 dark:text-white dark:border-gray-600"
+                                                    className="text-xl w-full rounded-2xl border border-gray-100 bg-gray-50 pl-11 pr-12 py-4 font-semibold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:bg-gray-700/60 dark:text-white dark:border-gray-600"
                                                 />
                                                 <button
                                                     type="button"
                                                     onClick={() => setShowPw((p) => ({ ...p, new: !p.new }))}
-                                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
+                                                    className="text-2xl absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
                                                 >
                                                     {showPw.new ? <FiEyeOff /> : <FiEye />}
                                                 </button>
@@ -330,7 +330,7 @@ function Profile() {
                                                             />
                                                         ))}
                                                     </div>
-                                                    <p className="text-xs font-bold" style={{ color: strengthColor[strength] }}>
+                                                    <p className="text-2xl font-bold" style={{ color: strengthColor[strength] }}>
                                                         Độ mạnh: {strengthLabel[strength]}
                                                     </p>
                                                 </div>
@@ -338,11 +338,11 @@ function Profile() {
                                         </div>
 
                                         <div className="space-y-2 lg:col-span-2">
-                                            <label className="text-xs font-black uppercase tracking-wider text-gray-400">
+                                            <label className="text-2xl font-black uppercase tracking-wider text-gray-400">
                                                 Xác nhận mật khẩu
                                             </label>
                                             <div className="relative">
-                                                <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                                                <FiLock className="text-2xl absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                                                 <input
                                                     type={showPw.confirm ? 'text' : 'password'}
                                                     placeholder="Nhập lại mật khẩu mới"
@@ -350,12 +350,12 @@ function Profile() {
                                                     onChange={(e) =>
                                                         setPasswords((p) => ({ ...p, confirmPassword: e.target.value }))
                                                     }
-                                                    className="w-full rounded-2xl border border-gray-100 bg-gray-50 pl-11 pr-12 py-4 font-semibold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:bg-gray-700/60 dark:text-white dark:border-gray-600"
+                                                    className="text-xl w-full rounded-2xl border border-gray-100 bg-gray-50 pl-11 pr-12 py-4 font-semibold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:bg-gray-700/60 dark:text-white dark:border-gray-600"
                                                 />
                                                 <button
                                                     type="button"
                                                     onClick={() => setShowPw((p) => ({ ...p, confirm: !p.confirm }))}
-                                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
+                                                    className="text-2xl absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
                                                 >
                                                     {showPw.confirm ? <FiEyeOff /> : <FiEye />}
                                                 </button>
@@ -381,7 +381,7 @@ function Profile() {
                                         <button
                                             type="submit"
                                             disabled={pwSubmitting}
-                                            className="w-full rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 py-4 font-black text-white shadow-xl disabled:opacity-60"
+                                            className="text-2xl w-full rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 py-4 font-black text-white shadow-xl disabled:opacity-60"
                                         >
                                             {pwSubmitting ? 'Đang cập nhật...' : 'Cập nhật mật khẩu'}
                                         </button>
@@ -399,7 +399,7 @@ function Profile() {
                                                 Lịch sử Swap
                                             </h2>
                                         </div>
-                                        <span className="rounded-full bg-gray-100 px-4 py-1.5 text-[10px] font-black uppercase text-gray-500 dark:bg-gray-700 dark:text-gray-300">
+                                        <span className="text-xl rounded-full bg-gray-100 px-4 py-1.5 font-black uppercase text-gray-500 dark:bg-gray-700 dark:text-gray-300">
                                             {history.length} mục đã lưu
                                         </span>
                                     </div>
@@ -431,7 +431,7 @@ function Profile() {
                                                             ) : (
                                                                 <img
                                                                     src={mediaSrc}
-                                                                    alt="Kết quả"
+                                                                    alt="Kết quả swap"
                                                                     className="h-full w-full object-cover"
                                                                 />
                                                             )}
@@ -460,11 +460,11 @@ function Profile() {
                                                                     ) : (
                                                                         <FiImage className="text-blue-500 text-sm" />
                                                                     )}
-                                                                    <span className="font-bold text-sm text-gray-700 dark:text-gray-200">
+                                                                    <span className="font-bold text-xl text-gray-700 dark:text-gray-200">
                                                                         {isVideo ? 'Video Swap' : 'Ảnh Swap'}
                                                                     </span>
                                                                 </div>
-                                                                <p className="text-[10px] font-bold text-gray-400 mt-0.5">
+                                                                <p className="text-xl font-bold text-gray-400 mt-0.5">
                                                                     {dateLabel}
                                                                 </p>
                                                             </div>

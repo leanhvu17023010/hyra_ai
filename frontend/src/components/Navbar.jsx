@@ -94,7 +94,8 @@ function Navbar({ setActiveModal, darkMode, setDarkMode }) {
         >
 
             {/* LEFT: LOGO + DARK MODE */}
-            <Link to="/" className="flex items-center gap-3">
+            <div className="flex items-center gap-3">
+            <Link to="/" >
 
                 {/* LOGO */}
                 <h1
@@ -105,7 +106,7 @@ function Navbar({ setActiveModal, darkMode, setDarkMode }) {
                 >
                     Example AI
                 </h1>
-
+            </Link>
                 {/* DARK MODE TOGGLE */}
                 <button
                     onClick={() => setDarkMode(!darkMode)}
@@ -121,8 +122,9 @@ function Navbar({ setActiveModal, darkMode, setDarkMode }) {
                 >
                     {darkMode ? <FiSun /> : <FiMoon />}
                 </button>
+                </div>
 
-            </Link>
+
 
             {/* RIGHT */}
             <div
