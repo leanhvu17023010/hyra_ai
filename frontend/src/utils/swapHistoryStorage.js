@@ -1,9 +1,34 @@
-const STORAGE_KEY = 'hyra_swap_history';
+const STORAGE_PREFIX = 'hyra_swap_history';
 const MAX_ITEMS = 50;
 
-export function getSwapHistoryLocal() {
+/** JWT `sub` = email đăng nhập (backend). Mỗi tài khoản một bucket lịch sử. */
+export function getSwapAccountKeyFromToken() {
     try {
-        const raw = localStorage.getItem(STORAGE_KEY);
+        const token = localStorage.getItem('token');
+        if (!token) return null;
+        const parts = token.split('.');
+        if (parts.length < 2) return null;
+        let b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+        const pad = b64.length % 4;
+        if (pad) b64 += '='.repeat(4 - pad);
+        const payload = JSON.parse(atob(b64));
+        const sub = payload.sub;
+        return typeof sub === 'string' && sub.length > 0 ? sub : null;
+    } catch {
+        return null;
+    }
+}
+
+function storageKeyForAccount(accountKey) {
+    if (!accountKey) return null;
+    return `${STORAGE_PREFIX}:${accountKey}`;
+}
+
+export function getSwapHistoryLocal(accountKey = getSwapAccountKeyFromToken()) {
+    const key = storageKeyForAccount(accountKey);
+    if (!key) return [];
+    try {
+        const raw = localStorage.getItem(key);
         const list = raw ? JSON.parse(raw) : [];
         return Array.isArray(list) ? list : [];
     } catch {
@@ -11,13 +36,15 @@ export function getSwapHistoryLocal() {
     }
 }
 
-export function addSwapHistoryEntry(entry) {
-    const list = getSwapHistoryLocal().filter((item) => item.id !== entry.id);
+export function addSwapHistoryEntry(entry, accountKey = getSwapAccountKeyFromToken()) {
+    const key = storageKeyForAccount(accountKey);
+    if (!key) return;
+    const list = getSwapHistoryLocal(accountKey).filter((item) => item.id !== entry.id);
     list.unshift({
         ...entry,
         createdAt: entry.createdAt || new Date().toISOString(),
     });
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(list.slice(0, MAX_ITEMS)));
+    localStorage.setItem(key, JSON.stringify(list.slice(0, MAX_ITEMS)));
 }
 
 export function computeStatsFromHistory(history) {

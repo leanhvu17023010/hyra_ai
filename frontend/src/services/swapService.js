@@ -64,11 +64,11 @@ const swapService = {
     getSwapHistory: async () => {
         try {
             const response = await api.get('/swap/tasks/history');
-            if (response.data?.result?.length) {
+            if (Array.isArray(response.data?.result)) {
                 return response.data;
             }
         } catch {
-            /* BE chưa có endpoint — dùng local */
+            /* BE chưa có endpoint — dùng local theo tài khoản */
         }
         return { result: getSwapHistoryLocal() };
     },
@@ -76,7 +76,7 @@ const swapService = {
     getStats: async () => {
         try {
             const response = await api.get('/swap/tasks/stats');
-            if (response.data?.result) {
+            if (response.data?.result != null && typeof response.data.result === 'object') {
                 return response.data;
             }
         } catch {

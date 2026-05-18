@@ -293,7 +293,7 @@ function Profile() {
                                             </div>
                                         </div>
 
-                                        <div className="space-y-2 py-5" >
+                                        <div className="space-y-2 py-5.0" >
                                             <label className="text-xs font-black uppercase tracking-wider text-gray-400">
                                                 Mật khẩu mới
                                             </label>
