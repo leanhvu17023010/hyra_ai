@@ -8,6 +8,7 @@ import {
 } from "react-icons/fi";
 
 import userService from "../services/userService";
+import authService from "../services/authService";
 import { Link } from "react-router-dom";
 
 function Navbar({ setActiveModal, darkMode, setDarkMode }) {
@@ -60,13 +61,9 @@ function Navbar({ setActiveModal, darkMode, setDarkMode }) {
     }, []);
 
     const handleLogout = () => {
-
-        localStorage.removeItem("token");
-
+        authService.logout();
         setUser(null);
-
         window.location.reload();
-
     };
 
     return (

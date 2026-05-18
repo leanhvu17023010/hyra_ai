@@ -28,6 +28,7 @@ function ImageSwap() {
                 return;
             }
             const blobUrl = await swapService.getResultBlobUrlFromPath(task.resultUrl);
+            swapService.saveCompletedTaskToHistory(_taskId, task.resultUrl, 'image');
             setResultImageSrc(blobUrl);
             setProgress(100);
             setMessage('Xử lý thành công!');
@@ -58,6 +59,10 @@ function ImageSwap() {
     const handleSwap = async () => {
         if (!sourceImage || !targetImage) {
             setMessage('Vui lòng chọn cả ảnh gốc và ảnh muốn swap.');
+            return;
+        }
+        if (!localStorage.getItem('token')) {
+            setMessage('Vui lòng đăng nhập để sử dụng tính năng swap.');
             return;
         }
 

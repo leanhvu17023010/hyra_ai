@@ -6,13 +6,13 @@ const userService = {
         return response.data;
     },
 
-    changePassword: async (oldPassword, newPassword) => {
-        const response = await api.post('/users/change-password', {
-            oldPassword,
-            newPassword
+    changePassword: async (currentPassword, newPassword) => {
+        const response = await api.post('/auth/change-password', {
+            currentPassword,
+            newPassword,
         });
         return response.data;
-    }
+    },
 };
 
 export default userService;

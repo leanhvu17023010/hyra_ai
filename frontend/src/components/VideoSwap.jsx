@@ -28,6 +28,7 @@ function VideoSwap() {
                 return;
             }
             const blobUrl = await swapService.getResultBlobUrlFromPath(task.resultUrl);
+            swapService.saveCompletedTaskToHistory(_taskId, task.resultUrl, 'video');
             setResultVideoSrc(blobUrl);
             setProgress(100);
             setMessage('Xử lý thành công!');
@@ -58,6 +59,10 @@ function VideoSwap() {
     const handleSwap = async () => {
         if (!sourceImage || !targetVideo) {
             setMessage('Vui lòng chọn cả ảnh và video gốc.');
+            return;
+        }
+        if (!localStorage.getItem('token')) {
+            setMessage('Vui lòng đăng nhập để sử dụng tính năng swap.');
             return;
         }
 
