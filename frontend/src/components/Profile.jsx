@@ -161,14 +161,14 @@ function Profile() {
                 </div>
             )}
 
-            <div className="mx-auto max-w-6xl">
+            <div className="mx-auto w-full">
                 <div className="flex items-center justify-center pb-10">
                     <h2 className="text-5xl font-black text-gray-800 dark:text-white uppercase tracking-tight">
                         Hồ sơ của bạn
                     </h2>
                 </div>
                 <div className="flex flex-col gap-8 lg:flex-row items-start">
-                    <div className="w-full shrink-0 lg:w-72 sticky top-10">
+                    <div className="w-full shrink-0 lg:w-100 sticky top-10">
                         <div className="overflow-hidden rounded-3xl bg-white shadow-xl shadow-blue-500/5 border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
                             <div className="p-3">
                                 {menuItems.map((item) => (
@@ -176,6 +176,7 @@ function Profile() {
                                         key={item.id}
                                         type="button"
                                         onClick={() => setActiveSection(item.id)}
+                                        fullName                          
                                         className={`group mb-1.5 flex w-full items-center justify-between rounded-2xl px-5 py-4 transition-all duration-200 ${
                                             activeSection === item.id
                                                 ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 dark:shadow-none'
@@ -266,8 +267,8 @@ function Profile() {
                                         </div>
                                     </div>
 
-                                    <form onSubmit={handlePasswordChange} className="max-w-lg space-y-6">
-                                        <div className="space-y-2">
+                                    <form onSubmit={handlePasswordChange} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                        <div className="space-y-2 py-5">
                                             <label className="text-xs font-black uppercase tracking-wider text-gray-400">
                                                 Mật khẩu hiện tại
                                             </label>
@@ -292,7 +293,7 @@ function Profile() {
                                             </div>
                                         </div>
 
-                                        <div className="space-y-2">
+                                        <div className="space-y-2 py-5" >
                                             <label className="text-xs font-black uppercase tracking-wider text-gray-400">
                                                 Mật khẩu mới
                                             </label>
@@ -336,7 +337,7 @@ function Profile() {
                                             )}
                                         </div>
 
-                                        <div className="space-y-2">
+                                        <div className="space-y-2 lg:col-span-2">
                                             <label className="text-xs font-black uppercase tracking-wider text-gray-400">
                                                 Xác nhận mật khẩu
                                             </label>
@@ -367,16 +368,16 @@ function Profile() {
 
                                         {pwMsg.text && (
                                             <div
-                                                className={`rounded-2xl px-5 py-4 text-sm font-bold ${
+                                                className={`rounded-2xl px-5 text-sm font-bold ${
                                                     pwMsg.type === 'success'
-                                                        ? 'bg-green-50 text-green-600 border border-green-100'
-                                                        : 'bg-red-50 text-red-600 border border-red-100'
+                                                        ? 'bg-green-50 text-green-600 '
+                                                        : 'bg-red-50 text-red-600 '
                                                 }`}
                                             >
                                                 {pwMsg.text}
                                             </div>
                                         )}
-
+                                        <div className="lg:col-span-2 pt-4">
                                         <button
                                             type="submit"
                                             disabled={pwSubmitting}
@@ -384,8 +385,9 @@ function Profile() {
                                         >
                                             {pwSubmitting ? 'Đang cập nhật...' : 'Cập nhật mật khẩu'}
                                         </button>
+                                        </div>
                                     </form>
-                                </div>
+                                </div>   
                             )}
 
                             {activeSection === 'history' && (

@@ -15,6 +15,8 @@ function Navbar({ setActiveModal, darkMode, setDarkMode }) {
 
     const [user, setUser] = useState(null);
 
+
+
     // DROPDOWN
     const [openDropdown, setOpenDropdown]
         = useState(false);
@@ -92,7 +94,7 @@ function Navbar({ setActiveModal, darkMode, setDarkMode }) {
         >
 
             {/* LEFT: LOGO + DARK MODE */}
-            <div className="flex items-center gap-3">
+            <Link to="/" className="flex items-center gap-3">
 
                 {/* LOGO */}
                 <h1
@@ -120,7 +122,7 @@ function Navbar({ setActiveModal, darkMode, setDarkMode }) {
                     {darkMode ? <FiSun /> : <FiMoon />}
                 </button>
 
-            </div>
+            </Link>
 
             {/* RIGHT */}
             <div
