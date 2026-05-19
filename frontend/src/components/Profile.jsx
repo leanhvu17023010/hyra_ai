@@ -230,7 +230,7 @@ function Profile() {
                                         </div>
                                     </div>
 
-                                    <div className="grid gap-4 sm:grid-cols-2">
+                                    <div className="grid gap-4 sm:grid-cols-2 py-5">
                                         <div className="rounded-2xl border border-blue-100 bg-blue-50/80 p-6 dark:border-blue-900 dark:bg-blue-950/40">
                                             <div className="flex items-center gap-3 text-blue-600 dark:text-blue-400">
                                                 <FiImage className="text-2xl" />

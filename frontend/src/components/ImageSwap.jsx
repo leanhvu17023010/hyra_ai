@@ -120,7 +120,7 @@ function ImageSwap() {
                         disabled={isLoading || !sourceImage || !targetImage}
                         className="w-full py-2.5 rounded-lg text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
                     >
-                        {isLoading ? 'Đang xử lý...' : '✨ Bắt đầu Swap'}
+                        {isLoading ? 'Đang xử lý...' : 'Bắt đầu Swap'}
                     </button>
 
                     {resultImageSrc && (
