@@ -46,8 +46,13 @@ public class MediaController {
                 type = "AUDIO";
             } else {
                 String fileName = file.getOriginalFilename();
-                if (fileName != null && (fileName.endsWith(".mp4") || fileName.endsWith(".mov") || fileName.endsWith(".avi"))) {
-                    type = "VIDEO";
+                if (fileName != null) {
+                    String lowerCaseName = fileName.toLowerCase();
+                    if (lowerCaseName.endsWith(".mp4") || lowerCaseName.endsWith(".mov") || lowerCaseName.endsWith(".avi")) {
+                        type = "VIDEO";
+                    } else if (lowerCaseName.endsWith(".mp3") || lowerCaseName.endsWith(".wav") || lowerCaseName.endsWith(".ogg") || lowerCaseName.endsWith(".m4a")) {
+                        type = "AUDIO";
+                    }
                 }
             }
 
