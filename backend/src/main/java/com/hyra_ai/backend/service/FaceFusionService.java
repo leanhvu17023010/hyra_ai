@@ -286,7 +286,7 @@ public class FaceFusionService {
         String userId = swapTask.getUser().getId();
         String taskId = swapTask.getId();
 
-        Path resultsDir = Paths.get("uploads", userId, taskId);
+        Path resultsDir = Paths.get("uploads", userId, "SwapTask", taskId);
         if (!Files.exists(resultsDir)) {
             Files.createDirectories(resultsDir);
         }
@@ -298,7 +298,7 @@ public class FaceFusionService {
         Files.write(resultPath, bytes);
 
         // Cập nhật thông tin đường dẫn mới vào DB
-        swapTask.setResultUrl("/uploads/" + userId + "/" + taskId + "/" + resultFileName);
+        swapTask.setResultUrl("/uploads/" + userId + "/SwapTask/" + taskId + "/" + resultFileName);
         swapTask.setStatus("Complete");
         swapTaskRepository.save(swapTask);
 

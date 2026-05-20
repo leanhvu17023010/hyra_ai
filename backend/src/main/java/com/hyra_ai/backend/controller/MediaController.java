@@ -27,6 +27,8 @@ public class MediaController {
     SwapTaskService swapTaskService;
     com.hyra_ai.backend.repository.SwapTaskRepository swapTaskRepository;
     com.hyra_ai.backend.repository.UserRepository userRepository;
+    com.hyra_ai.backend.repository.XttsTaskRepository xttsTaskRepository;
+    com.hyra_ai.backend.service.XttsService xttsService;
 
     @PostMapping("/upload")
     public ApiResponse<Media> uploadFile(@RequestParam("file") MultipartFile file,
@@ -57,19 +59,24 @@ public class MediaController {
             }
 
             // BƯỚC 2: Tính toán đường dẫn động (Folder)
-            String folder = "library";
-            if (taskId != null && !taskId.isEmpty()) {
-                com.hyra_ai.backend.entity.SwapTask task = swapTaskRepository.findById(taskId).orElse(null);
-                if (task != null && task.getUser() != null) {
-                    folder = task.getUser().getId() + "/" + taskId;
-                }
+        String folder = "library";
+        if (taskId != null && !taskId.isEmpty()) {
+            com.hyra_ai.backend.entity.SwapTask swapTask = swapTaskRepository.findById(taskId).orElse(null);
+            if (swapTask != null && swapTask.getUser() != null) {
+                folder = swapTask.getUser().getId() + "/SwapTask/" + taskId;
             } else {
-                String email = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
-                com.hyra_ai.backend.entity.User user = userRepository.findByEmail(email).orElse(null);
-                if (user != null) {
-                    folder = user.getId() + "/library";
+                com.hyra_ai.backend.entity.XttsTask xttsTask = xttsTaskRepository.findById(taskId).orElse(null);
+                if (xttsTask != null && xttsTask.getUser() != null) {
+                    folder = xttsTask.getUser().getId() + "/XttsTask/" + taskId;
                 }
             }
+        } else {
+            String email = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+            com.hyra_ai.backend.entity.User user = userRepository.findByEmail(email).orElse(null);
+            if (user != null) {
+                folder = user.getId() + "/library";
+            }
+        }
 
             // BƯỚC 3: Lưu file xuống ổ cứng
             String filePath = storageService.store(file, folder);
@@ -85,7 +92,15 @@ public class MediaController {
             Media savedMedia = mediaRepository.save(media);
 
             if(taskId != null && !taskId.isEmpty()){
-                swapTaskService.addMediaToTask(taskId, savedMedia, role);
+                com.hyra_ai.backend.entity.SwapTask swapTask = swapTaskRepository.findById(taskId).orElse(null);
+                if (swapTask != null) {
+                    swapTaskService.addMediaToTask(taskId, savedMedia, role);
+                } else {
+                    com.hyra_ai.backend.entity.XttsTask xttsTask = xttsTaskRepository.findById(taskId).orElse(null);
+                    if (xttsTask != null) {
+                        xttsService.addMediaToTask(taskId, savedMedia, role);
+                    }
+                }
             }
 
             return ApiResponse.<Media>builder()
