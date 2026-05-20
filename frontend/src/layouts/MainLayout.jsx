@@ -10,7 +10,7 @@ import VerifyModal from "../components/VerifyModal";
 import ResetPasswordModal from "../components/ResetPasswordModal";
 
 function MainLayout(){
-    const [darkMode, setDarkMode] = useState(true);
+    const [darkMode, setDarkMode] = useState(false);
     const [activeModal, setActiveModal] = useState(null);
     const [modalData, setModalData] = useState({ email: '', mode: '', otp: '' });
 
@@ -26,6 +26,16 @@ function MainLayout(){
             document.documentElement.classList.remove("dark");
         }
     }, [darkMode]);
+
+    useEffect(() => {
+        const handleOpenAuth = (e) => {
+            if (e.detail) {
+                setActiveModal(e.detail);
+            }
+        };
+        window.addEventListener('open-auth-modal', handleOpenAuth);
+        return () => window.removeEventListener('open-auth-modal', handleOpenAuth);
+    }, []);
     return(
         <div className="
         min-h-screen 
@@ -81,7 +91,7 @@ function MainLayout(){
                     onSwitch={handleSwitchModal} 
                 />
             )}
-            <main className="flex-1 flex justify-center pt-10">
+            <main className="flex-1 flex justify-center pt-10 pb-20">
                 <Outlet/> 
             </main>
             <Footer />

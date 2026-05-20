@@ -1,7 +1,7 @@
 const TABS = [
     { id: 'image', label: 'Hoán đổi khuôn mặt ảnh' },
     { id: 'video', label: 'Video hoán đổi khuôn mặt' },
-    { id: 'tts',   label: 'Text to Speech' },
+    { id: 'tts',   label: 'Chuyển văn bản thành âm thanh' },
 ];
 
 function SwapTabs({ tab, setTab }) {
@@ -14,7 +14,7 @@ function SwapTabs({ tab, setTab }) {
                     className={`py-5 px-8 rounded-full text-xl font-medium transition-colors duration-300 ease-in-out transform hover:scale-105 ${
                         tab === t.id
                         ? 'bg-[#5b6ef7] text-white dark:bg-[#11229c] dark:hover:bg-[#1128b9]'
-                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                        : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 shadow-sm'
                     }`}
                 >
                     {t.label}

@@ -94,6 +94,8 @@ function RegisterModal({ onClose, onSwitch }) {
         className="
           w-140
           bg-white
+          dark:bg-gray-800
+          dark:text-white
           backdrop-blur-xl
           rounded-3xl
           p-10
@@ -129,6 +131,8 @@ function RegisterModal({ onClose, onSwitch }) {
             text-center
             py-5
             mb-10
+            text-gray-900
+            dark:text-white
           "
         >
           Đăng ký
@@ -179,6 +183,8 @@ function RegisterModal({ onClose, onSwitch }) {
               ${errors.userName ? 'border-red-500' : 'border-zinc-300'}
               dark:border-zinc-700
               bg-white
+              dark:bg-gray-700
+              dark:text-white
               outline-none
               focus:ring-2
               focus:ring-indigo-300
@@ -219,6 +225,8 @@ function RegisterModal({ onClose, onSwitch }) {
               ${errors.email ? 'border-red-500' : 'border-zinc-300'}
               dark:border-zinc-700
               bg-white
+              dark:bg-gray-700
+              dark:text-white
               outline-none
               focus:ring-2
               focus:ring-indigo-300
@@ -259,6 +267,8 @@ function RegisterModal({ onClose, onSwitch }) {
               ${errors.password ? 'border-red-500' : 'border-zinc-300'}
               dark:border-zinc-700
               bg-white
+              dark:bg-gray-700
+              dark:text-white
               outline-none
               focus:ring-2
               focus:ring-indigo-300
@@ -314,6 +324,8 @@ function RegisterModal({ onClose, onSwitch }) {
               ${errors.confirmPassword ? 'border-red-500' : 'border-zinc-300'}
               dark:border-zinc-700
               bg-white
+              dark:bg-gray-700
+              dark:text-white
               outline-none
               focus:ring-2
               focus:ring-indigo-300
@@ -374,6 +386,8 @@ function RegisterModal({ onClose, onSwitch }) {
             rounded-2xl
             bg-blue-800
             hover:bg-blue-600
+            dark:bg-blue-600
+            dark:hover:bg-blue-500
             text-white
             text-lg
             font-semibold
@@ -394,6 +408,7 @@ function RegisterModal({ onClose, onSwitch }) {
             onClick={() => onSwitch("login")}
             className="
               text-blue-800
+              dark:text-blue-400
               font-semibold
               ml-5
               cursor-pointer

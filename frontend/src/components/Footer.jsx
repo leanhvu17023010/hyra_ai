@@ -4,7 +4,7 @@ function Footer() {
     const year = new Date().getFullYear();
 
     return (
-        <footer className="mt-16 border-t border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+        <footer className="w-full mt-16 border-t border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
             <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 py-6 md:flex-row">
 
                 {/* Logo + text */}

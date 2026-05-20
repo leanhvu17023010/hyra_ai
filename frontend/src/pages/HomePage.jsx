@@ -3,6 +3,7 @@ import SwapTabs from "../components/SwapTabs";
 import ImageSwap from "../components/ImageSwap";
 import VideoSwap from "../components/VideoSwap";
 import TextToSpeech from "../components/TextToSpeech";
+import HowToSwap from "../components/HowToSwap";
 import Introduction from "../components/Introduction";
 
 
@@ -30,14 +31,18 @@ function HomePage(){
                 <SwapTabs tab={tab} setTab={setTab} />
             </div>
 
-            <div className="w-full mb-8 py-5">
+            <div className="w-full mb-4 py-5">
                 {tab === 'image' && <ImageSwap />}
                 {tab === 'video' && <VideoSwap />}
                 {tab === 'tts'   && <TextToSpeech />}
             </div>
 
+
             {/* Phần Giới thiệu & Ưu điểm */}
             <Introduction />
+
+            {/* Hướng dẫn cách swap */}
+            <HowToSwap tab={tab} />
         </div>
     )
 }

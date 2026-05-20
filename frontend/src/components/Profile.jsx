@@ -126,7 +126,7 @@ function Profile() {
     }
 
     return (
-        <div className="min-h-screen w-full bg-blue-100 p-4 md:p-10 dark:bg-gray-900 transition-colors duration-300">
+        <div className="w-full max-w-7xl mx-auto px-4 py-8 md:py-10 transition-colors duration-300">
             {previewItem && (
                 <div
                     className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
@@ -169,7 +169,7 @@ function Profile() {
                 </div>
                 <div className="flex flex-col gap-9 lg:flex-row items-start">
                     <div className="w-full shrink-0 lg:w-120 sticky top-30">
-                        <div className="overflow-hidden rounded-3xl bg-white shadow-xl shadow-blue-500/5 border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+                        <div className="overflow-hidden rounded-3xl bg-white shadow-md border border-gray-300 dark:bg-gray-800 dark:border-gray-700">
                             <div className="p-3">
                                 {menuItems.map((item) => (
                                     <button
@@ -208,7 +208,7 @@ function Profile() {
                     </div>
 
                     <div className="flex-1 w-full">
-                        <div className="min-h-[500px] rounded-[32px] bg-white p-8 md:p-10 shadow-xl shadow-blue-500/5 border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+                        <div className="min-h-[500px] rounded-[32px] bg-white p-8 md:p-10 shadow-md border border-gray-300 dark:bg-gray-800 dark:border-gray-700">
                             {activeSection === 'info' && (
                                 <div className="space-y-8">
                                     <div className="grid gap-8 md:grid-cols-2">
@@ -216,7 +216,7 @@ function Profile() {
                                             <label className="text-xl font-black uppercase text-gray-400 tracking-wider">
                                                 Họ và tên hiển thị
                                             </label>
-                                            <div className="text-2xl rounded-2xl font-bold py-5 text-gray-700 dark:bg-gray-700/50 dark:text-white border border-gray-100 dark:border-gray-600">
+                                            <div className="text-2xl rounded-2xl font-bold py-5 px-4 text-gray-700 dark:bg-gray-700/50 dark:text-white border border-gray-300 dark:border-gray-600">
                                                 {user?.userName}
                                             </div>
                                         </div>
@@ -224,7 +224,7 @@ function Profile() {
                                             <label className="text-xl font-black uppercase text-gray-400 tracking-wider">
                                                 Email đăng ký
                                             </label>
-                                            <div className="text-2xl rounded-2xl font-bold py-5 text-gray-700 dark:bg-gray-700/50 dark:text-white border border-gray-100 dark:border-gray-600">
+                                            <div className="text-2xl rounded-2xl font-bold py-5 px-4 text-gray-700 dark:bg-gray-700/50 dark:text-white border border-gray-300 dark:border-gray-600">
                                                 {user?.email}
                                             </div>
                                         </div>
@@ -281,7 +281,7 @@ function Profile() {
                                                     onChange={(e) =>
                                                         setPasswords((p) => ({ ...p, oldPassword: e.target.value }))
                                                     }
-                                                    className="text-xl w-full rounded-2xl border border-gray-100 bg-gray-50 pl-11 pr-12 py-4 font-semibold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:bg-gray-700/60 dark:text-white dark:border-gray-600"
+                                                    className="text-xl w-full rounded-2xl border border-gray-300 bg-gray-50 pl-11 pr-12 py-4 font-semibold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:bg-gray-700/60 dark:text-white dark:border-gray-600"
                                                 />
                                                 <button
                                                     type="button"
@@ -306,7 +306,7 @@ function Profile() {
                                                     onChange={(e) =>
                                                         setPasswords((p) => ({ ...p, newPassword: e.target.value }))
                                                     }
-                                                    className="text-xl w-full rounded-2xl border border-gray-100 bg-gray-50 pl-11 pr-12 py-4 font-semibold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:bg-gray-700/60 dark:text-white dark:border-gray-600"
+                                                    className="text-xl w-full rounded-2xl border border-gray-300 bg-gray-50 pl-11 pr-12 py-4 font-semibold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:bg-gray-700/60 dark:text-white dark:border-gray-600"
                                                 />
                                                 <button
                                                     type="button"
@@ -350,7 +350,7 @@ function Profile() {
                                                     onChange={(e) =>
                                                         setPasswords((p) => ({ ...p, confirmPassword: e.target.value }))
                                                     }
-                                                    className="text-xl w-full rounded-2xl border border-gray-100 bg-gray-50 pl-11 pr-12 py-4 font-semibold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:bg-gray-700/60 dark:text-white dark:border-gray-600"
+                                                    className="text-xl w-full rounded-2xl border border-gray-300 bg-gray-50 pl-11 pr-12 py-4 font-semibold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:bg-gray-700/60 dark:text-white dark:border-gray-600"
                                                 />
                                                 <button
                                                     type="button"
@@ -418,7 +418,7 @@ function Profile() {
                                                 return (
                                                     <div
                                                         key={item.id}
-                                                        className="group overflow-hidden rounded-[24px] border border-gray-100 bg-white p-3 transition-all hover:shadow-2xl hover:shadow-blue-500/10 dark:bg-gray-700/50 dark:border-gray-600"
+                                                        className="group overflow-hidden rounded-[24px] border border-gray-300 bg-white p-3 shadow-md transition-all hover:shadow-2xl hover:shadow-blue-500/10 dark:bg-gray-700/50 dark:border-gray-600"
                                                     >
                                                         <div className="relative mb-4 aspect-video overflow-hidden rounded-[20px] bg-gray-100">
                                                             {isVideo ? (

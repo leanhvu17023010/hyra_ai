@@ -7,8 +7,10 @@ import { useSwapTaskPolling } from '../hooks/useSwapTaskPolling';
 
 function UploadBox({ label, icon, preview, isVideo, onClick, inputRef, onChange, accept, hint }) {
     return (
-        <div className="rounded-2xl border border-gray-200 bg-white p-3 dark:border-gray-600 dark:bg-gray-700">
-            <p className="mb-3 text-2sx py-2 font-semibold text-gray-600 dark:text-gray-300">{label}</p>
+        <div className="rounded-2xl border border-gray-300 bg-white p-3 dark:border-gray-600 dark:bg-gray-700 shadow-md">
+            <p className="mb-3 text-2sx py-2 font-semibold text-gray-600 dark:text-gray-300">
+                {label}
+                </p>
             <div
                 className="mx-3 mb-3 h-40 border-2 border-dashed border-gray-300 rounded-2xl bg-gray-50 dark:bg-gray-600 flex items-center justify-center cursor-pointer hover:border-blue-400 transition-colors overflow-hidden"
                 onClick={onClick}
@@ -44,7 +46,13 @@ function VideoSwap() {
     const { startPolling, stopPolling } = useSwapTaskPolling({
         onProgress: (pct) => { setProgress(pct); setMessage(`AI đang xử lý... ${pct}%`); },
         onComplete: async (_taskId, task) => {
-            if (!task?.resultUrl) { setMessage('Chưa có file kết quả. Vui lòng thử lại.'); setIsLoading(false); return; }
+            if (!task?.resultUrl) 
+                { 
+                    setMessage('Chưa có file kết quả. Vui lòng thử lại.'); 
+                    setIsLoading(false); 
+                    return; 
+                }
+                // chuyển file BE thành URL brower đọc được
             const blobUrl = await swapService.getResultBlobUrlFromPath(task.resultUrl);
             swapService.saveCompletedTaskToHistory(_taskId, task.resultUrl, 'video');
             setResultVideoSrc(blobUrl);
@@ -118,7 +126,7 @@ function VideoSwap() {
                     hint="Tối đa 5 giây và 30MB"
                 />
 
-                <div className="bg-white dark:bg-gray-700 rounded-xl border border-gray-100 p-4 flex flex-col gap-3">
+                <div className="bg-white dark:bg-gray-700 rounded-2xl border border-gray-300 p-4 flex flex-col gap-3 shadow-md">
                     <button
                         onClick={handleSwap}
                         disabled={isLoading || !sourceImage || !targetVideo}
@@ -139,7 +147,7 @@ function VideoSwap() {
             </div>
 
             {/* Cột phải – kết quả */}
-            <div className="flex-1 min-w-0 bg-white dark:bg-gray-700 rounded-xl border border-gray-100 overflow-hidden flex flex-col">
+            <div className="flex-1 min-w-0 bg-white dark:bg-gray-700 rounded-2xl border border-gray-300 overflow-hidden flex flex-col shadow-md">
 
                 <div className="relative flex-1 min-h-[480px] bg-gray-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden">
                     {resultVideoSrc ? (
