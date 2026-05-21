@@ -1,13 +1,13 @@
 import { FiArrowRight, FiZap } from 'react-icons/fi';
 
 const BADGES = [
-    '⚡ FaceFusion AI',
-    '🎙️ Voice Clone',
-    '🔒 Bảo mật cao',
-    '🌐 Miễn phí sử dụng',
+    'FaceFusion AI',
+    'Voice Clone',
+    'Bảo mật cao',
+    'Miễn phí sử dụng',
 ];
 
-function HeroSection({ onStartClick }) {
+function HeroSection({ onStartClick, onGuideClick }) {
     return (
         <section className="w-full text-center pt-6 pb-10 flex flex-col items-center gap-6 relative">
             {/* Glow background effect */}
@@ -50,12 +50,12 @@ function HeroSection({ onStartClick }) {
                     Bắt đầu ngay miễn phí
                     <FiArrowRight size={16} />
                 </button>
-                <a
-                    href="#how-to"
+                <button
+                    onClick={onGuideClick}
                     className="inline-flex items-center gap-2 px-7 py-3 rounded-xl font-semibold text-gray-700 dark:text-gray-300 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 cursor-pointer"
                 >
                     Xem hướng dẫn
-                </a>
+                </button>
             </div>
 
             {/* Tech Badges */}

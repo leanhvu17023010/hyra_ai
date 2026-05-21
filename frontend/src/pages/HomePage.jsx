@@ -12,16 +12,23 @@ import FAQSection from "../components/home/FAQSection";
 function HomePage() {
     const [tab, setTab] = useState('video');
     const toolRef = useRef(null);
+    const howToRef = useRef(null);
 
-    const scrollToTool = () => {
-        toolRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Scroll mượt có offset navbar (~68px)
+    const scrollToSection = (ref) => {
+        if (!ref.current) return;
+        const top = ref.current.getBoundingClientRect().top + window.scrollY - 80;
+        window.scrollTo({ top, behavior: 'smooth' });
     };
 
     return (
         <div className="flex flex-col items-center w-full max-w-7xl">
 
             {/* Hero Section */}
-            <HeroSection onStartClick={scrollToTool} />
+            <HeroSection
+                onStartClick={() => scrollToSection(toolRef)}
+                onGuideClick={() => scrollToSection(howToRef)}
+            />
 
             {/* Stats Section */}
             <StatsSection />
@@ -45,7 +52,7 @@ function HomePage() {
             <Introduction />
 
             {/* How To Swap */}
-            <div id="how-to" className="w-full scroll-mt-8">
+            <div ref={howToRef} id="how-to" className="w-full">
                 <HowToSwap tab={tab} />
             </div>
 
