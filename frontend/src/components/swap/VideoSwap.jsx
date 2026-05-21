@@ -8,7 +8,7 @@ import { useSwapTaskPolling } from '../../hooks/useSwapTaskPolling';
 function UploadBox({ label, icon, preview, isVideo, onClick, inputRef, onChange, accept, hint }) {
     return (
         <div className="rounded-2xl border border-gray-300 bg-white p-3 dark:border-gray-600 dark:bg-gray-700 shadow-md">
-            <p className="mb-3 text-2sx py-2 font-semibold text-gray-600 dark:text-gray-300">
+            <p className="mb-3 text-sm py-2 font-semibold text-gray-600 dark:text-gray-300">
                 {label}
                 </p>
             <div

@@ -9,6 +9,8 @@ function TextToSpeech() {
     const [text, setText] = useState('');
     const [isPlaying, setIsPlaying] = useState(false);
     const [error, setError] = useState('');
+    const [swapDone, setSwapDone] = useState(false); // đánh dấu swap đã hoàn tất
+    const [swapText, setSwapText] = useState('');   // lưu text đã swap để phát lại
     
     // Voice Swap / Voice Clone States
     const [sourceType, setSourceType] = useState('upload'); // 'upload' | 'record'
@@ -118,76 +120,58 @@ function TextToSpeech() {
 
     // Core execution handler
     const handleExecute = async () => {
+        // Kiểm tra điều kiện: phải có text
         if (!text.trim()) return setError('Vui lòng nhập nội dung văn bản.');
+        // Kiểm tra điều kiện: phải có file âm thanh mẫu
+        if (!audioFile) return setError('Vui lòng cung cấp giọng đọc mẫu (tải file hoặc ghi âm) trước khi swap.');
+        // Kiểm tra điều kiện: phải đăng nhập
+        if (!localStorage.getItem('token')) return setError('login-required');
+
         setError('');
 
-        const token = localStorage.getItem('token');
+        try {
+            setIsLoading(true);
+            setProgress(0);
+            setMessage('Đang khởi tạo tác vụ hoán đổi...');
 
-        // Flow 1: AI Swap Voice (Requires authentication and voice sample)
-        if (audioFile) {
-            if (!token) {
-                return setError('login-required');
-            }
+            const { result: taskId } = await swapService.createSwapTask();
+            if (!taskId) throw new Error('Khởi tạo thất bại');
 
-            try {
-                setIsLoading(true);
-                setProgress(0);
-                setMessage('Đang khởi tạo tác vụ hoán đổi...');
-                
-                // Gọi API backend tạo task
-                const { result: taskId } = await swapService.createSwapTask();
-                if (!taskId) throw new Error('Khởi tạo thất bại');
+            setMessage('Đang tải tệp âm thanh mẫu lên hệ thống...');
+            await swapService.uploadMediaToTask(audioFile, taskId, 'audio');
 
-                setMessage('Đang tải tệp âm thanh mẫu lên hệ thống...');
-                await swapService.uploadMediaToTask(audioFile, taskId, 'audio');
+            // Giả lập tiến trình xử lý giọng nói AI
+            let currentProgress = 0;
+            const interval = setInterval(() => {
+                currentProgress += 10;
+                if (currentProgress >= 100) {
+                    clearInterval(interval);
+                    setProgress(100);
+                    setMessage('Hoàn tất hoán đổi giọng đọc AI!');
 
-                // Giả lập tiến trình xử lý giọng nói AI
-                let currentProgress = 0;
-                const interval = setInterval(() => {
-                    currentProgress += 10;
-                    if (currentProgress >= 100) {
-                        clearInterval(interval);
-                        setProgress(100);
-                        setMessage('Hoàn tất hoán đổi giọng đọc AI!');
-                        
-                        setTimeout(() => {
-                            setIsLoading(false);
-                            
-                            // Phát tiếng bằng speechSynthesis với tinh chỉnh clone
-                            const utterance = new SpeechSynthesisUtterance(text);
-                            utterance.lang = 'vi-VN';
-                            utterance.pitch = 1.15; // Tinh chỉnh cao độ giọng clone
-                            utterance.rate = 0.95;  // Tinh chỉnh tốc độ đọc
-                            utterance.onend = () => setIsPlaying(false);
-                            utterance.onerror = () => setIsPlaying(false);
-                            window.speechSynthesis.cancel();
-                            window.speechSynthesis.speak(utterance);
-                            setIsPlaying(true);
-                        }, 500);
-                    } else {
-                        setProgress(currentProgress);
-                        setMessage(`Đang nhân bản và cấu hình giọng nói... ${currentProgress}%`);
-                    }
-                }, 300);
+                    setTimeout(() => {
+                        setIsLoading(false);
+                        setSwapDone(true);
+                        setSwapText(text); // lưu lại text để phát lại
+                        const utterance = new SpeechSynthesisUtterance(text);
+                        utterance.lang = 'vi-VN';
+                        utterance.pitch = 1.15;
+                        utterance.rate = 0.95;
+                        utterance.onend = () => setIsPlaying(false);
+                        utterance.onerror = () => setIsPlaying(false);
+                        window.speechSynthesis.cancel();
+                        window.speechSynthesis.speak(utterance);
+                        setIsPlaying(true);
+                    }, 500);
+                } else {
+                    setProgress(currentProgress);
+                    setMessage(`Đang nhân bản và cấu hình giọng nói... ${currentProgress}%`);
+                }
+            }, 300);
 
-            } catch (err) {
-                setIsLoading(false);
-                setError('Xử lý tác vụ AI thất bại. Vui lòng thử lại.');
-            }
-        } 
-        // Flow 2: Default browser Text to Speech (No login required)
-        else {
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'vi-VN';
-            utterance.onend = () => setIsPlaying(false);
-            utterance.onerror = () => {
-                setError('Trình duyệt không hỗ trợ tổng hợp giọng nói.');
-                setIsPlaying(false);
-            };
-
-            window.speechSynthesis.cancel();
-            window.speechSynthesis.speak(utterance);
-            setIsPlaying(true);
+        } catch (err) {
+            setIsLoading(false);
+            setError('Xử lý tác vụ AI thất bại. Vui lòng thử lại.');
         }
     };
 
@@ -196,11 +180,26 @@ function TextToSpeech() {
         setIsPlaying(false);
     };
 
+    const handleReplay = () => {
+        if (!swapText) return;
+        const utterance = new SpeechSynthesisUtterance(swapText);
+        utterance.lang = 'vi-VN';
+        utterance.pitch = 1.15;
+        utterance.rate = 0.95;
+        utterance.onend = () => setIsPlaying(false);
+        utterance.onerror = () => setIsPlaying(false);
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(utterance);
+        setIsPlaying(true);
+    };
+
     const handleReset = () => {
         window.speechSynthesis.cancel();
         setText('');
         setError('');
         setIsPlaying(false);
+        setSwapDone(false);
+        setSwapText('');
         handleClearAudio();
     };
 
@@ -239,7 +238,7 @@ function TextToSpeech() {
                         <button
                             type="button"
                             onClick={() => { setSourceType('upload'); handleClearAudio(); }}
-                            className={`flex-1 py-1.5 text-xl font-semibold rounded-lg transition-all cursor-pointer ${
+                            className={`flex-1 py-1.5 text-sm font-semibold rounded-lg transition-all cursor-pointer ${
                                 sourceType === 'upload'
                                     ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-blue-400'
                                     : 'text-gray-500 dark:text-gray-300 hover:text-gray-700'
@@ -250,7 +249,7 @@ function TextToSpeech() {
                         <button
                             type="button"
                             onClick={() => { setSourceType('record'); handleClearAudio(); }}
-                            className={`flex-1 py-1.5 text-xl font-semibold rounded-lg transition-all cursor-pointer ${
+                            className={`flex-1 py-1.5 text-sm font-semibold rounded-lg transition-all cursor-pointer ${
                                 sourceType === 'record'
                                     ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-blue-400'
                                     : 'text-gray-500 dark:text-gray-300 hover:text-gray-700'
@@ -269,7 +268,7 @@ function TextToSpeech() {
                                     className="border-2 border-dashed border-gray-300 dark:border-gray-500 rounded-xl bg-gray-50 dark:bg-gray-600 p-6 flex flex-col items-center justify-center cursor-pointer hover:border-blue-400 transition-colors"
                                 >
                                     <FiUploadCloud size={24} className="text-gray-400 mb-2" />
-                                    <span className="text-xm text-gray-500 dark:text-gray-300 text-center font-medium">Tải tệp âm thanh</span>
+                                    <span className="text-sm text-gray-500 dark:text-gray-300 text-center font-medium">Tải tệp âm thanh</span>
                                     <span className="text-xs text-gray-400 text-center mt-1">Hỗ trợ mp3, wav, m4a</span>
                                     <input
                                         type="file"
@@ -282,7 +281,7 @@ function TextToSpeech() {
                             ) : (
                                 <div className="p-3 bg-gray-50 dark:bg-gray-600 border border-gray-200 dark:border-gray-500 rounded-xl">
                                     <div className="flex justify-between items-center mb-2">
-                                        <span className="text-xl font-semibold text-gray-600 dark:text-gray-300 truncate max-w-[180px]">
+                                        <span className="text-sm font-semibold text-gray-600 dark:text-gray-300 truncate max-w-[180px]">
                                             {audioFileName}
                                         </span>
                                         <button
@@ -309,13 +308,13 @@ function TextToSpeech() {
                                     <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-2">
                                         <FiMic size={20} />
                                     </div>
-                                    <span className="text-xm text-gray-500 dark:text-gray-300 font-medium">Bắt đầu ghi âm</span>
+                                    <span className="text-sm text-gray-500 dark:text-gray-300 font-medium">Bắt đầu ghi âm</span>
                                 </button>
                             ) : isRecording ? (
                                 <div className="w-full border border-red-200 dark:border-red-900 bg-red-50/50 dark:bg-red-950/20 rounded-xl p-4 flex flex-col items-center">
                                     <div className="flex items-center gap-2 mb-3">
                                         <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-                                        <span className="text-xl font-semibold text-red-600 dark:text-red-400">
+                                        <span className="text-sm font-semibold text-red-600 dark:text-red-400">
                                             ĐANG GHI ÂM ({formatTime(recordingTime)})
                                         </span>
                                     </div>
@@ -363,7 +362,7 @@ function TextToSpeech() {
                         }`}>
                             <FiVolume2 className={isPlaying ? "text-white" : "text-gray-400 dark:text-gray-300"} size={22} />
                         </div>
-                        <p className="text-xm font-medium text-gray-600 dark:text-gray-300">
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
                             {isPlaying ? 'Đang phát...' : 'Sẵn sàng'}
                         </p>
 
@@ -392,11 +391,11 @@ function TextToSpeech() {
                     <div className="flex flex-col gap-2">
                         {error === 'login-required' ? (
                             <div className="p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-xl text-center">
-                                <p className="text-xs text-red-600 dark:text-red-400 mb-2 font-medium">Yêu cầu đăng nhập để swap giọng</p>
+                                <p className="text-sm text-red-600 dark:text-red-400 mb-2 font-medium">Yêu cầu đăng nhập để swap giọng</p>
                                 <button
                                     type="button"
                                     onClick={handleOpenLogin}
-                                    className="w-full py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition-colors shadow-sm"
+                                    className="w-full py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer transition-colors shadow-sm"
                                 >
                                     <FiLogIn size={13} /> Đăng nhập ngay
                                 </button>
@@ -411,23 +410,33 @@ function TextToSpeech() {
                                     >
                                         <FiSquare size={14} /> Dừng lại
                                     </button>
+                                ) : swapDone ? (
+                                    // Đã swap xong, có thể nghe lại hoặc swap mới
+                                    <div className="flex flex-col gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={handleReplay}
+                                            className="w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-green-600 hover:bg-green-700 transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                                        >
+                                            <FiPlay size={14} /> Nghe lại
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => { setSwapDone(false); setSwapText(''); }}
+                                            disabled={!text.trim() || !audioFile || isRecording}
+                                            className="w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                                        >
+                                            <FiCpu size={14} /> Swap lại
+                                        </button>
+                                    </div>
                                 ) : (
                                     <button
                                         type="button"
                                         onClick={handleExecute}
-                                        disabled={!text.trim() || isRecording}
+                                        disabled={!text.trim() || !audioFile || isRecording}
                                         className="w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm"
                                     >
-                                        {audioFile ? (
-                                            <>
-                                                <FiCpu size={14} /> AI Swap Giọng nói
-                                            </>
-                                        ) : (
-                                            <>
-                                                <FiPlay className='text-xl' /> 
-                                                <span className='text-xm'>Phát giọng mặc định</span>
-                                            </>
-                                        )}
+                                        <FiCpu size={14} /> AI Swap Giọng nói
                                     </button>
                                 )}
                             </>
@@ -435,9 +444,9 @@ function TextToSpeech() {
                         <button
                             type="button"
                             onClick={handleReset}
-                            className="w-full py-2 rounded-xl text-xs font-medium border border-gray-300 text-gray-500 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                            className="w-full py-2 rounded-xl text-sm font-medium border border-gray-300 text-gray-500 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                         >
-                            <FiRefreshCw size={12} /> <span className='text-sm'>Thiết lập lại từ đầu</span>
+                            <FiRefreshCw size={12} /> Thiết lập lại từ đầu
                         </button>
                         {error && error !== 'login-required' && (
                             <p className="text-xs text-red-500 text-center font-medium pt-1">{error}</p>

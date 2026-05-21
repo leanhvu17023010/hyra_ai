@@ -51,12 +51,12 @@ function HowToSwap({ tab }) {
                     <div key={i} className="flex gap-4 items-start bg-white dark:bg-gray-700 rounded-2xl border border-gray-300 dark:border-gray-600 p-5 shadow-md">
                         {/* Số thứ tự */}
                         <div className="shrink-0 w-10 h-10 rounded-full bg-[#5b6ef7]/10 border border-[#5b6ef7]/30 flex items-center justify-center mt-0.5">
-                            <span className="text-xm font-bold text-[#5b6ef7]">{String(i + 1).padStart(2, '0')}</span>
+                            <span className="text-sm font-bold text-[#5b6ef7]">{String(i + 1).padStart(2, '0')}</span>
                         </div>
                         {/* Nội dung */}
                         <div>
                             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1.5">{step.title}</h3>
-                            <p className="text-xm text-gray-500 dark:text-gray-400 leading-relaxed">{step.desc}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{step.desc}</p>
                         </div>
                     </div>
                 ))}

@@ -51,7 +51,7 @@ function FAQItem({ q, a }) {
 function FAQSection() {
     return (
         <section className="w-full mt-12 mb-4">
-            <div className="flex flex-col items-center justify-center text-center pt-20 mb-8 mt-16">
+            <div className="flex flex-col items-center justify-center text-center pt-40 mb-8 mt-16">
                 <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
                  Câu hỏi <span className="text-[#5b6ef7]">thường gặp</span>
                 </h2>

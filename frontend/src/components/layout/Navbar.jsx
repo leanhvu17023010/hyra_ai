@@ -99,26 +99,15 @@ function Navbar({ setActiveModal, darkMode, setDarkMode }) {
 
                 {/* LOGO */}
                 <h1
-                    className="
-                        text-2xl
-                        font-bold
-                    "
+                    className="text-xl font-bold"
                 >
-                    Example AI
+                    Hyra AI
                 </h1>
             </Link>
                 {/* DARK MODE TOGGLE */}
                 <button
                     onClick={() => setDarkMode(!darkMode)}
-                    className="
-                        p-2
-                        rounded-xl
-                        hover:bg-gray-100
-                        dark:hover:bg-gray-800
-                        transition-all
-                        cursor-pointer
-                        text-xl
-                    "
+                    className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all cursor-pointer text-base"
                 >
                     {darkMode ? <FiSun /> : <FiMoon />}
                 </button>
@@ -171,13 +160,7 @@ function Navbar({ setActiveModal, darkMode, setDarkMode }) {
                         >
 
                             {/* NAME */}
-                            <span
-                                className="
-                                    font-semibold
-                                    text-lg
-                                    cursor-pointer
-                                "
-                            >
+                            <span className="font-medium text-sm cursor-pointer">
                                 {user.userName || user.email}
                             </span>
 
@@ -293,30 +276,8 @@ function Navbar({ setActiveModal, darkMode, setDarkMode }) {
                 ) : (
 
                     <button
-
-                        className="
-                            bg-[#5b6ef7]
-                            hover:bg-[#4a5ce6]
-
-                            text-white
-
-                            px-6
-                            py-2
-
-                            rounded-lg
-
-                            transition-colors
-
-                            dark:bg-[#11229c]
-                            dark:hover:bg-[#1128b9]
-
-                            cursor-pointer
-                        "
-
-                        onClick={() =>
-                            setActiveModal("login")
-                        }
-
+                        className="bg-[#5b6ef7] hover:bg-[#4a5ce6] text-white text-sm font-medium px-5 py-2 rounded-lg transition-colors dark:bg-[#11229c] dark:hover:bg-[#1128b9] cursor-pointer"
+                        onClick={() => setActiveModal("login")}
                     >
                         Đăng nhập
                     </button>

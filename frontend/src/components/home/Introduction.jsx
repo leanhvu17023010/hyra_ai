@@ -25,9 +25,9 @@ const features = [
 
 function Introduction() {
     return (
-        <section className="w-full py-15">
+        <section className="w-full py-30">
             {/* Header */}
-            <div className="flex flex-col items-center justify-center text-center mb-8 mt-20">
+            <div className="flex flex-col items-center justify-center text-center mb-10 mt-40">
                 <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 ">
                     Tại sao chọn <span className="text-[#5b6ef7]">Hyra AI</span>?
                 </h2>
