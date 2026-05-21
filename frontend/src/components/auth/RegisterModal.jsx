@@ -8,8 +8,8 @@ import {
   FiX
 } from "react-icons/fi"
 
-import authService from "../services/authService"
-import { registerSchema, validate } from "../utils/validation"
+import authService from "../../services/authService"
+import { registerSchema, validate } from "../../utils/validation"
 
 function RegisterModal({ onClose, onSwitch }) {
 

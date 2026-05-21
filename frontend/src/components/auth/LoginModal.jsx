@@ -2,8 +2,8 @@ import { useState } from "react"
 import { FcGoogle } from "react-icons/fc"
 import { useGoogleLogin } from "@react-oauth/google"
 import axios from "axios"
-import authService from "../services/authService"
-import { loginSchema, validate } from "../utils/validation"
+import authService from "../../services/authService"
+import { loginSchema, validate } from "../../utils/validation"
 import {
   FiX,
   FiMail,

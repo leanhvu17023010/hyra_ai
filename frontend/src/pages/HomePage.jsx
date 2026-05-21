@@ -1,13 +1,13 @@
 import { useState, useRef } from "react";
-import SwapTabs from "../components/SwapTabs";
-import ImageSwap from "../components/ImageSwap";
-import VideoSwap from "../components/VideoSwap";
-import TextToSpeech from "../components/TextToSpeech";
-import HowToSwap from "../components/HowToSwap";
-import Introduction from "../components/Introduction";
-import HeroSection from "../components/HeroSection";
-import StatsSection from "../components/StatsSection";
-import FAQSection from "../components/FAQSection";
+import SwapTabs from "../components/swap/SwapTabs";
+import ImageSwap from "../components/swap/ImageSwap";
+import VideoSwap from "../components/swap/VideoSwap";
+import TextToSpeech from "../components/swap/TextToSpeech";
+import HowToSwap from "../components/home/HowToSwap";
+import Introduction from "../components/home/Introduction";
+import HeroSection from "../components/home/HeroSection";
+import StatsSection from "../components/home/StatsSection";
+import FAQSection from "../components/home/FAQSection";
 
 function HomePage() {
     const [tab, setTab] = useState('video');

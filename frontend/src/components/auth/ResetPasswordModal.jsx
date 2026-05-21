@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { FiLock, FiEye, FiEyeOff, FiX } from "react-icons/fi"
-import authService from "../services/authService"
-import { resetPasswordSchema, validate } from "../utils/validation"
+import authService from "../../services/authService"
+import { resetPasswordSchema, validate } from "../../utils/validation"
 
 function ResetPasswordModal({ email, otp, onClose, onSwitch }) {
   const [newPassword, setNewPassword] = useState("")

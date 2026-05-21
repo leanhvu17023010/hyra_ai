@@ -7,8 +7,8 @@ import {
     FiMoon
 } from "react-icons/fi";
 
-import userService from "../services/userService";
-import authService from "../services/authService";
+import userService from "../../services/userService";
+import authService from "../../services/authService";
 import { Link } from "react-router-dom";
 
 function Navbar({ setActiveModal, darkMode, setDarkMode }) {

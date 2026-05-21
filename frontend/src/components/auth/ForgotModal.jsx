@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { FiMail, FiX, FiArrowLeft } from "react-icons/fi"
-import authService from "../services/authService"
-import { forgotSchema, validate } from "../utils/validation"
+import authService from "../../services/authService"
+import { forgotSchema, validate } from "../../utils/validation"
 
 function ForgotModal({ onClose, onSwitch }) {
   const [email, setEmail] = useState("")

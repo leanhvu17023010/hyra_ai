@@ -1,13 +1,13 @@
 import { Outlet } from "react-router-dom"
-import Navbar from "../components/Navbar"
-import Footer from "../components/Footer"
+import Navbar from "../components/layout/Navbar"
+import Footer from "../components/layout/Footer"
 import { useState, useEffect } from "react";
 
-import LoginModal from "../components/LoginModal";
-import RegisterModal from "../components/RegisterModal";
-import ForgotModal from "../components/ForgotModal";
-import VerifyModal from "../components/VerifyModal";
-import ResetPasswordModal from "../components/ResetPasswordModal";
+import LoginModal from "../components/auth/LoginModal";
+import RegisterModal from "../components/auth/RegisterModal";
+import ForgotModal from "../components/auth/ForgotModal";
+import VerifyModal from "../components/auth/VerifyModal";
+import ResetPasswordModal from "../components/auth/ResetPasswordModal";
 
 function MainLayout(){
     const [darkMode, setDarkMode] = useState(false);

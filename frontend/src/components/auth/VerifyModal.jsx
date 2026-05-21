@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react"
 import { FiX, FiArrowLeft, FiShield } from "react-icons/fi"
-import authService from "../services/authService"
+import authService from "../../services/authService"
 
 function VerifyModal({ email, otpMode, userName, password, onClose, onSwitch }) {
   const [code, setCode] = useState(["", "", "", "", "", ""])

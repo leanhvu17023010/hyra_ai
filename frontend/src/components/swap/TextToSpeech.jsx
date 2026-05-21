@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { FiPlay, FiSquare, FiRefreshCw, FiVolume2, FiMic, FiUploadCloud, FiTrash2, FiCpu, FiLogIn } from 'react-icons/fi';
-import swapService from '../services/swapService';
+import swapService from '../../services/swapService';
 import SwapProcessingOverlay from './SwapProcessingOverlay';
 
 const MAX_CHARS = 1000;
