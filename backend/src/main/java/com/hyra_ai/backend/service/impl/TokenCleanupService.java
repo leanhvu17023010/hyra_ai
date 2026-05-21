@@ -22,8 +22,8 @@ public class TokenCleanupService {
     InvalidatedTokenRepository invalidatedTokenRepository;
 
     // Run at 01:00 AM every day
-//    @Scheduled(cron = "0 0 0 * * ?")
-    @Scheduled(fixedRate = 10000)
+    @Scheduled(cron = "0 0 0 * * ?")
+//    @Scheduled(fixedRate = 10000)
     @Transactional
     public void cleanupExpiredTokens() {
         log.info("Bắt đầu xóa các token hết hạn ");
