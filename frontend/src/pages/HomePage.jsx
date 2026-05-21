@@ -1,49 +1,58 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import SwapTabs from "../components/SwapTabs";
 import ImageSwap from "../components/ImageSwap";
 import VideoSwap from "../components/VideoSwap";
 import TextToSpeech from "../components/TextToSpeech";
 import HowToSwap from "../components/HowToSwap";
 import Introduction from "../components/Introduction";
+import HeroSection from "../components/HeroSection";
+import StatsSection from "../components/StatsSection";
+import FAQSection from "../components/FAQSection";
 
+function HomePage() {
+    const [tab, setTab] = useState('video');
+    const toolRef = useRef(null);
 
-function HomePage(){
-    const [tab, setTab] = useState('video'); 
-
-    const titles = {
-        image: 'Hoán đổi khuôn mặt AI trên Ảnh trực tuyến',
-        video: 'Hoán đổi khuôn mặt AI Video trực tuyến',
-        tts:   'Chuyển văn bản thành giọng nói AI',
+    const scrollToTool = () => {
+        toolRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
 
     return (
         <div className="flex flex-col items-center w-full max-w-7xl">
-            <h1 className="text-5xl font-extrabold mb-8 text-black dark:text-white text-center">
-                {titles[tab]}
-            </h1>
-            <span className="py-5 dark:text-white text-center">
-                {tab === 'tts'
-                    ? 'Nhập văn bản và chọn giọng đọc để tạo ra âm thanh nghe tự nhiên trong vài giây.'
-                    : 'Công cụ trực tuyến mạnh mẽ để hoán đổi khuôn mặt này sang khuôn mặt khác một cách liền mạch.'}
-            </span>
-            
-            <div className="mb-8 py-5">
-                <SwapTabs tab={tab} setTab={setTab} />
+
+            {/* Hero Section */}
+            <HeroSection onStartClick={scrollToTool} />
+
+            {/* Stats Section */}
+            <StatsSection />
+
+            {/* Tool Section */}
+            <div ref={toolRef} className="w-full scroll-mt-8" id="tool">
+                {/* Tabs */}
+                <div className="flex justify-center mb-8">
+                    <SwapTabs tab={tab} setTab={setTab} />
+                </div>
+
+                {/* Tab panel */}
+                <div className="w-full">
+                    {tab === 'image' && <ImageSwap />}
+                    {tab === 'video' && <VideoSwap />}
+                    {tab === 'tts'   && <TextToSpeech />}
+                </div>
             </div>
 
-            <div className="w-full mb-4 py-5">
-                {tab === 'image' && <ImageSwap />}
-                {tab === 'video' && <VideoSwap />}
-                {tab === 'tts'   && <TextToSpeech />}
-            </div>
-
-
-            {/* Phần Giới thiệu & Ưu điểm */}
+            {/* Introduction / Tại sao chọn Hyra AI */}
             <Introduction />
 
-            {/* Hướng dẫn cách swap */}
-            <HowToSwap tab={tab} />
+            {/* How To Swap */}
+            <div id="how-to" className="w-full scroll-mt-8">
+                <HowToSwap tab={tab} />
+            </div>
+
+            {/* FAQ */}
+            <FAQSection />
         </div>
-    )
+    );
 }
-export default HomePage
+
+export default HomePage;

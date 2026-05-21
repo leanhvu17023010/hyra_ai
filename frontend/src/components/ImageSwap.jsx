@@ -62,8 +62,8 @@ function ImageSwap() {
             const { result: taskId } = await swapService.createSwapTask();
             if (!taskId) throw new Error();
             setMessage('Đang tải ảnh lên...');
-            await swapService.uploadMediaToTask(sourceImage, taskId);
-            await swapService.uploadMediaToTask(targetImage, taskId);
+            await swapService.uploadMediaToTask(sourceImage, taskId, 'source');
+            await swapService.uploadMediaToTask(targetImage, taskId, 'target');
             setMessage('Đang xử lý bằng AI... 0%');
             startPolling(taskId);
         } catch (err) {
