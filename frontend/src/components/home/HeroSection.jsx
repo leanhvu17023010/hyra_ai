@@ -44,15 +44,14 @@ function HeroSection({ onStartClick, onGuideClick }) {
             <div className="flex items-center gap-3 flex-wrap justify-center">
                 <button
                     onClick={onStartClick}
-                    className="inline-flex items-center gap-2 px-7 py-3 rounded-xl font-semibold text-white text-sm shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-blue-300/40 cursor-pointer"
-                    style={{ background: 'linear-gradient(135deg, #5b6ef7, #7c3aed)' }}
+                    className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-white text-sm shadow-lg shadow-[#5b6ef7]/20 bg-gradient-to-r from-[#5b6ef7] to-[#7c3aed] hover:from-[#4b5ee7] hover:to-[#6c2ae5] transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-[#5b6ef7]/30 cursor-pointer"
                 >
                     Bắt đầu ngay miễn phí
                     <FiArrowRight size={16} />
                 </button>
                 <button
                     onClick={onGuideClick}
-                    className="inline-flex items-center gap-2 px-7 py-3 rounded-xl font-semibold text-gray-700 dark:text-gray-300 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 cursor-pointer"
+                    className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-slate-700 dark:text-slate-200 text-sm border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer hover:scale-105"
                 >
                     Xem hướng dẫn
                 </button>

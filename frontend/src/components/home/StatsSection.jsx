@@ -12,15 +12,14 @@ function StatsSection() {
                 {STATS.map((s, i) => (
                     <div
                         key={i}
-                        className="flex flex-col items-center justify-center py-10 px-6 rounded-2xl bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 text-center"
+                        className="flex flex-col items-center justify-center py-10 px-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 text-center"
                     >
                         <span
-                            className="text-3xl font-extrabold bg-clip-text text-transparent"
-                            style={{ backgroundImage: 'linear-gradient(135deg, #5b6ef7, #7c3aed)' }}
+                            className="text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-[#5b6ef7] to-[#7c3aed]"
                         >
                             {s.value}
                         </span>
-                        <span className="mt-1 text-sm text-gray-500 dark:text-gray-400 font-medium">{s.label}</span>
+                        <span className="mt-1.5 text-sm text-slate-500 dark:text-slate-400 font-medium">{s.label}</span>
                     </div>
                 ))}
             </div>

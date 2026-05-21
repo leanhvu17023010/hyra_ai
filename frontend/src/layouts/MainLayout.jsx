@@ -39,9 +39,11 @@ function MainLayout(){
     return(
         <div className="
         min-h-screen 
-        bg-[#def1ff] 
+        bg-slate-50
+        dark:bg-slate-950
+        text-slate-900
+        dark:text-slate-50
         flex flex-col font-sans
-        dark:bg-gray-900
         transition-colors
         duration-300
         ">

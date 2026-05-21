@@ -41,33 +41,33 @@ function HowToSwap({ tab }) {
 
             {/* Tiêu đề */}
             <div className="text-center mb-10 flex flex-col items-center justify-center pt-20 pb-5">
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">{c.title}</h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed">{c.subtitle}</p>
+                <h2 className="text-4xl font-extrabold text-slate-900 dark:text-white mb-3">{c.title}</h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">{c.subtitle}</p>
             </div>
 
             {/* Steps — lưới 2x2 */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6 pb-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6 pb-5">
                 {c.steps.map((step, i) => (
-                    <div key={i} className="flex gap-4 items-start bg-white dark:bg-gray-700 rounded-2xl border border-gray-300 dark:border-gray-600 p-5 shadow-md">
+                    <div key={i} className="flex gap-4 items-start bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 p-6 shadow-sm hover:shadow-md transition-all duration-300">
                         {/* Số thứ tự */}
                         <div className="shrink-0 w-10 h-10 rounded-full bg-[#5b6ef7]/10 border border-[#5b6ef7]/30 flex items-center justify-center mt-0.5">
                             <span className="text-sm font-bold text-[#5b6ef7]">{String(i + 1).padStart(2, '0')}</span>
                         </div>
                         {/* Nội dung */}
                         <div>
-                            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1.5">{step.title}</h3>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{step.desc}</p>
+                            <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1.5">{step.title}</h3>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{step.desc}</p>
                         </div>
                     </div>
                 ))}
             </div>
 
             {/* Tips */}
-            <div className="p-5 bg-white dark:bg-gray-700 rounded-2xl border border-gray-300 dark:border-gray-600 shadow-md">
-                <p className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-3">Mẹo để có kết quả tốt nhất</p>
+            <div className="p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-sm">
+                <p className="text-lg font-bold text-slate-900 dark:text-white mb-3">Mẹo để có kết quả tốt nhất</p>
                 <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {c.tips.map((tip, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-gray-500 dark:text-gray-400">
+                        <li key={i} className="flex items-start gap-2 text-sm text-slate-500 dark:text-slate-400">
                             <span className="text-[#5b6ef7] shrink-0">•</span> {tip}
                         </li>
                     ))}

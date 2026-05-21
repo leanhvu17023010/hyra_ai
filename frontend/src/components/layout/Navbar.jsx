@@ -72,24 +72,23 @@ function Navbar({ setActiveModal, darkMode, setDarkMode }) {
 
         <nav
             className="
+                sticky
+                top-0
+                z-50
                 flex
                 justify-between
                 items-center
-
                 px-8
                 py-4
-
-                bg-white
-                text-black
-
+                backdrop-blur-md
+                bg-white/80
+                dark:bg-slate-950/80
+                text-slate-900
+                dark:text-slate-50
                 shadow-sm
-
-                dark:bg-gray-900
-                dark:text-white
-
-                border
-                border-gray-300
-                dark:border-gray-700
+                border-b
+                border-slate-200/80
+                dark:border-slate-900
             "
         >
 

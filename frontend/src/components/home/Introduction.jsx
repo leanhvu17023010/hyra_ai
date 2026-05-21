@@ -27,27 +27,27 @@ function Introduction() {
     return (
         <section className="w-full py-30">
             {/* Header */}
-            <div className="flex flex-col items-center justify-center text-center mb-10 mt-40">
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 ">
-                    Tại sao chọn <span className="text-[#5b6ef7]">Hyra AI</span>?
+            <div className="flex flex-col items-center justify-center text-center mb-10 mt-20">
+                <h2 className="text-4xl font-extrabold text-slate-900 dark:text-white mb-3">
+                    Tại sao chọn <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#5b6ef7] to-[#a78bfa]">Hyra AI</span>?
                 </h2>
-                <p className="text-sm pb-5 text-gray-500 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed">
+                <p className="text-sm pb-5 text-slate-500 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
                     Nền tảng hoán đổi khuôn mặt thông minh thế hệ mới — nhanh, đẹp và bảo mật tuyệt đối.
                 </p>
             </div>
 
             {/* 4 feature cards — cùng style với HowToSwap và toàn trang */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {features.map((f, i) => (
                     <div
                         key={i}
-                        className="bg-white dark:bg-gray-700 rounded-2xl border border-gray-300 dark:border-gray-600 p-6 flex flex-col items-center text-center gap-3 hover:-translate-y-1 shadow-md hover:shadow-lg transition-all duration-300"
+                        className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 p-6 flex flex-col items-center text-center gap-3 hover:-translate-y-1 shadow-sm hover:shadow-md transition-all duration-300"
                     >
-                        <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-[#5b6ef7]">
+                        <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center text-[#5b6ef7]">
                             {f.icon}
                         </div>
-                        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{f.title}</h3>
-                        <p className="text-base text-gray-500 dark:text-gray-400 leading-relaxed">{f.desc}</p>
+                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">{f.title}</h3>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{f.desc}</p>
                     </div>
                 ))}
             </div>
