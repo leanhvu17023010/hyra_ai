@@ -212,6 +212,10 @@ public class AuthenticationService {
     // VERIFY TOKEN (CORE)
 
     private SignedJWT verifyToken(String token, boolean isRefresh) throws JOSEException, ParseException {
+        if (token == null || token.trim().isEmpty()) {
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+
         JWSVerifier verifier = new MACVerifier(getSignerKeyBytes());
         SignedJWT signedJWT = SignedJWT.parse(token);
 
@@ -250,6 +254,20 @@ public class AuthenticationService {
 
         return signedJWT;
     }
+
+    public void validateTokenStatus(String jti, String email) {
+        if (invalidatedRepository.existsById(jti)) {
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+
+        User user = findUserByEmailSafe(email)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        if (!user.isActive()) {
+            throw new AppException(ErrorCode.ACCOUNT_LOCKED);
+        }
+    }
+
 
 
     // TOKEN GENERATION
