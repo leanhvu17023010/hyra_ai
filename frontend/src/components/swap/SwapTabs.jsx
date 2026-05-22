@@ -14,7 +14,7 @@ function SwapTabs({ tab, setTab }) {
                     className={`py-3 px-6 rounded-full text-sm font-semibold transition-colors duration-200 hover:scale-105 transform ${
                         tab === t.id
                         ? 'bg-[#5b6ef7] text-white dark:bg-[#11229c] dark:hover:bg-[#1128b9]'
-                        : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 shadow-sm'
+                        : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-300 shadow-md shadow-black/[0.04]'
                     }`}
                 >
                     {t.label}

@@ -12,7 +12,7 @@ function StatsSection() {
                 {STATS.map((s, i) => (
                     <div
                         key={i}
-                        className="flex flex-col items-center justify-center py-10 px-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 text-center"
+                        className="flex flex-col items-center justify-center py-10 px-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 shadow-md shadow-black/[0.04] hover:shadow-xl hover:shadow-black/[0.08] hover:-translate-y-0.5 transition-all duration-300 text-center"
                     >
                         <span
                             className="text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-[#5b6ef7] to-[#7c3aed]"

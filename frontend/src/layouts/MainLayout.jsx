@@ -39,7 +39,7 @@ function MainLayout(){
     return(
         <div className="
         min-h-screen 
-        bg-slate-50
+        bg-slate-100
         dark:bg-slate-950
         text-slate-900
         dark:text-slate-50

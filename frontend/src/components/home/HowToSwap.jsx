@@ -48,7 +48,7 @@ function HowToSwap({ tab }) {
             {/* Steps — lưới 2x2 */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6 pb-5">
                 {c.steps.map((step, i) => (
-                    <div key={i} className="flex gap-4 items-start bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 p-6 shadow-sm hover:shadow-md transition-all duration-300">
+                    <div key={i} className="flex gap-4 items-start bg-white dark:bg-slate-900 rounded-3xl border border-slate-300 dark:border-slate-800 p-6 shadow-md shadow-black/[0.04] hover:shadow-xl hover:shadow-black/[0.08] transition-all duration-300">
                         {/* Số thứ tự */}
                         <div className="shrink-0 w-10 h-10 rounded-full bg-[#5b6ef7]/10 border border-[#5b6ef7]/30 flex items-center justify-center mt-0.5">
                             <span className="text-sm font-bold text-[#5b6ef7]">{String(i + 1).padStart(2, '0')}</span>
@@ -63,7 +63,7 @@ function HowToSwap({ tab }) {
             </div>
 
             {/* Tips */}
-            <div className="p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-sm">
+            <div className="p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-300 dark:border-slate-800 shadow-md shadow-black/[0.04]">
                 <p className="text-lg font-bold text-slate-900 dark:text-white mb-3">Mẹo để có kết quả tốt nhất</p>
                 <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {c.tips.map((tip, i) => (

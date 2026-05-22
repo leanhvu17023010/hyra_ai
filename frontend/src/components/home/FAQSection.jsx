@@ -27,11 +27,11 @@ const FAQS = [
 function FAQItem({ q, a }) {
     const [open, setOpen] = useState(false);
     return (
-        <div className="flex flex-col justify border border-slate-200/80 mb-5 dark:border-slate-800/80 rounded-3xl overflow-hidden bg-white dark:bg-slate-900 shadow-sm hover:shadow-md transition-shadow">
+        <div className="flex flex-col border border-slate-300 dark:border-slate-800 rounded-3xl overflow-hidden bg-white dark:bg-slate-900 shadow-md shadow-black/[0.04] hover:shadow-lg transition-shadow">
             <button
                 type="button"
                 onClick={() => setOpen(!open)}
-                className="w-full flex items-center justify-between px-6 py-5 text-left cursor-pointer"
+                className="w-full flex items-center justify-between px-8 py-6 text-left cursor-pointer"
             >
                 <span className="font-semibold text-slate-800 dark:text-white text-base">{q}</span>
                 <FiChevronDown
@@ -50,8 +50,8 @@ function FAQItem({ q, a }) {
 
 function FAQSection() {
     return (
-        <section className="mt-12 mb-4 ">
-            <div className="flex flex-col items-center justify-center text-center pt-40 py-5 mb-8 mt-16">
+        <section className="w-full mt-12 mb-4">
+            <div className="flex flex-col items-center justify-center text-center pt-20 mb-8 mt-16">
                 <h2 className="text-4xl font-extrabold text-slate-900 dark:text-white mb-3">
                  Câu hỏi <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#5b6ef7] to-[#a78bfa]">thường gặp</span>
                 </h2>
@@ -59,7 +59,7 @@ function FAQSection() {
                     Không tìm thấy câu trả lời? Liên hệ với chúng tôi qua email.
                 </p>
             </div>
-            <div className="flex flex-col gap-5 max-w-3xl mx-auto w-full">
+            <div className="flex flex-col gap-4 w-full">
                 {FAQS.map((faq, i) => (
                     <FAQItem key={i} q={faq.q} a={faq.a} />
                 ))}

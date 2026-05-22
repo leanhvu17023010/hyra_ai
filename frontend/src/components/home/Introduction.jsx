@@ -41,7 +41,7 @@ function Introduction() {
                 {features.map((f, i) => (
                     <div
                         key={i}
-                        className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 p-6 flex flex-col items-center text-center gap-3 hover:-translate-y-1 shadow-sm hover:shadow-md transition-all duration-300"
+                        className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-300 dark:border-slate-800 p-6 flex flex-col items-center text-center gap-3 hover:-translate-y-1 shadow-md shadow-black/[0.04] hover:shadow-xl hover:shadow-black/[0.08] transition-all duration-300"
                     >
                         <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center text-[#5b6ef7]">
                             {f.icon}
