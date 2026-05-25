@@ -10,8 +10,10 @@ import {
 import userService from "../../services/userService";
 import authService from "../../services/authService";
 import { Link } from "react-router-dom";
+import useUIStore from "../../store/uiStore";
 
-function Navbar({ setActiveModal, darkMode, setDarkMode }) {
+function Navbar() {
+    const { setActiveModal, darkMode, toggleDarkMode } = useUIStore();
 
     const [user, setUser] = useState(null);
 
@@ -105,7 +107,7 @@ function Navbar({ setActiveModal, darkMode, setDarkMode }) {
             </Link>
                 {/* DARK MODE TOGGLE */}
                 <button
-                    onClick={() => setDarkMode(!darkMode)}
+                    onClick={toggleDarkMode}
                     className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all cursor-pointer text-base"
                 >
                     {darkMode ? <FiSun /> : <FiMoon />}

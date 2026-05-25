@@ -1,31 +1,17 @@
 import { Outlet } from "react-router-dom"
+import { useEffect } from "react";
 import Navbar from "../components/layout/Navbar"
 import Footer from "../components/layout/Footer"
-import { useState, useEffect } from "react";
 
 import LoginModal from "../components/auth/LoginModal";
 import RegisterModal from "../components/auth/RegisterModal";
 import ForgotModal from "../components/auth/ForgotModal";
 import VerifyModal from "../components/auth/VerifyModal";
 import ResetPasswordModal from "../components/auth/ResetPasswordModal";
+import useUIStore from "../store/uiStore";
 
 function MainLayout(){
-    const [darkMode, setDarkMode] = useState(true);
-    const [activeModal, setActiveModal] = useState(null);
-    const [modalData, setModalData] = useState({ email: '', mode: '', otp: '' });
-
-    const handleSwitchModal = (modal, data = {}) => {
-        setModalData(prev => ({ ...prev, ...data }));
-        setActiveModal(modal);
-    };
-
-    useEffect(()=>{
-        if(darkMode){
-            document.documentElement.classList.add("dark");
-        }else{
-            document.documentElement.classList.remove("dark");
-        }
-    }, [darkMode]);
+    const { activeModal, modalData, setActiveModal, closeModal, switchModal, darkMode } = useUIStore();
 
     useEffect(() => {
         const handleOpenAuth = (e) => {
@@ -35,7 +21,17 @@ function MainLayout(){
         };
         window.addEventListener('open-auth-modal', handleOpenAuth);
         return () => window.removeEventListener('open-auth-modal', handleOpenAuth);
-    }, []);
+    }, [setActiveModal]);
+    
+    // Initialize dark mode class on mount based on initial state
+    useEffect(() => {
+        if(darkMode){
+            document.documentElement.classList.add("dark");
+        }else{
+            document.documentElement.classList.remove("dark");
+        }
+    }, [darkMode]);
+
     return(
         <div className="
         min-h-screen 
@@ -47,30 +43,26 @@ function MainLayout(){
         transition-colors
         duration-300
         ">
-            <Navbar 
-                setActiveModal={setActiveModal} 
-                darkMode={darkMode} 
-                setDarkMode={setDarkMode} 
-            />
+            <Navbar />
             
             {activeModal === 'login' && (
                 <LoginModal 
-                    onClose={() => setActiveModal(null)} 
-                    onSwitch={handleSwitchModal} 
+                    onClose={closeModal} 
+                    onSwitch={switchModal} 
                 />
             )}
             
             {activeModal === 'register' && (
                 <RegisterModal 
-                    onClose={() => setActiveModal(null)} 
-                    onSwitch={handleSwitchModal} 
+                    onClose={closeModal} 
+                    onSwitch={switchModal} 
                 />
             )}
 
             {activeModal === 'forgot' && (
                 <ForgotModal 
-                    onClose={() => setActiveModal(null)} 
-                    onSwitch={handleSwitchModal} 
+                    onClose={closeModal} 
+                    onSwitch={switchModal} 
                 />
             )}
 
@@ -80,8 +72,8 @@ function MainLayout(){
                     otpMode={modalData.mode}
                     userName={modalData.userName}
                     password={modalData.password}
-                    onClose={() => setActiveModal(null)} 
-                    onSwitch={handleSwitchModal} 
+                    onClose={closeModal} 
+                    onSwitch={switchModal} 
                 />
             )}
 
@@ -89,8 +81,8 @@ function MainLayout(){
                 <ResetPasswordModal 
                     email={modalData.email}
                     otp={modalData.otp}
-                    onClose={() => setActiveModal(null)} 
-                    onSwitch={handleSwitchModal} 
+                    onClose={closeModal} 
+                    onSwitch={switchModal} 
                 />
             )}
             <main className="flex-1 flex justify-center pt-10 pb-20">
@@ -100,4 +92,4 @@ function MainLayout(){
         </div>
     )
 }
-export default MainLayout  
+export default MainLayout
