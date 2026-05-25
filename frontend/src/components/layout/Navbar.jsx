@@ -11,63 +11,24 @@ import userService from "../../services/userService";
 import authService from "../../services/authService";
 import { Link } from "react-router-dom";
 import useUIStore from "../../store/uiStore";
+import useAuthStore from "../../store/authStore";
 
 function Navbar() {
     const { setActiveModal, darkMode, toggleDarkMode } = useUIStore();
-
-    const [user, setUser] = useState(null);
-
-
+    const { user, isInitialized, fetchUser, logout } = useAuthStore();
 
     // DROPDOWN
-    const [openDropdown, setOpenDropdown]
-        = useState(false);
+    const [openDropdown, setOpenDropdown] = useState(false);
 
     useEffect(() => {
-
-        const fetchUser = async () => {
-
-            const token =
-                localStorage.getItem("token");
-
-            if (token) {
-
-                try {
-
-                    const response =
-                        await userService.getMyInfo();
-
-                    if (response.result) {
-                        setUser(response.result);
-                    }
-
-                }
-
-                catch (error) {
-
-                    console.error(
-                        "Error fetching user info:",
-                        error
-                    );
-
-                    localStorage.removeItem(
-                        "token"
-                    );
-
-                }
-
-            }
-
-        };
-
-        fetchUser();
-
-    }, []);
+        if (!isInitialized) {
+            fetchUser();
+        }
+    }, [isInitialized, fetchUser]);
 
     const handleLogout = () => {
         authService.logout();
-        setUser(null);
-        window.location.reload();
+        logout();
     };
 
     return (

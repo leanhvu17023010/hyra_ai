@@ -8,6 +8,7 @@ import Introduction from "../components/home/Introduction";
 import HeroSection from "../components/home/HeroSection";
 import StatsSection from "../components/home/StatsSection";
 import FAQSection from "../components/home/FAQSection";
+import { motion, AnimatePresence } from "framer-motion";
 
 function HomePage() {
     const [tab, setTab] = useState('video');
@@ -41,10 +42,20 @@ function HomePage() {
                 </div>
 
                 {/* Tab panel */}
-                <div className="w-full">
-                    {tab === 'image' && <ImageSwap />}
-                    {tab === 'video' && <VideoSwap />}
-                    {tab === 'tts'   && <TextToSpeech />}
+                <div className="w-full min-h-[500px]">
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={tab}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            transition={{ duration: 0.3, ease: "easeInOut" }}
+                        >
+                            {tab === 'image' && <ImageSwap />}
+                            {tab === 'video' && <VideoSwap />}
+                            {tab === 'tts'   && <TextToSpeech />}
+                        </motion.div>
+                    </AnimatePresence>
                 </div>
             </div>
 

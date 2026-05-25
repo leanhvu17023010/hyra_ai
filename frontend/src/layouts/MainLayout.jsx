@@ -9,6 +9,7 @@ import ForgotModal from "../components/auth/ForgotModal";
 import VerifyModal from "../components/auth/VerifyModal";
 import ResetPasswordModal from "../components/auth/ResetPasswordModal";
 import useUIStore from "../store/uiStore";
+import { AnimatePresence } from "framer-motion";
 
 function MainLayout(){
     const { activeModal, modalData, setActiveModal, closeModal, switchModal, darkMode } = useUIStore();
@@ -45,46 +46,53 @@ function MainLayout(){
         ">
             <Navbar />
             
-            {activeModal === 'login' && (
-                <LoginModal 
-                    onClose={closeModal} 
-                    onSwitch={switchModal} 
-                />
-            )}
-            
-            {activeModal === 'register' && (
-                <RegisterModal 
-                    onClose={closeModal} 
-                    onSwitch={switchModal} 
-                />
-            )}
+            <AnimatePresence>
+                {activeModal === 'login' && (
+                    <LoginModal 
+                        key="login-modal"
+                        onClose={closeModal} 
+                        onSwitch={switchModal} 
+                    />
+                )}
+                
+                {activeModal === 'register' && (
+                    <RegisterModal 
+                        key="register-modal"
+                        onClose={closeModal} 
+                        onSwitch={switchModal} 
+                    />
+                )}
 
-            {activeModal === 'forgot' && (
-                <ForgotModal 
-                    onClose={closeModal} 
-                    onSwitch={switchModal} 
-                />
-            )}
+                {activeModal === 'forgot' && (
+                    <ForgotModal 
+                        key="forgot-modal"
+                        onClose={closeModal} 
+                        onSwitch={switchModal} 
+                    />
+                )}
 
-            {activeModal === 'verify' && (
-                <VerifyModal 
-                    email={modalData.email}
-                    otpMode={modalData.mode}
-                    userName={modalData.userName}
-                    password={modalData.password}
-                    onClose={closeModal} 
-                    onSwitch={switchModal} 
-                />
-            )}
+                {activeModal === 'verify' && (
+                    <VerifyModal 
+                        key="verify-modal"
+                        email={modalData.email}
+                        otpMode={modalData.mode}
+                        userName={modalData.userName}
+                        password={modalData.password}
+                        onClose={closeModal} 
+                        onSwitch={switchModal} 
+                    />
+                )}
 
-            {activeModal === 'reset-password' && (
-                <ResetPasswordModal 
-                    email={modalData.email}
-                    otp={modalData.otp}
-                    onClose={closeModal} 
-                    onSwitch={switchModal} 
-                />
-            )}
+                {activeModal === 'reset-password' && (
+                    <ResetPasswordModal 
+                        key="reset-password-modal"
+                        email={modalData.email}
+                        otp={modalData.otp}
+                        onClose={closeModal} 
+                        onSwitch={switchModal} 
+                    />
+                )}
+            </AnimatePresence>
             <main className="flex-1 flex justify-center pt-10 pb-20">
                 <Outlet/> 
             </main>

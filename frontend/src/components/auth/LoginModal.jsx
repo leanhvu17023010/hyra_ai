@@ -11,6 +11,7 @@ import {
   FiEye,
   FiEyeOff
 } from "react-icons/fi"
+import { motion } from "framer-motion"
 
 function LoginModal({ onClose, onSwitch }) {
   const [showPass, setShowPass] = useState(false)
@@ -79,8 +80,10 @@ function LoginModal({ onClose, onSwitch }) {
   // Không cần kiểm tra !open ở đây vì modal được render có điều kiện từ MainLayout
 
   return (
-
-    <div
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
       className="
         fixed
         inset-0
@@ -92,8 +95,11 @@ function LoginModal({ onClose, onSwitch }) {
         z-50
       "
     >
-
-      <div
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        transition={{ type: "spring", duration: 0.5, bounce: 0.3 }}
         className="
           w-140
           bg-white
@@ -358,9 +364,8 @@ function LoginModal({ onClose, onSwitch }) {
           </span>
         </p>
 
-      </div>
-
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
 

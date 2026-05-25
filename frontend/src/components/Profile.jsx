@@ -10,6 +10,7 @@ import {
 import userService from '../services/userService';
 import swapService from '../services/swapService';
 import authService from '../services/authService';
+import useAuthStore from '../store/authStore';
 
 import ProfileInfo from './profile/ProfileInfo';
 import ChangePassword from './profile/ChangePassword';
@@ -17,7 +18,7 @@ import SwapHistory from './profile/SwapHistory';
 
 function Profile() {
     const navigate = useNavigate();
-    const [user, setUser] = useState(null);
+    const { user, logout } = useAuthStore();
     const [stats, setStats] = useState({ imageSwapCount: 0, videoSwapCount: 0 });
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -25,8 +26,7 @@ function Profile() {
 
     const handleLogout = () => {
         authService.logout();
-        navigate('/');
-        window.location.reload();
+        logout();
     };
 
     useEffect(() => {
@@ -38,12 +38,10 @@ function Profile() {
 
         const loadAllData = async () => {
             try {
-                const [uInfo, uStats, uHistory] = await Promise.all([
-                    userService.getMyInfo(),
+                const [uStats, uHistory] = await Promise.all([
                     swapService.getStats(),
                     swapService.getSwapHistory(),
                 ]);
-                if (uInfo.result) setUser(uInfo.result);
                 if (uStats.result) setStats(uStats.result);
                 if (uHistory.result) setHistory(uHistory.result);
             } catch (err) {

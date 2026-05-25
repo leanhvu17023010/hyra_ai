@@ -31,7 +31,12 @@ function FAQItem({ q, a }) {
             <button
                 type="button"
                 onClick={() => setOpen(!open)}
-                className="w-full flex items-center justify-between px-8 py-6 text-left cursor-pointer"
+                className="w-full flex items-
+                
+                
+                
+                
+                center justify-between px-8 py-6 text-left cursor-pointer"
             >
                 <span className="font-semibold text-slate-800 dark:text-white text-base">{q}</span>
                 <FiChevronDown
