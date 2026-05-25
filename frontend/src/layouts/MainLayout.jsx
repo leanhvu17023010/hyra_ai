@@ -10,7 +10,7 @@ import VerifyModal from "../components/auth/VerifyModal";
 import ResetPasswordModal from "../components/auth/ResetPasswordModal";
 
 function MainLayout(){
-    const [darkMode, setDarkMode] = useState(false);
+    const [darkMode, setDarkMode] = useState(true);
     const [activeModal, setActiveModal] = useState(null);
     const [modalData, setModalData] = useState({ email: '', mode: '', otp: '' });
 
@@ -100,4 +100,4 @@ function MainLayout(){
         </div>
     )
 }
-export default MainLayout
+export default MainLayout  

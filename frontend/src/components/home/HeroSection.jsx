@@ -73,3 +73,4 @@ function HeroSection({ onStartClick, onGuideClick }) {
 }
 
 export default HeroSection;
+
