@@ -110,8 +110,6 @@ function LoginModal({ onClose, onSwitch }) {
           p-10
           relative
           shadow-[0_20px_80px_rgba(0,0,0,0.25)]
-          transition-all
-          duration-300
         "
       >
         <button

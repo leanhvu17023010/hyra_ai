@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react"
 import { FiX, FiArrowLeft, FiShield } from "react-icons/fi"
+import { motion } from "framer-motion"
 import authService from "../../services/authService"
 
 function VerifyModal({ email, otpMode, userName, password, onClose, onSwitch }) {
@@ -94,7 +95,10 @@ function VerifyModal({ email, otpMode, userName, password, onClose, onSwitch }) 
   }
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
       className="
         fixed
         inset-0
@@ -106,7 +110,11 @@ function VerifyModal({ email, otpMode, userName, password, onClose, onSwitch }) 
         z-50
       "
     >
-      <div
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        transition={{ type: "spring", duration: 0.5, bounce: 0.3 }}
         className="
           w-140
           bg-white
@@ -117,8 +125,6 @@ function VerifyModal({ email, otpMode, userName, password, onClose, onSwitch }) 
           p-10
           relative
           shadow-[0_20px_80px_rgba(0,0,0,0.25)]
-          transition-all
-          duration-300
         "
       >
         <button
@@ -229,8 +235,8 @@ function VerifyModal({ email, otpMode, userName, password, onClose, onSwitch }) 
                 </button>
             </p>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
 

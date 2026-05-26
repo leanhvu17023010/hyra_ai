@@ -7,7 +7,7 @@ import {
     FiChevronRight,
     FiLogOut,
 } from 'react-icons/fi';
-import userService from '../services/userService';
+
 import swapService from '../services/swapService';
 import authService from '../services/authService';
 import useAuthStore from '../store/authStore';

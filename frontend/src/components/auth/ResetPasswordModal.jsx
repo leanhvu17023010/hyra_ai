@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { FiLock, FiEye, FiEyeOff, FiX } from "react-icons/fi"
+import { motion } from "framer-motion"
 import authService from "../../services/authService"
 import { resetPasswordSchema, validate } from "../../utils/validation"
 
@@ -41,8 +42,19 @@ function ResetPasswordModal({ email, otp, onClose, onSwitch }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="w-140 bg-white dark:bg-gray-800 dark:text-white backdrop-blur-xl rounded-3xl p-10 relative shadow-[0_20px_80px_rgba(0,0,0,0.25)] transition-all duration-300">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        transition={{ type: "spring", duration: 0.5, bounce: 0.3 }}
+        className="w-140 bg-white dark:bg-gray-800 dark:text-white backdrop-blur-xl rounded-3xl p-10 relative shadow-[0_20px_80px_rgba(0,0,0,0.25)]"
+      >
         <button onClick={onClose} className="absolute top-5 right-5 text-2xl text-zinc-400 hover:text-black transition-all">
           <FiX />
         </button>
@@ -97,8 +109,8 @@ function ResetPasswordModal({ email, otp, onClose, onSwitch }) {
             {loading ? "Đang xử lý..." : "Cập nhật mật khẩu"}
           </button>
         </form>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
 
