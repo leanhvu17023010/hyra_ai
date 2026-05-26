@@ -2,8 +2,8 @@ import { useState } from "react"
 import { FcGoogle } from "react-icons/fc"
 import { useGoogleLogin } from "@react-oauth/google"
 import axios from "axios"
-import authService from "../services/authService"
-import { loginSchema, validate } from "../utils/validation"
+import authService from "../../services/authService"
+import { loginSchema, validate } from "../../utils/validation"
 import {
   FiX,
   FiMail,
@@ -11,6 +11,7 @@ import {
   FiEye,
   FiEyeOff
 } from "react-icons/fi"
+import { motion } from "framer-motion"
 
 function LoginModal({ onClose, onSwitch }) {
   const [showPass, setShowPass] = useState(false)
@@ -79,8 +80,10 @@ function LoginModal({ onClose, onSwitch }) {
   // Không cần kiểm tra !open ở đây vì modal được render có điều kiện từ MainLayout
 
   return (
-
-    <div
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
       className="
         fixed
         inset-0
@@ -92,11 +95,16 @@ function LoginModal({ onClose, onSwitch }) {
         z-50
       "
     >
-
-      <div
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        transition={{ type: "spring", duration: 0.5, bounce: 0.3 }}
         className="
           w-140
           bg-white
+          dark:bg-gray-800
+          dark:text-white
           backdrop-blur-xl
           rounded-3xl
           p-10
@@ -124,7 +132,7 @@ function LoginModal({ onClose, onSwitch }) {
         </button>
 
         <h2
-          className="text-4xl font-bold text-center py-5 mb-10">
+          className="text-4xl font-bold text-center py-5 mb-10 text-gray-900 dark:text-white">
           Đăng nhập
         </h2>
 
@@ -147,7 +155,9 @@ function LoginModal({ onClose, onSwitch }) {
             gap-3
             text-lg
             font-medium
-          hover:bg-zinc-100
+            hover:bg-zinc-100
+            dark:hover:bg-zinc-700
+            dark:text-white
             transition-all
             duration-300
             cursor-pointer
@@ -200,10 +210,12 @@ function LoginModal({ onClose, onSwitch }) {
               ${errors.email ? 'border-red-500' : 'border-zinc-300'}
               dark:border-zinc-700
               bg-white
+              dark:bg-gray-700
+              dark:text-white
               outline-none
               focus:ring-2
               focus:ring-indigo-300
-              dark:focus:ring-orange-500/20
+              dark:focus:ring-indigo-500/20
               transition-all
             `}
           />
@@ -240,6 +252,8 @@ function LoginModal({ onClose, onSwitch }) {
               ${errors.password ? 'border-red-500' : 'border-zinc-300'}
               dark:border-zinc-700
               bg-white
+              dark:bg-gray-700
+              dark:text-white
               outline-none
               focus:ring-2
               focus:ring-indigo-300
@@ -287,6 +301,7 @@ function LoginModal({ onClose, onSwitch }) {
             onClick={() => onSwitch('forgot')}
             className="
               text-blue-800
+              dark:text-blue-400
               hover:underline
               cursor-pointer
             "
@@ -306,6 +321,8 @@ function LoginModal({ onClose, onSwitch }) {
             rounded-2xl
             bg-blue-800
             hover:bg-blue-600
+            dark:bg-blue-600
+            dark:hover:bg-blue-500
             text-white
             text-lg
             font-semibold
@@ -335,6 +352,7 @@ function LoginModal({ onClose, onSwitch }) {
             onClick={() => onSwitch('register')}
             className="
               text-blue-800
+              dark:text-blue-400
               font-semibold
               ml-5
               cursor-pointer
@@ -346,9 +364,8 @@ function LoginModal({ onClose, onSwitch }) {
           </span>
         </p>
 
-      </div>
-
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
 

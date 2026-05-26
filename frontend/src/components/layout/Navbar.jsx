@@ -7,89 +7,51 @@ import {
     FiMoon
 } from "react-icons/fi";
 
-import userService from "../services/userService";
-import authService from "../services/authService";
+import userService from "../../services/userService";
+import authService from "../../services/authService";
 import { Link } from "react-router-dom";
+import useUIStore from "../../store/uiStore";
+import useAuthStore from "../../store/authStore";
 
-function Navbar({ setActiveModal, darkMode, setDarkMode }) {
-
-    const [user, setUser] = useState(null);
-
-
+function Navbar() {
+    const { setActiveModal, darkMode, toggleDarkMode } = useUIStore();
+    const { user, isInitialized, fetchUser, logout } = useAuthStore();
 
     // DROPDOWN
-    const [openDropdown, setOpenDropdown]
-        = useState(false);
+    const [openDropdown, setOpenDropdown] = useState(false);
 
     useEffect(() => {
-
-        const fetchUser = async () => {
-
-            const token =
-                localStorage.getItem("token");
-
-            if (token) {
-
-                try {
-
-                    const response =
-                        await userService.getMyInfo();
-
-                    if (response.result) {
-                        setUser(response.result);
-                    }
-
-                }
-
-                catch (error) {
-
-                    console.error(
-                        "Error fetching user info:",
-                        error
-                    );
-
-                    localStorage.removeItem(
-                        "token"
-                    );
-
-                }
-
-            }
-
-        };
-
-        fetchUser();
-
-    }, []);
+        if (!isInitialized) {
+            fetchUser();
+        }
+    }, [isInitialized, fetchUser]);
 
     const handleLogout = () => {
         authService.logout();
-        setUser(null);
-        window.location.reload();
+        logout();
     };
 
     return (
 
         <nav
             className="
+                sticky
+                top-0
+                z-50
                 flex
                 justify-between
                 items-center
-
                 px-8
                 py-4
-
-                bg-white
-                text-black
-
+                backdrop-blur-md
+                bg-white/80
+                dark:bg-slate-950/80
+                text-slate-900
+                dark:text-slate-50
                 shadow-sm
-
-                dark:bg-gray-900
-                dark:text-white
-
-                border
-                border-gray-300
-                dark:border-gray-700
+                border-b
+                border-slate-200/80
+                dark:border-slate-900
             "
         >
 
@@ -99,26 +61,15 @@ function Navbar({ setActiveModal, darkMode, setDarkMode }) {
 
                 {/* LOGO */}
                 <h1
-                    className="
-                        text-2xl
-                        font-bold
-                    "
+                    className="text-xl font-bold"
                 >
-                    Example AI
+                    Hyra AI
                 </h1>
             </Link>
                 {/* DARK MODE TOGGLE */}
                 <button
-                    onClick={() => setDarkMode(!darkMode)}
-                    className="
-                        p-2
-                        rounded-xl
-                        hover:bg-gray-100
-                        dark:hover:bg-gray-800
-                        transition-all
-                        cursor-pointer
-                        text-xl
-                    "
+                    onClick={toggleDarkMode}
+                    className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all cursor-pointer text-base"
                 >
                     {darkMode ? <FiSun /> : <FiMoon />}
                 </button>
@@ -171,13 +122,7 @@ function Navbar({ setActiveModal, darkMode, setDarkMode }) {
                         >
 
                             {/* NAME */}
-                            <span
-                                className="
-                                    font-semibold
-                                    text-lg
-                                    cursor-pointer
-                                "
-                            >
+                            <span className="font-medium text-sm cursor-pointer">
                                 {user.userName || user.email}
                             </span>
 
@@ -293,30 +238,8 @@ function Navbar({ setActiveModal, darkMode, setDarkMode }) {
                 ) : (
 
                     <button
-
-                        className="
-                            bg-[#5b6ef7]
-                            hover:bg-[#4a5ce6]
-
-                            text-white
-
-                            px-6
-                            py-2
-
-                            rounded-lg
-
-                            transition-colors
-
-                            dark:bg-[#11229c]
-                            dark:hover:bg-[#1128b9]
-
-                            cursor-pointer
-                        "
-
-                        onClick={() =>
-                            setActiveModal("login")
-                        }
-
+                        className="bg-[#5b6ef7] hover:bg-[#4a5ce6] text-white text-sm font-medium px-5 py-2 rounded-lg transition-colors dark:bg-[#11229c] dark:hover:bg-[#1128b9] cursor-pointer"
+                        onClick={() => setActiveModal("login")}
                     >
                         Đăng nhập
                     </button>

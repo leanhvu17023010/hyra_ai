@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react"
 import { FiX, FiArrowLeft, FiShield } from "react-icons/fi"
-import authService from "../services/authService"
+import authService from "../../services/authService"
 
 function VerifyModal({ email, otpMode, userName, password, onClose, onSwitch }) {
   const [code, setCode] = useState(["", "", "", "", "", ""])
@@ -110,6 +110,8 @@ function VerifyModal({ email, otpMode, userName, password, onClose, onSwitch }) 
         className="
           w-140
           bg-white
+          dark:bg-gray-800
+          dark:text-white
           backdrop-blur-xl
           rounded-3xl
           p-10
@@ -156,12 +158,12 @@ function VerifyModal({ email, otpMode, userName, password, onClose, onSwitch }) 
         </button>
 
         <div className="flex justify-center mb-6">
-            <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-800 text-3xl">
+            <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center text-blue-800 dark:text-blue-400 text-3xl">
                 <FiShield />
             </div>
         </div>
 
-        <h2 className="text-4xl font-bold text-center mb-4">
+        <h2 className="text-4xl font-bold text-center mb-4 text-gray-900 dark:text-white">
           Xác thực mã
         </h2>
         <p className="text-center text-zinc-500 mb-10 px-10">
@@ -193,12 +195,15 @@ function VerifyModal({ email, otpMode, userName, password, onClose, onSwitch }) 
                 rounded-xl
                 border
                 border-zinc-300
+                dark:border-zinc-600
+                bg-white
+                dark:bg-gray-700
+                dark:text-white
                 focus:border-blue-800
                 focus:ring-4
                 focus:ring-blue-100
                 outline-none
                 transition-all
-              
               "
             />
           ))}
@@ -207,7 +212,7 @@ function VerifyModal({ email, otpMode, userName, password, onClose, onSwitch }) 
         <button
           onClick={handleVerify}
           disabled={loading}
-          className={`w-full py-4 rounded-2xl bg-blue-800 hover:bg-blue-600 text-white text-lg font-semibold hover:scale-[1.02] cursor-pointer transition-all duration-300 ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+          className={`w-full py-4 rounded-2xl bg-blue-800 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 text-white text-lg font-semibold hover:scale-[1.02] cursor-pointer transition-all duration-300 ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
         >
           {loading ? "Đang kiểm tra..." : "Xác nhận"}
         </button>
@@ -218,7 +223,7 @@ function VerifyModal({ email, otpMode, userName, password, onClose, onSwitch }) 
                 <button
                     onClick={handleResend}
                     disabled={timer > 0}
-                    className={`font-semibold transition-all ${timer > 0 ? "text-zinc-400" : "text-blue-800 hover:underline cursor-pointer"}`}
+                    className={`font-semibold transition-all ${timer > 0 ? "text-zinc-400" : "text-blue-800 dark:text-blue-400 hover:underline cursor-pointer"}`}
                 >
                     Gửi lại {timer > 0 && `(${timer}s)`}
                 </button>

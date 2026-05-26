@@ -17,11 +17,14 @@ const swapService = {
     },
 
     // Tải file lên và gắn vào taskId tương ứng
-    uploadMediaToTask: async (file, taskId) => {
+    uploadMediaToTask: async (file, taskId, role) => {
         const formData = new FormData();
         formData.append('file', file);
         if (taskId) {
             formData.append('taskId', taskId);
+        }
+        if (role) {
+            formData.append('role', role);
         }
 
         const response = await api.post('/media/upload', formData, {

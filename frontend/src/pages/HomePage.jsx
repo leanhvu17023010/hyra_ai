@@ -1,41 +1,76 @@
-import { useState } from "react";
-import SwapTabs from "../components/SwapTabs";
-import ImageSwap from "../components/ImageSwap";
-import VideoSwap from "../components/VideoSwap";
-import Introduction from "../components/Introduction";
+import { useState, useRef } from "react";
+import SwapTabs from "../components/swap/SwapTabs";
+import ImageSwap from "../components/swap/ImageSwap";
+import VideoSwap from "../components/swap/VideoSwap";
+import TextToSpeech from "../components/swap/TextToSpeech";
+import HowToSwap from "../components/home/HowToSwap";
+import Introduction from "../components/home/Introduction";
+import HeroSection from "../components/home/HeroSection";
+import StatsSection from "../components/home/StatsSection";
+import FAQSection from "../components/home/FAQSection";
+import { motion, AnimatePresence } from "framer-motion";
 
+function HomePage() {
+    const [tab, setTab] = useState('video');
+    const toolRef = useRef(null);
+    const howToRef = useRef(null);
 
-function HomePage(){
-    const [tab, setTab] = useState('video'); 
+    // Scroll mượt có offset navbar (~68px)
+    const scrollToSection = (ref) => {
+        if (!ref.current) return;
+        const top = ref.current.getBoundingClientRect().top + window.scrollY - 80;
+        window.scrollTo({ top, behavior: 'smooth' });
+    };
 
     return (
-        <div className="
-        flex 
-        flex-col 
-        items-center 
-        w-full 
-        max-w-7xl ">
-            <h1 className="
-            text-5xl font-extrabold mb-8 text-black dark:text-white">
-                Hoán đổi khuôn mặt AI Video & Ảnh trực tuyến 
-            </h1>
-            <span className="py-5 dark:text-white">Công cụ trực tuyến mạnh mẽ để hoán đổi khuôn mặt này sang khuôn mặt khác một cách liền mạch. 
-                Ứng dụng hoán đổi khuôn mặt tốt nhất hiện có.</span>
-            
-            <div className="mb-8 py-5 ">
-            <SwapTabs tab={tab} setTab={setTab} />
+        <div className="flex flex-col items-center w-full max-w-7xl">
+
+            {/* Hero Section */}
+            <HeroSection
+                onStartClick={() => scrollToSection(toolRef)}
+                onGuideClick={() => scrollToSection(howToRef)}
+            />
+
+            {/* Stats Section */}
+            <StatsSection />
+
+            {/* Tool Section */}
+            <div ref={toolRef} className="w-full scroll-mt-8" id="tool">
+                {/* Tabs */}
+                <div className="flex justify-center mb-8">
+                    <SwapTabs tab={tab} setTab={setTab} />
+                </div>
+
+                {/* Tab panel */}
+                <div className="w-full min-h-[500px]">
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={tab}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            transition={{ duration: 0.3, ease: "easeInOut" }}
+                        >
+                            {tab === 'image' && <ImageSwap />}
+                            {tab === 'video' && <VideoSwap />}
+                            {tab === 'tts'   && <TextToSpeech />}
+                        </motion.div>
+                    </AnimatePresence>
+                </div>
             </div>
 
-            <div className="w-full mb-8 py-5">
-                {
-                 tab === "image" 
-                 ? <ImageSwap/> 
-                 : <VideoSwap/> }
-            </div>
-
-            {/* Phần Giới thiệu & Ưu điểm */}
+            {/* Introduction / Tại sao chọn Hyra AI */}
             <Introduction />
+
+            {/* How To Swap */}
+            <div ref={howToRef} id="how-to" className="w-full">
+                <HowToSwap tab={tab} />
+            </div>
+
+            {/* FAQ */}
+            <FAQSection />
         </div>
-    )
+    );
 }
-export default HomePage
+
+export default HomePage;

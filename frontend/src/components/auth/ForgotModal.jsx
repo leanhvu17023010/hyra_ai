@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { FiMail, FiX, FiArrowLeft } from "react-icons/fi"
-import authService from "../services/authService"
-import { forgotSchema, validate } from "../utils/validation"
+import authService from "../../services/authService"
+import { forgotSchema, validate } from "../../utils/validation"
 
 function ForgotModal({ onClose, onSwitch }) {
   const [email, setEmail] = useState("")
@@ -61,6 +61,8 @@ function ForgotModal({ onClose, onSwitch }) {
         className="
           w-140
           bg-white
+          dark:bg-gray-800
+          dark:text-white
           backdrop-blur-xl
           rounded-3xl
           p-10
@@ -106,7 +108,7 @@ function ForgotModal({ onClose, onSwitch }) {
           <span className="text-sm font-medium">Quay lại</span>
         </button>
 
-        <h2 className="text-4xl font-bold text-center py-5 mb-5 mt-4">
+        <h2 className="text-4xl font-bold text-center py-5 mb-5 mt-4 text-gray-900 dark:text-white">
           Quên mật khẩu?
         </h2>
         <p className="text-center text-zinc-500 mb-10">
@@ -144,6 +146,8 @@ function ForgotModal({ onClose, onSwitch }) {
                   ${errors.email ? 'border-red-500' : 'border-zinc-300'}
                   dark:border-zinc-700
                   bg-white
+                  dark:bg-gray-700
+                  dark:text-white
                   outline-none
                   focus:ring-2
                   focus:ring-indigo-300
@@ -158,7 +162,7 @@ function ForgotModal({ onClose, onSwitch }) {
             <button
               onClick={handleResetPassword}
               disabled={loading}
-              className={`w-full py-4 rounded-2xl bg-blue-800 hover:bg-blue-600 text-white text-lg font-semibold hover:scale-[1.02] cursor-pointer transition-all duration-300 ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+              className={`w-full py-4 rounded-2xl bg-blue-800 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 text-white text-lg font-semibold hover:scale-[1.02] cursor-pointer transition-all duration-300 ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
             >
               {loading ? "Đang xử lý..." : "Gửi yêu cầu"}
             </button>
@@ -168,7 +172,7 @@ function ForgotModal({ onClose, onSwitch }) {
         <div className="text-center mt-8 py-2">
             <span
                 onClick={() => onSwitch('login')}
-                className="text-blue-800 font-semibold cursor-pointer hover:underline "
+                className="text-blue-800 dark:text-blue-400 font-semibold cursor-pointer hover:underline "
             >
                 Quay lại Đăng nhập
             </span>

@@ -1,14 +1,14 @@
 import { useRef, useState } from 'react';
-import ImageAI from '../assets/Images/ImageAI.jpg';
+import ImageAI from '../../assets/Images/ImageAI.jpg';
 import { FiCamera } from 'react-icons/fi';
-import swapService from '../services/swapService';
+import swapService from '../../services/swapService';
 import SwapProcessingOverlay from './SwapProcessingOverlay';
-import { useSwapTaskPolling } from '../hooks/useSwapTaskPolling';
+import { useSwapTaskPolling } from '../../hooks/useSwapTaskPolling';
 
 function UploadBox({ label, icon, preview, onClick, inputRef, onChange, accept, hint }) {
     return (
-        <div className="rounded-2xl border border-gray-200 bg-white p-3 dark:border-gray-600 dark:bg-gray-700">
-            <p className="mb-3 text-2sx py-2 font-semibold text-gray-600 dark:text-gray-300">{label}</p>
+        <div className="rounded-2xl border border-gray-300 bg-white p-3 dark:border-gray-600 dark:bg-gray-700 shadow-md">
+            <p className="mb-3 text-sm py-2 font-semibold text-gray-600 dark:text-gray-300">{label}</p>
             <div
                 className="mx-3 mb-3 h-40 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50 dark:bg-gray-600 flex items-center justify-center cursor-pointer hover:border-blue-400 transition-colors overflow-hidden"
                 onClick={onClick}
@@ -62,8 +62,8 @@ function ImageSwap() {
             const { result: taskId } = await swapService.createSwapTask();
             if (!taskId) throw new Error();
             setMessage('Đang tải ảnh lên...');
-            await swapService.uploadMediaToTask(sourceImage, taskId);
-            await swapService.uploadMediaToTask(targetImage, taskId);
+            await swapService.uploadMediaToTask(sourceImage, taskId, 'source');
+            await swapService.uploadMediaToTask(targetImage, taskId, 'target');
             setMessage('Đang xử lý bằng AI... 0%');
             startPolling(taskId);
         } catch (err) {
@@ -114,13 +114,13 @@ function ImageSwap() {
                     hint="jpg, jpeg, png, webp"
                 />
 
-                <div className="bg-white dark:bg-gray-700 rounded-xl border border-gray-100 p-4 flex flex-col gap-3">
+                <div className="bg-white dark:bg-gray-700 rounded-2xl border border-gray-300 p-4 flex flex-col gap-3 shadow-md">
                     <button
                         onClick={handleSwap}
                         disabled={isLoading || !sourceImage || !targetImage}
                         className="w-full py-2.5 rounded-lg text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
                     >
-                        {isLoading ? 'Đang xử lý...' : '✨ Bắt đầu Swap'}
+                        {isLoading ? 'Đang xử lý...' : 'Bắt đầu Swap'}
                     </button>
 
                     {resultImageSrc && (
@@ -135,7 +135,7 @@ function ImageSwap() {
             </div>
 
             {/* Cột phải – kết quả */}
-            <div className="flex-1 min-w-0 bg-white dark:bg-gray-700 rounded-xl border border-gray-100 overflow-hidden flex flex-col">
+            <div className="flex-1 min-w-0 bg-white dark:bg-gray-700 rounded-2xl border border-gray-300 overflow-hidden flex flex-col shadow-md">
                 <div className="relative flex-1 min-h-[480px] bg-gray-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden">
                     {resultImageSrc ? (
                         <img src={resultImageSrc} alt="Kết quả" className="max-w-full max-h-[540px] object-contain" />
