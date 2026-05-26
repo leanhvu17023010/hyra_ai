@@ -1,6 +1,5 @@
 package com.hyra_ai.backend.configuration;
 
-import java.text.ParseException;
 import java.util.Objects;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -13,9 +12,7 @@ import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Component;
 
-import com.hyra_ai.backend.dto.request.IntrospectRequest;
 import com.hyra_ai.backend.service.AuthenticationService;
-import com.nimbusds.jose.JOSEException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -37,25 +34,7 @@ public class CustomJwtDecoder implements JwtDecoder {
             throw new JwtException("Token is null or empty");
         }
 
-        try {
-            // Check token còn hiệu lực không, nếu không -> Exception
-            var response = authenticationService.introspect(
-                    IntrospectRequest.builder().token(token).build());
-
-            if (!response.isValid()) {
-                log.warn("Token validation failed: token is invalid");
-                throw new JwtException("Token invalid");
-            }
-        } catch (JOSEException | ParseException e) {
-            log.warn("Token parsing/verification failed: {}", e.getMessage());
-            throw new JwtException("Token invalid: " + e.getMessage());
-        } catch (Exception e) {
-            // Catch any other unexpected exceptions
-            log.error("Unexpected error during token introspection: {}", e.getMessage(), e);
-            throw new JwtException("Token validation failed: " + e.getMessage());
-        }
-
-        // Nếu token còn hiệu lực
+        Jwt jwt;
         try {
             if (Objects.isNull(nimbusJwtDecoder)) {
                 SecretKeySpec secretKeySpec = new SecretKeySpec(getSignerKeyBytes(), "HS512");
@@ -63,12 +42,22 @@ public class CustomJwtDecoder implements JwtDecoder {
                         .macAlgorithm(MacAlgorithm.HS512)
                         .build();
             }
-
-            return nimbusJwtDecoder.decode(token);
+            jwt = nimbusJwtDecoder.decode(token);
         } catch (Exception e) {
-            log.error("Error decoding JWT token: {}", e.getMessage(), e);
-            throw new JwtException("Token decode failed: " + e.getMessage());
+            log.warn("Token signature/expiration verification failed: {}", e.getMessage());
+            throw new JwtException("Token invalid: " + e.getMessage());
         }
+
+        try {
+            String jti = jwt.getId();
+            String email = jwt.getSubject();
+            authenticationService.validateTokenStatus(jti, email);
+        } catch (Exception e) {
+            log.warn("Token validation failed in database check: {}", e.getMessage());
+            throw new JwtException("Token validation failed: " + e.getMessage());
+        }
+
+        return jwt;
     }
 
     private byte[] getSignerKeyBytes() {
@@ -76,3 +65,4 @@ public class CustomJwtDecoder implements JwtDecoder {
         return sanitized.getBytes();
     }
 }
+

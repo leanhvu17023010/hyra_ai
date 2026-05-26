@@ -34,8 +34,20 @@ public class FaceFusionService {
         try {
             log.info("==> Bắt đầu quy trình FaceFusion cho Task: {}", swapTask.getId());
 
-            // 1. Lấy đường dẫn file vật lý
-            String sourceRelativePath = swapTask.getSourceImage().getUrl().substring(9);
+            // 1. Lấy đường dẫn file vật lý (Ưu tiên Audio nếu có, nếu không thì lấy Ảnh)
+            String sourceRelativePath;
+            String processorType;
+
+            if (swapTask.getAudioMedia() != null) {
+                sourceRelativePath = swapTask.getAudioMedia().getUrl().substring(9); // Cắt bỏ "/uploads/"
+                processorType = "lip_syncer";
+                log.info("Chế độ: Lip Sync (Audio)");
+            } else {
+                sourceRelativePath = swapTask.getSourceImage().getUrl().substring(9);
+                processorType = "face_swapper";
+                log.info("Chế độ: Face Swap (Image)");
+            }
+            
             String targetRelativePath = swapTask.getTargetMedia().getUrl().substring(9);
 
             Path sourceFile = Paths.get("uploads", sourceRelativePath);
@@ -45,7 +57,8 @@ public class FaceFusionService {
             MultipartBodyBuilder builder = new MultipartBodyBuilder();
             builder.part("source_file", new FileSystemResource(sourceFile));
             builder.part("target_file", new FileSystemResource(targetFile));
-            builder.part("processors", "face_swapper");
+            // Truyền đúng processor (Tuy Backend của bạn có thể tự động nhận diện, nhưng truyền tường minh vẫn an toàn hơn)
+            builder.part("processors", processorType);
 
             ProcessResponse response = faceFusionWebClient.post()
                     .uri("/api/process")
@@ -273,7 +286,7 @@ public class FaceFusionService {
         String userId = swapTask.getUser().getId();
         String taskId = swapTask.getId();
 
-        Path resultsDir = Paths.get("uploads", userId, taskId);
+        Path resultsDir = Paths.get("uploads", userId, "SwapTask", taskId);
         if (!Files.exists(resultsDir)) {
             Files.createDirectories(resultsDir);
         }
@@ -285,7 +298,7 @@ public class FaceFusionService {
         Files.write(resultPath, bytes);
 
         // Cập nhật thông tin đường dẫn mới vào DB
-        swapTask.setResultUrl("/uploads/" + userId + "/" + taskId + "/" + resultFileName);
+        swapTask.setResultUrl("/uploads/" + userId + "/SwapTask/" + taskId + "/" + resultFileName);
         swapTask.setStatus("Complete");
         swapTaskRepository.save(swapTask);
 

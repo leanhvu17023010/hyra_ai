@@ -1,0 +1,38 @@
+package com.hyra_ai.backend.configuration;
+
+import io.netty.channel.ChannelOption;
+import io.netty.handler.timeout.ReadTimeoutHandler;
+import io.netty.handler.timeout.WriteTimeoutHandler;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.netty.http.client.HttpClient;
+import reactor.netty.resources.ConnectionProvider;
+
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
+
+@Configuration
+public class XttsClientConfig {
+    @Bean
+    public WebClient xttsWebClient(@Value("${xtts.base-url}") String baseUrl){
+
+        ConnectionProvider provider = ConnectionProvider.newConnection();
+
+        HttpClient httpClient = HttpClient.create(provider)
+                .responseTimeout(Duration.ofMinutes(10))
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 15_000)
+                .option(ChannelOption.SO_KEEPALIVE, true)
+                .doOnConnected(conn -> conn
+                        .addHandlerLast(new ReadTimeoutHandler(120, TimeUnit.SECONDS))
+                        .addHandlerLast(new WriteTimeoutHandler(120, TimeUnit.SECONDS)));
+
+        return WebClient.builder()
+                .baseUrl(baseUrl)
+                .clientConnector(new ReactorClientHttpConnector(httpClient))
+                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(100 * 1024 * 1024))
+                .build();
+    }
+}

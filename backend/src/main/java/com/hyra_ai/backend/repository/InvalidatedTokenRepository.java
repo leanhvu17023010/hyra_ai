@@ -22,4 +22,10 @@ public interface InvalidatedTokenRepository extends JpaRepository<InvalidatedTok
                     "INSERT INTO invalidated_token (id, expiry_time) VALUES (:id, :expiryTime) ON DUPLICATE KEY UPDATE expiry_time = :expiryTime",
             nativeQuery = true)
     void saveOrUpdate(@Param("id") String id, @Param("expiryTime") Date expiryTime);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM InvalidatedToken t WHERE t.expiryTime < :now")
+    void deleteExpiredTokens(@Param("now") Date now);
 }
+

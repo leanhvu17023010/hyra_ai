@@ -47,11 +47,17 @@ public class SwapTaskService {
                 }
             } else if( "VIDEO".equalsIgnoreCase(media.getFileType())){
                 swapTask.setTargetMedia(media);
+            } else if( "AUDIO".equalsIgnoreCase(media.getFileType())){
+                swapTask.setAudioMedia(media);
             }
         }
         swapTaskRepository.save(swapTask);
 
-        if(swapTask.getSourceImage() != null && swapTask.getTargetMedia() != null){
+        boolean hasTarget = swapTask.getTargetMedia() != null;
+        boolean hasSourceFace = swapTask.getSourceImage() != null;
+        boolean hasSourceAudio = swapTask.getAudioMedia() != null;
+
+        if(hasTarget && (hasSourceFace || hasSourceAudio)){
             faceFusionService.sendtoFaceFusion(swapTask);
         }
 
