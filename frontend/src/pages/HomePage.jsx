@@ -3,6 +3,7 @@ import SwapTabs from "../components/swap/SwapTabs";
 import ImageSwap from "../components/swap/ImageSwap";
 import VideoSwap from "../components/swap/VideoSwap";
 import TextToSpeech from "../components/swap/TextToSpeech";
+import VideoVoiceCloneLipSync from "../components/swap/VideoVoiceCloneLipSync";
 import HowToSwap from "../components/home/HowToSwap";
 import Introduction from "../components/home/Introduction";
 import HeroSection from "../components/home/HeroSection";
@@ -54,6 +55,7 @@ function HomePage() {
                             {tab === 'image' && <ImageSwap />}
                             {tab === 'video' && <VideoSwap />}
                             {tab === 'tts'   && <TextToSpeech />}
+                            {tab === 'lipsync' && <VideoVoiceCloneLipSync />}
                         </motion.div>
                     </AnimatePresence>
                 </div>
