@@ -4,7 +4,8 @@ import {
     FiUser,
     FiLogOut,
     FiSun,
-    FiMoon
+    FiMoon,
+    FiShield
 } from "react-icons/fi";
 
 import authService from "../../services/authService";
@@ -56,7 +57,7 @@ function Navbar() {
 
             {/* LEFT: LOGO + DARK MODE */}
             <div className="flex items-center gap-3">
-            <Link to="/" >
+            <Link to={user && user.role && user.role.name === 'ADMIN' ? "/admin" : "/"} >
 
                 {/* LOGO */}
                 <h1
@@ -195,6 +196,26 @@ function Navbar() {
                                     <FiUser className="text-lg" />
                                     Thông tin tài khoản</Link>
 
+                                {user.role && user.role.name === 'ADMIN' && (
+                                    <Link to="/admin"
+                                        className="
+                                            w-full
+                                            flex
+                                            items-center
+                                            gap-3
+                                            text-left
+                                            px-5
+                                            py-3
+                                            hover:bg-gray-100
+                                            dark:hover:bg-gray-800
+                                            cursor-pointer
+                                            transition-all
+                                        "
+                                    >
+                                        <FiShield className="text-lg text-purple-650 dark:text-purple-400" />
+                                        Trang quản trị
+                                    </Link>
+                                )}
 
                                 {/* LOGOUT */}
                                 <button

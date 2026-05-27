@@ -32,6 +32,17 @@ const CONTENT = {
         ],
         tips: ['Chia văn bản dài thành đoạn ngắn', 'Dùng dấu chấm phẩy cho ngữ điệu tự nhiên', 'Tránh ký tự đặc biệt', 'Hoạt động tốt nhất trên Chrome & Edge'],
     },
+    lipsync: {
+        title: 'Cách lồng tiếng và đồng bộ môi video (Lip Sync) với Hyra AI',
+        subtitle: 'Lồng tiếng nói tự nhiên hoặc nhân bản giọng nói của bạn trực tiếp vào video bằng công nghệ AI tiên tiến, tự động khớp khẩu hình môi.',
+        steps: [
+            { title: 'Tải video cần lồng tiếng', desc: 'Chọn video gốc mà bạn muốn ghép giọng nói và tự động đồng bộ chuyển động môi. Định dạng tối đa 5 giây và 30MB.' },
+            { title: 'Nhập text hoặc tải file giọng', desc: 'Chọn lồng tiếng bằng cách nhập văn bản (AI nhân bản giọng đọc từ giọng mẫu) hoặc tải/ghi âm trực tiếp file giọng nói của bạn.' },
+            { title: 'AI đồng bộ chuyển động môi', desc: 'Nhấn "Bắt đầu Lip Sync". AI sẽ tự động tạo âm thanh và sử dụng mô hình Lip Sync để thay đổi khuôn miệng nhân vật theo lời nói.' },
+            { title: 'Xem và tải video kết quả', desc: 'Sau khi hoàn thành, video kết quả sẽ tự động phát. Nhấn "Tải xuống" để lưu video lồng tiếng chất lượng cao.' },
+        ],
+        tips: ['Video gốc có khuôn mặt cận cảnh rõ ràng', 'Giọng mẫu rõ âm, không có tiếng ồn nền', 'Chia văn bản lồng tiếng thành câu ngắn', 'Hỗ trợ MP4, WAV, MP3'],
+    },
 };
 
 function HowToSwap({ tab }) {

@@ -4,6 +4,7 @@ import { useGoogleLogin } from "@react-oauth/google"
 import axios from "axios"
 import authService from "../../services/authService"
 import { loginSchema, validate } from "../../utils/validation"
+import useAuthStore from "../../store/authStore"
 import {
   FiX,
   FiMail,
@@ -37,8 +38,13 @@ function LoginModal({ onClose, onSwitch }) {
         const result = await authService.loginWithGoogle(sub, email, name)
 
         if (result.result.authenticated) {
+          const user = await useAuthStore.getState().fetchUser()
           onClose()
-          window.location.reload() // Hoặc chuyển hướng
+          if (user && user.role && user.role.name === 'ADMIN') {
+            window.location.href = '/admin'
+          } else {
+            window.location.reload()
+          }
         }
       } catch (err) {
         console.error("Lỗi đăng nhập Google:", err)
@@ -66,8 +72,13 @@ function LoginModal({ onClose, onSwitch }) {
     try {
       const result = await authService.login(email, password)
       if (result.result.authenticated) {
+        const user = await useAuthStore.getState().fetchUser()
         onClose()
-        window.location.reload()
+        if (user && user.role && user.role.name === 'ADMIN') {
+          window.location.href = '/admin'
+        } else {
+          window.location.reload()
+        }
       }
     } catch (err) {
       console.error("Lỗi đăng nhập:", err)

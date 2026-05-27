@@ -46,7 +46,7 @@ function ChangePassword() {
     return (
         <div>
             <div className="flex items-center gap-4 mb-10">
-                <div className="flex h-15 w-15 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30">
+                <div className="flex h-15 w-15 items-center justify-center rounded-2xl bg-gradient-to-br from-[#5b6ef7] to-[#4a5ce6] text-white shadow-lg shadow-[#5b6ef7]/25">
                     <FiShield className="text-2xl" />
                 </div>
                 <div>
@@ -71,7 +71,7 @@ function ChangePassword() {
                             onChange={(e) =>
                                 setPasswords((p) => ({ ...p, oldPassword: e.target.value }))
                             }
-                            className="text-xl w-full rounded-2xl border border-gray-300 bg-gray-50 pl-11 pr-12 py-4 font-semibold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:bg-gray-700/60 dark:text-white dark:border-gray-600"
+                            className="text-xl w-full rounded-2xl border border-gray-300 bg-gray-50 pl-11 pr-12 py-4 font-semibold outline-none focus:border-[#5b6ef7] focus:ring-2 focus:ring-[#5b6ef7]/20 dark:bg-gray-700/60 dark:text-white dark:border-gray-600"
                         />
                         <button
                             type="button"
@@ -96,7 +96,7 @@ function ChangePassword() {
                             onChange={(e) =>
                                 setPasswords((p) => ({ ...p, newPassword: e.target.value }))
                             }
-                            className="text-xl w-full rounded-2xl border border-gray-300 bg-gray-50 pl-11 pr-12 py-4 font-semibold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:bg-gray-700/60 dark:text-white dark:border-gray-600"
+                            className="text-xl w-full rounded-2xl border border-gray-300 bg-gray-50 pl-11 pr-12 py-4 font-semibold outline-none focus:border-[#5b6ef7] focus:ring-2 focus:ring-[#5b6ef7]/20 dark:bg-gray-700/60 dark:text-white dark:border-gray-600"
                         />
                         <button
                             type="button"
@@ -140,7 +140,7 @@ function ChangePassword() {
                             onChange={(e) =>
                                 setPasswords((p) => ({ ...p, confirmPassword: e.target.value }))
                             }
-                            className="text-xl w-full rounded-2xl border border-gray-300 bg-gray-50 pl-11 pr-12 py-4 font-semibold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:bg-gray-700/60 dark:text-white dark:border-gray-600"
+                            className="text-xl w-full rounded-2xl border border-gray-300 bg-gray-50 pl-11 pr-12 py-4 font-semibold outline-none focus:border-[#5b6ef7] focus:ring-2 focus:ring-[#5b6ef7]/20 dark:bg-gray-700/60 dark:text-white dark:border-gray-600"
                         />
                         <button
                             type="button"
@@ -171,7 +171,7 @@ function ChangePassword() {
                 <button
                     type="submit"
                     disabled={pwSubmitting}
-                    className="text-2xl w-full rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 py-4 font-black text-white shadow-xl disabled:opacity-60"
+                    className="text-2xl w-full rounded-2xl bg-gradient-to-r from-[#5b6ef7] to-[#4a5ce6] py-4 font-black text-white shadow-xl disabled:opacity-60"
                 >
                     {pwSubmitting ? 'Đang cập nhật...' : 'Cập nhật mật khẩu'}
                 </button>

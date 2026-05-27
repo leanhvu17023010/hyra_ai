@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom"
+import { Outlet, useNavigate, useLocation } from "react-router-dom"
 import { useEffect } from "react";
 import Navbar from "../components/layout/Navbar"
 import Footer from "../components/layout/Footer"
@@ -9,10 +9,14 @@ import ForgotModal from "../components/auth/ForgotModal";
 import VerifyModal from "../components/auth/VerifyModal";
 import ResetPasswordModal from "../components/auth/ResetPasswordModal";
 import useUIStore from "../store/uiStore";
+import useAuthStore from "../store/authStore";
 import { AnimatePresence } from "framer-motion";
 
 function MainLayout(){
+    const navigate = useNavigate();
+    const location = useLocation();
     const { activeModal, modalData, setActiveModal, closeModal, switchModal, darkMode } = useUIStore();
+    const { user, isInitialized } = useAuthStore();
 
     useEffect(() => {
         const handleOpenAuth = (e) => {
@@ -32,6 +36,15 @@ function MainLayout(){
             document.documentElement.classList.remove("dark");
         }
     }, [darkMode]);
+
+    // Auto-redirect admin users to admin panel
+    useEffect(() => {
+        if (isInitialized && user && user.role && user.role.name === 'ADMIN') {
+            if (location.pathname !== '/admin') {
+                navigate('/admin');
+            }
+        }
+    }, [isInitialized, user, location.pathname, navigate]);
 
     return(
         <div className="

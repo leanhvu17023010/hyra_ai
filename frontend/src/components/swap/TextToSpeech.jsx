@@ -211,8 +211,8 @@ function TextToSpeech() {
             <div className="flex-1 min-w-[320px] flex flex-col gap-4">
                 
                 {/* 1. Nhập văn bản */}
-                <div className="rounded-2xl border border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-700 overflow-hidden flex flex-col shadow-md">
-                    <div className="flex justify-between items-center px-5 py-4 border-b border-gray-100 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-750">
+                <div className="rounded-2xl border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-900 overflow-hidden flex flex-col shadow-md">
+                    <div className="flex justify-between items-center px-5 py-4 border-b border-slate-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-950/20">
                         <p className="text-lg font-semibold text-gray-600 dark:text-gray-300">Nhập văn bản</p>
                         <span className={`text-xs font-semibold ${text.length > MAX_CHARS * 0.9 ? 'text-red-500' : 'text-gray-400'}`}>
                             {text.length}/{MAX_CHARS}
@@ -227,9 +227,9 @@ function TextToSpeech() {
                 </div>
 
                 {/* 2. Chọn giọng mẫu (Tải file hoặc Ghi âm) */}
-                <div className="rounded-2xl border border-gray-300 bg-white p-4 dark:border-gray-600 dark:bg-gray-700 shadow-md">
+                <div className="rounded-2xl border border-slate-300 bg-white p-4 dark:border-slate-700 dark:bg-slate-900 shadow-md">
                     <p className="mb-3 text-lg font-semibold text-gray-600 dark:text-gray-300 flex items-center gap-2">
-                        <FiMic className="text-blue-500" />
+                        <FiMic className="text-[#5b6ef7] dark:text-[#a78bfa]" />
                         Giọng đọc mẫu
                     </p>
                     
@@ -240,7 +240,7 @@ function TextToSpeech() {
                             onClick={() => { setSourceType('upload'); handleClearAudio(); }}
                             className={`flex-1 py-1.5 text-sm font-semibold rounded-lg transition-all cursor-pointer ${
                                 sourceType === 'upload'
-                                    ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-blue-400'
+                                    ? 'bg-white dark:bg-gray-700 shadow-sm text-[#5b6ef7] dark:text-[#a78bfa]'
                                     : 'text-gray-500 dark:text-gray-300 hover:text-gray-700'
                             }`}
                         >
@@ -251,7 +251,7 @@ function TextToSpeech() {
                             onClick={() => { setSourceType('record'); handleClearAudio(); }}
                             className={`flex-1 py-1.5 text-sm font-semibold rounded-lg transition-all cursor-pointer ${
                                 sourceType === 'record'
-                                    ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-blue-400'
+                                    ? 'bg-white dark:bg-gray-700 shadow-sm text-[#5b6ef7] dark:text-[#a78bfa]'
                                     : 'text-gray-500 dark:text-gray-300 hover:text-gray-700'
                             }`}
                         >
@@ -265,7 +265,7 @@ function TextToSpeech() {
                             {!audioFile ? (
                                 <div
                                     onClick={() => fileInputRef.current?.click()}
-                                    className="border-2 border-dashed border-gray-300 dark:border-gray-500 rounded-xl bg-gray-50 dark:bg-gray-600 p-6 flex flex-col items-center justify-center cursor-pointer hover:border-blue-400 transition-colors"
+                                    className="border-2 border-dashed border-slate-300 dark:border-slate-750 rounded-xl bg-slate-50 dark:bg-slate-950/25 p-6 flex flex-col items-center justify-center cursor-pointer hover:border-[#5b6ef7] dark:hover:border-[#a78bfa] transition-colors"
                                 >
                                     <FiUploadCloud size={24} className="text-gray-400 mb-2" />
                                     <span className="text-sm text-gray-500 dark:text-gray-300 text-center font-medium">Tải tệp âm thanh</span>
@@ -303,9 +303,9 @@ function TextToSpeech() {
                                 <button
                                     type="button"
                                     onClick={startRecording}
-                                    className="w-full border-2 border-dashed border-gray-300 dark:border-gray-500 rounded-xl bg-gray-50 dark:bg-gray-600 py-8 flex flex-col items-center justify-center cursor-pointer hover:border-blue-400 transition-colors"
+                                    className="w-full border-2 border-dashed border-slate-300 dark:border-slate-750 rounded-xl bg-slate-50 dark:bg-slate-950/25 py-8 flex flex-col items-center justify-center cursor-pointer hover:border-[#5b6ef7] dark:hover:border-[#a78bfa] transition-colors"
                                 >
-                                    <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-2">
+                                    <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-950/20 flex items-center justify-center text-[#5b6ef7] dark:text-[#a78bfa] mb-2">
                                         <FiMic size={20} />
                                     </div>
                                     <span className="text-sm text-gray-500 dark:text-gray-300 font-medium">Bắt đầu ghi âm</span>
@@ -352,12 +352,12 @@ function TextToSpeech() {
             <div className="w-80 shrink-0 flex flex-col gap-4">
                 
                 {/* 1. Trạng thái phát */}
-                <div className="rounded-2xl border border-gray-300 bg-white p-4 dark:border-gray-600 dark:bg-gray-700 shadow-md">
+                <div className="rounded-2xl border border-slate-300 bg-white p-4 dark:border-slate-700 dark:bg-slate-900 shadow-md">
                     <p className="mb-2 text-lg font-semibold text-gray-600 dark:text-gray-300">Trạng thái phát</p>
                     <div className="flex flex-col items-center gap-3 py-3">
                         <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
                             isPlaying
-                                ? 'bg-blue-600 shadow-lg shadow-blue-200 dark:shadow-blue-900 scale-105'
+                                ? 'bg-gradient-to-r from-[#5b6ef7] to-[#a78bfa] shadow-lg shadow-[#5b6ef7]/20 scale-105'
                                 : 'bg-gray-100 dark:bg-gray-600'
                         }`}>
                             <FiVolume2 className={isPlaying ? "text-white" : "text-gray-400 dark:text-gray-300"} size={22} />
@@ -372,7 +372,7 @@ function TextToSpeech() {
                                 <div
                                     key={i}
                                     className={`flex-1 rounded-full transition-all duration-200 ${
-                                        isPlaying ? 'bg-blue-500' : 'bg-gray-200 dark:bg-gray-500'
+                                        isPlaying ? 'bg-[#5b6ef7]' : 'bg-gray-200 dark:bg-gray-500'
                                     }`}
                                     style={{
                                         height: isPlaying
@@ -386,7 +386,7 @@ function TextToSpeech() {
                 </div>
 
                 {/* 2. Điều khiển */}
-                <div className="rounded-2xl border border-gray-300 bg-white p-4 dark:border-gray-600 dark:bg-gray-700 shadow-md">
+                <div className="rounded-2xl border border-slate-300 bg-white p-4 dark:border-slate-700 dark:bg-slate-900 shadow-md">
                     <p className="mb-3 text-lg font-semibold text-gray-600 dark:text-gray-300">Điều khiển</p>
                     <div className="flex flex-col gap-2">
                         {error === 'login-required' ? (
@@ -395,7 +395,7 @@ function TextToSpeech() {
                                 <button
                                     type="button"
                                     onClick={handleOpenLogin}
-                                    className="w-full py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer transition-colors shadow-sm"
+                                    className="w-full py-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer transition-colors shadow-sm"
                                 >
                                     <FiLogIn size={13} /> Đăng nhập ngay
                                 </button>
@@ -406,7 +406,7 @@ function TextToSpeech() {
                                     <button
                                         type="button"
                                         onClick={handleStop}
-                                        className="w-full py-2.5 rounded-xl text-sm font-semibold bg-red-500 text-white hover:bg-red-600 transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                                        className="w-full py-2.5 rounded-xl text-sm font-semibold bg-red-500 hover:bg-red-600 text-white transition-all hover:scale-[1.02] transform duration-200 flex items-center justify-center gap-2 cursor-pointer"
                                     >
                                         <FiSquare size={14} /> Dừng lại
                                     </button>
@@ -416,7 +416,7 @@ function TextToSpeech() {
                                         <button
                                             type="button"
                                             onClick={handleReplay}
-                                            className="w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-green-600 hover:bg-green-700 transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                                            className="w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-green-600 hover:bg-green-700 transition-all hover:scale-[1.02] transform duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-sm"
                                         >
                                             <FiPlay size={14} /> Nghe lại
                                         </button>
@@ -424,7 +424,7 @@ function TextToSpeech() {
                                             type="button"
                                             onClick={() => { setSwapDone(false); setSwapText(''); }}
                                             disabled={!text.trim() || !audioFile || isRecording}
-                                            className="w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                                            className="w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#5b6ef7] to-[#a78bfa] hover:from-[#4b5ee7] hover:to-[#906ef5] disabled:from-gray-200 disabled:to-gray-300 disabled:text-gray-400 disabled:shadow-none disabled:cursor-not-allowed transition-all hover:scale-[1.02] transform duration-200 flex items-center justify-center gap-2 cursor-pointer"
                                         >
                                             <FiCpu size={14} /> Swap lại
                                         </button>
@@ -434,7 +434,7 @@ function TextToSpeech() {
                                         type="button"
                                         onClick={handleExecute}
                                         disabled={!text.trim() || !audioFile || isRecording}
-                                        className="w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                                        className="w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#5b6ef7] to-[#a78bfa] hover:from-[#4b5ee7] hover:to-[#906ef5] disabled:from-gray-200 disabled:to-gray-300 disabled:text-gray-400 disabled:shadow-none disabled:cursor-not-allowed transition-all hover:scale-[1.02] transform duration-200 flex items-center justify-center gap-2 cursor-pointer"
                                     >
                                         <FiCpu size={14} /> AI Swap Giọng nói
                                     </button>
@@ -444,7 +444,7 @@ function TextToSpeech() {
                         <button
                             type="button"
                             onClick={handleReset}
-                            className="w-full py-2 rounded-xl text-sm font-medium border border-gray-300 text-gray-500 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                            className="w-full py-2 rounded-xl text-sm font-medium border border-slate-300 text-slate-500 hover:bg-slate-50 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-800 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                         >
                             <FiRefreshCw size={12} /> Thiết lập lại từ đầu
                         </button>

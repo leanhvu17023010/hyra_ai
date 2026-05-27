@@ -28,8 +28,8 @@ api.interceptors.response.use(
             localStorage.removeItem('token');
             // Bắn sự kiện mở modal đăng nhập
             window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'login' }));
-            // Nếu đang ở trang cần bảo vệ (như profile), đẩy về trang chủ
-            if (window.location.pathname.includes('/profile')) {
+            // Nếu đang ở trang cần bảo vệ (như profile hoặc admin), đẩy về trang chủ
+            if (window.location.pathname.includes('/profile') || window.location.pathname.includes('/admin')) {
                 window.location.href = '/';
             }
         }
