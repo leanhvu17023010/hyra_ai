@@ -46,6 +46,19 @@ function MainLayout(){
         }
     }, [isInitialized, user, location.pathname, navigate]);
 
+    const isAdminRoute = location.pathname.startsWith('/admin');
+
+    if (isAdminRoute) {
+        return (
+            <div className="h-screen bg-slate-50 dark:bg-slate-950 font-sans transition-colors duration-300 flex flex-col overflow-hidden">
+                <Navbar />
+                <div className="flex-1 flex overflow-hidden">
+                    <Outlet />
+                </div>
+            </div>
+        );
+    }
+
     return(
         <div className="
         min-h-screen 
@@ -68,7 +81,7 @@ function MainLayout(){
                     />
                 )}
                 
-                {activeModal === 'register' && (
+      170          {activeModal === 'register' && (
                     <RegisterModal 
                         key="register-modal"
                         onClose={closeModal} 
@@ -113,4 +126,4 @@ function MainLayout(){
         </div>
     )
 }
-export default MainLayout
+export default MainLayout;
