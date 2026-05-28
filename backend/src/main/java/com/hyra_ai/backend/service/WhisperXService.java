@@ -13,7 +13,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.Duration;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.io.ByteArrayInputStream;
 
 import com.hyra_ai.backend.entity.Media;
 import com.hyra_ai.backend.entity.User;
@@ -95,33 +99,38 @@ public class WhisperXService {
                 Files.createDirectories(taskDir);
             }
 
-            // TODO: Mở comment phần gọi WebClient thực tế khi có backend AI sẵn sàng
-            /*
             MultipartBodyBuilder builder = new MultipartBodyBuilder();
-            builder.part("audio_file", new FileSystemResource(audioFile));
+            builder.part("file", new FileSystemResource(audioFile)); // Sửa "audio_file" thành "file" theo API docs
 
-            byte[] srtBytes = whisperXWebClient.post()
-                    .uri("/api/transcribe")
+            byte[] zipBytes = whisperXWebClient.post()
+                    .uri("/transcribe")
                     .contentType(MediaType.MULTIPART_FORM_DATA)
                     .bodyValue(builder.build())
                     .retrieve()
                     .bodyToMono(byte[].class)
                     .block(Duration.ofMinutes(10));
-            */
 
-            // TẠM THỜI GIẢ LẬP KẾT QUẢ SRT VÀ TXT
-            String srtFileName = "result.srt";
-            Path srtResultPath = taskDir.resolve(srtFileName);
-            String dummySrtContent = "1\n00:00:00,000 --> 00:00:05,000\n[Nhạc nền]\n\n2\n00:00:05,000 --> 00:00:10,000\nNội dung transcribe giả lập từ audio.\n";
-            Files.writeString(srtResultPath, dummySrtContent);
+            if (zipBytes == null || zipBytes.length == 0) {
+                throw new IllegalStateException("Dữ liệu trả về từ WhisperX bị trống");
+            }
 
-            String txtFileName = "result.txt";
-            Path txtResultPath = taskDir.resolve(txtFileName);
-            String dummyTxtContent = "Nội dung transcribe giả lập từ audio.";
-            Files.writeString(txtResultPath, dummyTxtContent);
-
-            task.setResultSrtUrl("/uploads/" + userId + "/WhisperTask/" + taskId + "/" + srtFileName);
-            task.setResultTxtUrl("/uploads/" + userId + "/WhisperTask/" + taskId + "/" + txtFileName);
+            // Xử lý giải nén file ZIP
+            try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(zipBytes))) {
+                ZipEntry entry;
+                while ((entry = zis.getNextEntry()) != null) {
+                    if (!entry.isDirectory()) {
+                        String fileName = Paths.get(entry.getName()).getFileName().toString();
+                        Path filePath = taskDir.resolve(fileName);
+                        Files.copy(zis, filePath, StandardCopyOption.REPLACE_EXISTING);
+                        
+                        if (fileName.endsWith(".srt")) {
+                            task.setResultSrtUrl("/uploads/" + userId + "/WhisperTask/" + taskId + "/" + fileName);
+                        } else if (fileName.endsWith(".txt")) {
+                            task.setResultTxtUrl("/uploads/" + userId + "/WhisperTask/" + taskId + "/" + fileName);
+                        }
+                    }
+                }
+            }
             
             task.setStatus("Complete");
             task.setProgress(100);
@@ -145,34 +154,44 @@ public class WhisperXService {
             String wavRelativePath = megaTask.getXttsResultUrl().substring(9); // Cắt bỏ "/uploads/"
             Path wavFile = Paths.get("uploads", wavRelativePath);
 
-            // Gửi sang WhisperX (Giả lập request)
-            /*
             MultipartBodyBuilder builder = new MultipartBodyBuilder();
-            builder.part("audio_file", new FileSystemResource(wavFile));
+            builder.part("file", new FileSystemResource(wavFile)); // Sửa "audio_file" thành "file"
 
-            byte[] srtBytes = whisperXWebClient.post()
-                    .uri("/api/transcribe")
+            byte[] zipBytes = whisperXWebClient.post()
+                    .uri("/transcribe")
                     .contentType(MediaType.MULTIPART_FORM_DATA)
                     .bodyValue(builder.build())
                     .retrieve()
                     .bodyToMono(byte[].class)
                     .block(Duration.ofMinutes(5));
-            */
-            
-            // TẠM THỜI GIẢ LẬP: Tạo file srt giả để tiếp tục luồng
+
+            if (zipBytes == null || zipBytes.length == 0) {
+                throw new IllegalStateException("Dữ liệu trả về từ WhisperX bị trống");
+            }
+
             String userId = megaTask.getUser().getId();
             String taskId = megaTask.getId();
             Path resultsDir = Paths.get("uploads", userId, "MegaTask", taskId);
             if (!Files.exists(resultsDir)) {
                 Files.createDirectories(resultsDir);
             }
-            String srtFileName = "subtitle_" + taskId + ".srt";
-            Path resultPath = resultsDir.resolve(srtFileName);
             
-            String dummySrtContent = "1\n00:00:00,000 --> 00:00:05,000\n[Nhạc nền]\n\n2\n00:00:05,000 --> 00:00:10,000\n" + megaTask.getInputText() + "\n";
-            Files.writeString(resultPath, dummySrtContent);
+            // Xử lý giải nén file ZIP
+            try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(zipBytes))) {
+                ZipEntry entry;
+                while ((entry = zis.getNextEntry()) != null) {
+                    if (!entry.isDirectory()) {
+                        String fileName = Paths.get(entry.getName()).getFileName().toString();
+                        Path filePath = resultsDir.resolve(fileName);
+                        Files.copy(zis, filePath, StandardCopyOption.REPLACE_EXISTING);
+                        
+                        if (fileName.endsWith(".srt")) {
+                            megaTask.setSrtResultUrl("/uploads/" + userId + "/MegaTask/" + taskId + "/" + fileName);
+                        }
+                    }
+                }
+            }
             
-            megaTask.setSrtResultUrl("/uploads/" + userId + "/MegaTask/" + taskId + "/" + srtFileName);
             megaTaskRepository.save(megaTask);
             log.info("==> WhisperX hoàn tất, kết quả lưu tại: {}", megaTask.getSrtResultUrl());
 

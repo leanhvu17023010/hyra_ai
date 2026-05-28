@@ -34,16 +34,19 @@ public class MegaWorkflowService {
             megaTaskRepository.save(megaTask);
             log.info("==> MegaWorkflow Started cho MegaTask: {}", megaTask.getId());
 
-            // 1. Tạo và chạy SwapTask
-            SwapTask swapTask = SwapTask.builder()
-                    .user(megaTask.getUser())
-                    .sourceImage(megaTask.getSourceFace())
-                    .targetMedia(megaTask.getTargetVideo())
-                    .status("Pending")
-                    .createAt(LocalDateTime.now())
-                    .build();
-            swapTask = swapTaskRepository.save(swapTask);
-            faceFusionService.sendtoFaceFusion(swapTask); // Phương thức này hiện tại là @Async
+            // 1. Tạo và chạy SwapTask (Chỉ chạy nếu có ảnh khuôn mặt)
+            SwapTask swapTask = null;
+            if (megaTask.getSourceFace() != null) {
+                swapTask = SwapTask.builder()
+                        .user(megaTask.getUser())
+                        .sourceImage(megaTask.getSourceFace())
+                        .targetMedia(megaTask.getTargetVideo())
+                        .status("Pending")
+                        .createAt(LocalDateTime.now())
+                        .build();
+                swapTask = swapTaskRepository.save(swapTask);
+                faceFusionService.sendtoFaceFusion(swapTask); // @Async
+            }
 
             // 2. Tạo và chạy XttsTask
             XttsTask xttsTask = XttsTask.builder()
@@ -55,22 +58,28 @@ public class MegaWorkflowService {
                     .createAt(LocalDateTime.now())
                     .build();
             xttsTask = xttsTaskRepository.save(xttsTask);
-            xttsService.processTts(xttsTask); // Phương thức này hiện tại cũng là @Async
+            xttsService.processTts(xttsTask); // @Async
 
-            // 3. Đợi cả hai máy 1 (Swap & XTTS) hoàn thành
-            waitForSwapTask(swapTask.getId());
-            waitForXttsTask(xttsTask.getId());
-
-            // Lấy URL kết quả từ DB
-            swapTask = swapTaskRepository.findById(swapTask.getId()).orElseThrow();
-            xttsTask = xttsTaskRepository.findById(xttsTask.getId()).orElseThrow();
-
-            if (!"Complete".equalsIgnoreCase(swapTask.getStatus()) || !"Complete".equalsIgnoreCase(xttsTask.getStatus())) {
-                throw new RuntimeException("Một trong các tiến trình ở Bước 1 thất bại");
+            // 3. Đợi các tiến trình hoàn thành
+            if (swapTask != null) {
+                waitForSwapTask(swapTask.getId());
+                swapTask = swapTaskRepository.findById(swapTask.getId()).orElseThrow();
+                if (!"Complete".equalsIgnoreCase(swapTask.getStatus())) {
+                    throw new RuntimeException("Tiến trình Swap (FaceFusion) thất bại");
+                }
+                megaTask.setSwapResultUrl(swapTask.getResultUrl());
+            } else {
+                // Nếu không dùng FaceFusion, lấy luôn video gốc làm video kết quả để đưa vào FFmpeg
+                megaTask.setSwapResultUrl(megaTask.getTargetVideo().getUrl());
             }
 
-            megaTask.setSwapResultUrl(swapTask.getResultUrl());
+            waitForXttsTask(xttsTask.getId());
+            xttsTask = xttsTaskRepository.findById(xttsTask.getId()).orElseThrow();
+            if (!"Complete".equalsIgnoreCase(xttsTask.getStatus())) {
+                throw new RuntimeException("Tiến trình XTTS thất bại");
+            }
             megaTask.setXttsResultUrl(xttsTask.getResultUrl());
+
             megaTaskRepository.save(megaTask);
 
             // 4. Máy 2: WhisperX

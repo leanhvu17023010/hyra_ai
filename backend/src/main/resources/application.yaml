@@ -37,6 +37,9 @@ facefusion:
 xtts:
   base-url: http://172.16.1.75:8020
 
+whisperx:
+  api:
+    url: http://172.16.0.200:8000
 
 jwt:
   signerKey: "/nvphzRqEgduNfnKy2ztU3XBeojbmK8jzDivxOxLIGnl+D5GfkjyXdLq15xz9af/\n"
