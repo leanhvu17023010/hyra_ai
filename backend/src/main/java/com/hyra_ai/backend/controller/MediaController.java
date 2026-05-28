@@ -29,6 +29,8 @@ public class MediaController {
     com.hyra_ai.backend.repository.UserRepository userRepository;
     com.hyra_ai.backend.repository.XttsTaskRepository xttsTaskRepository;
     com.hyra_ai.backend.service.XttsService xttsService;
+    com.hyra_ai.backend.repository.WhisperTaskRepository whisperTaskRepository;
+    com.hyra_ai.backend.service.WhisperXService whisperXService;
 
     @PostMapping("/upload")
     public ApiResponse<Media> uploadFile(@RequestParam("file") MultipartFile file,
@@ -68,6 +70,11 @@ public class MediaController {
                 com.hyra_ai.backend.entity.XttsTask xttsTask = xttsTaskRepository.findById(taskId).orElse(null);
                 if (xttsTask != null && xttsTask.getUser() != null) {
                     folder = xttsTask.getUser().getId() + "/XttsTask/" + taskId;
+                } else {
+                    com.hyra_ai.backend.entity.WhisperTask whisperTask = whisperTaskRepository.findById(taskId).orElse(null);
+                    if (whisperTask != null && whisperTask.getUser() != null) {
+                        folder = whisperTask.getUser().getId() + "/WhisperTask/" + taskId;
+                    }
                 }
             }
         } else {
@@ -99,6 +106,11 @@ public class MediaController {
                     com.hyra_ai.backend.entity.XttsTask xttsTask = xttsTaskRepository.findById(taskId).orElse(null);
                     if (xttsTask != null) {
                         xttsService.addMediaToTask(taskId, savedMedia, role);
+                    } else {
+                        com.hyra_ai.backend.entity.WhisperTask whisperTask = whisperTaskRepository.findById(taskId).orElse(null);
+                        if (whisperTask != null) {
+                            whisperXService.addMediaToTask(taskId, savedMedia, role);
+                        }
                     }
                 }
             }
