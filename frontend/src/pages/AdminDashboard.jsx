@@ -26,7 +26,6 @@ function AdminDashboard() {
 
     // Swap Time Configuration State
     const [swapTimeConfig, setSwapTimeConfig] = useState({
-        cooldown: 60,
         maxVideoDuration: 30,
         executionTimeout: 300,
         retentionPeriod: 24,

@@ -5,6 +5,7 @@ import MainLayout from "../layouts/MainLayout";
 import HomePage from "../pages/HomePage";
 import Profile from "../components/Profile";
 import AdminDashboard from "../pages/AdminDashboard";
+import GithubCallback from "../components/auth/GithubCallback";
 
 export const router = createBrowserRouter([
     {
@@ -22,6 +23,10 @@ export const router = createBrowserRouter([
             {
                 path: 'admin',
                 element: <AdminDashboard />
+            },
+            {
+                path: 'oauth/callback/github',
+                element: <GithubCallback />
             }
         ]
     }

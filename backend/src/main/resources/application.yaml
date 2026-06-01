@@ -55,3 +55,7 @@ logging:
     reactor.netty.http.client: WARN
     reactor.netty.channel: WARN
     io.netty.channel: WARN
+
+github:
+client-id: "Ov23li9gzj8XBdJI3dxw"
+client-secret: "d1090f9c88573ca3e2a9fa6f1087e30c3837010f"

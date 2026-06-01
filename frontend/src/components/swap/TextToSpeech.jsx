@@ -436,7 +436,7 @@ function TextToSpeech() {
                                         disabled={!text.trim() || !audioFile || isRecording}
                                         className="w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#5b6ef7] to-[#a78bfa] hover:from-[#4b5ee7] hover:to-[#906ef5] disabled:from-gray-200 disabled:to-gray-300 disabled:text-gray-400 disabled:shadow-none disabled:cursor-not-allowed transition-all hover:scale-[1.02] transform duration-200 flex items-center justify-center gap-2 cursor-pointer"
                                     >
-                                        <FiCpu size={14} /> AI Swap Giọng nói
+                                        AI Swap Giọng nói
                                     </button>
                                 )}
                             </>

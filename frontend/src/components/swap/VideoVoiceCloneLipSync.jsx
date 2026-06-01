@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { FiUploadCloud, FiTrash2, FiCpu, FiLogIn, FiVideo } from 'react-icons/fi';
+import { FiUploadCloud, FiCpu, FiLogIn, FiVideo } from 'react-icons/fi';
 import swapService from '../../services/swapService';
 
 import SwapProcessingOverlay from './SwapProcessingOverlay';
@@ -8,7 +8,42 @@ import videoAI from '../../assets/Images/voice.jpg';
 
 const MAX_CHARS = 1000;
 
-
+function UploadBox({ label, icon, preview, isVideo, isAudio, audioName, onClick, inputRef, onChange, accept, hint }) {
+    return (
+        <div className="rounded-3xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-5 shadow-lg flex flex-col flex-1">
+            <p className="mb-3 text-sm font-bold text-slate-700 dark:text-slate-200">{label}</p>
+            <div
+                className="flex-1 min-h-[180px] border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl bg-slate-50 dark:bg-slate-950/40 flex flex-col items-center justify-center cursor-pointer hover:border-[#5b6ef7] dark:hover:border-[#a78bfa] hover:bg-slate-100/50 dark:hover:bg-slate-950/60 transition-all duration-300 overflow-hidden"
+                onClick={onClick}
+            >
+                <input type="file" accept={accept} className="hidden" ref={inputRef} onChange={onChange} />
+                {preview ? (
+                    isVideo ? (
+                        <video src={preview} className="w-full h-full object-contain animate-fade-in" muted playsInline />
+                    ) : isAudio ? (
+                        <div className="flex flex-col items-center justify-center gap-3 p-4 w-full h-full text-slate-700 dark:text-slate-200" onClick={(e) => e.stopPropagation()}>
+                            <div className="w-12 h-12 rounded-full bg-[#5b6ef7]/5 dark:bg-[#a78bfa]/5 flex items-center justify-center text-[#5b6ef7] dark:text-[#a78bfa] mb-1">
+                                {icon}
+                            </div>
+                            <span className="text-xs font-semibold truncate max-w-[200px]">{audioName}</span>
+                            <audio src={preview} controls className="w-full max-w-[240px] h-8" />
+                        </div>
+                    ) : (
+                        <img src={preview} alt={label} className="w-full h-full object-contain animate-fade-in" />
+                    )
+                ) : (
+                    <div className="flex flex-col items-center gap-2 text-slate-400 p-4">
+                        <div className="w-12 h-12 rounded-full bg-[#5b6ef7]/5 dark:bg-[#a78bfa]/5 flex items-center justify-center text-[#5b6ef7] dark:text-[#a78bfa] mb-1">
+                            {icon}
+                        </div>
+                        <span className="text-xs font-semibold text-slate-650 dark:text-slate-300">Nhấn để tải lên</span>
+                        <span className="text-[10px] text-slate-400">{hint}</span>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
 
 function VideoVoiceCloneLipSync() {
     // Inputs
@@ -21,7 +56,6 @@ function VideoVoiceCloneLipSync() {
 
     // Subtitle / Caption System
     const [subtitleText, setSubtitleText] = useState('');
-    const [subtitleStyle] = useState('tiktok'); // 'tiktok' | 'karaoke' | 'pill'
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
 
@@ -62,95 +96,6 @@ function VideoVoiceCloneLipSync() {
         }
     };
 
-    const renderSubtitles = () => {
-        if (!subtitleText.trim() || duration === 0) return null;
-        
-        const words = subtitleText.trim().split(/\s+/);
-        const totalWords = words.length;
-        
-        // Calculate the active word index based on playback time
-        const activeWordIndex = Math.min(
-            Math.floor((currentTime / duration) * totalWords),
-            totalWords - 1
-        );
-
-        if (subtitleStyle === 'tiktok') {
-            // Show a window of 3-4 words for dynamic reading feel
-            const wordsToShow = 4;
-            const start = Math.max(0, Math.min(activeWordIndex - Math.floor(wordsToShow / 2), totalWords - wordsToShow));
-            const end = Math.min(totalWords, start + wordsToShow);
-
-            return (
-                <div className="absolute bottom-12 left-4 right-4 text-center pointer-events-none z-20 flex flex-wrap justify-center gap-x-3 gap-y-1 px-6">
-                    {words.slice(start, end).map((word, idx) => {
-                        const globalIdx = start + idx;
-                        const isActive = globalIdx === activeWordIndex;
-                        return (
-                            <span
-                                key={globalIdx}
-                                className={`text-2xl md:text-3xl font-black uppercase tracking-wide transition-all duration-155 ${
-                                    isActive
-                                        ? 'text-yellow-400 scale-110'
-                                        : 'text-white scale-100 opacity-90'
-                                }`}
-                                style={{
-                                    textShadow: '3.5px 3.5px 0 #000, -1.5px -1.5px 0 #000, 1.5px -1.5px 0 #000, -1.5px 1.5px 0 #000, 0 4px 6px rgba(0,0,0,0.6)',
-                                    fontFamily: '"Impact", "Arial Black", sans-serif'
-                                }}
-                            >
-                                {word}
-                            </span>
-                        );
-                    })}
-                </div>
-            );
-        }
-
-        if (subtitleStyle === 'karaoke') {
-            return (
-                <div className="absolute bottom-12 left-4 right-4 text-center pointer-events-none z-20 flex flex-wrap justify-center gap-x-2 gap-y-1 px-6 bg-black/30 py-2 rounded-xl backdrop-blur-[2px]">
-                    {words.map((word, globalIdx) => {
-                        const isSpoken = globalIdx <= activeWordIndex;
-                        return (
-                            <span
-                                key={globalIdx}
-                                className={`text-xl md:text-2xl font-extrabold transition-all duration-150 ${
-                                    isSpoken ? 'text-[#00ffcc]' : 'text-white'
-                                }`}
-                                style={{
-                                    textShadow: '2px 2px 2px #000'
-                                }}
-                            >
-                                {word}
-                            </span>
-                        );
-                    })}
-                </div>
-            );
-        }
-
-        if (subtitleStyle === 'pill') {
-            return (
-                <div className="absolute bottom-12 left-1/2 -translate-x-1/2 pointer-events-none z-20 bg-black/65 px-5 py-2.5 rounded-2xl text-white max-w-[85%] text-center backdrop-blur-md shadow-xl border border-white/10 flex flex-wrap justify-center gap-x-2 gap-y-1">
-                    {words.map((word, globalIdx) => {
-                        const isActive = globalIdx === activeWordIndex;
-                        return (
-                            <span
-                                key={globalIdx}
-                                className={`text-base md:text-lg font-bold transition-all duration-150 ${
-                                    isActive ? 'text-yellow-350 scale-105 font-extrabold' : 'text-white/80'
-                                }`}
-                            >
-                                {word}
-                            </span>
-                        );
-                    })}
-                </div>
-            );
-        }
-
-        return null;
-    };
 
     const handleClearDirectAudio = () => {
         setDirectAudioFile(null);
@@ -258,221 +203,154 @@ function VideoVoiceCloneLipSync() {
         : 'text-[#5b6ef7] dark:text-[#a78bfa]';
 
     return (
-        <div className="
-    grid
-    lg:grid-cols-[380px_1fr]
-    gap-6
-    w-full
-">
-
-            {/* ===== CỘT TRÁI: Điều khiển lồng tiếng ===== */}
-            <div className="flex flex-col gap-4 w-80 shrink-0">
-                
-{/* 1. Chọn video gốc */}
-<div className="rounded-2xl border border-slate-300 bg-white p-3 dark:border-slate-700 dark:bg-slate-900 shadow-md">
-    <p className="mb-3 text-xs font-semibold text-gray-600 dark:text-gray-300">
-        1. Video gốc cần lồng tiếng & phụ đề
-    </p>
-
-    {!targetVideoUrl ? (
-        <div
-            onClick={() => videoInputRef.current?.click()}
-            className="border border-dashed border-slate-300 dark:border-slate-750 rounded-xl bg-slate-50 dark:bg-slate-950/20 p-5 flex flex-col items-center justify-center cursor-pointer hover:border-[#5b6ef7] dark:hover:border-[#a78bfa] transition-colors"
-        >
-            <FiVideo size={22} className="text-gray-400 mb-1.5" />
-            <span className="text-xs text-gray-500 dark:text-gray-300 font-medium">
-                Tải video lên
-            </span>
-            <span className="text-[10px] text-gray-450 dark:text-gray-400 mt-0.5">
-                Hỗ trợ MP4, WebM (max 5s, 30MB)
-            </span>
-
-            <input
-                type="file"
-                ref={videoInputRef}
-                accept="video/*"
-                className="hidden"
-                onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                        if (targetVideoUrl) {
-                            URL.revokeObjectURL(targetVideoUrl);
-                        }
-
-                        setTargetVideo(file);
-                        setTargetVideoUrl(URL.createObjectURL(file));
-                    }
-                }}
-            />
-        </div>
-    ) : (
-        <div className="p-3 bg-gray-50 dark:bg-gray-600 border border-gray-200 dark:border-gray-550 rounded-xl">
-            <div className="flex justify-between items-center mb-2">
-                <span className="text-xs font-semibold text-gray-600 dark:text-gray-300 truncate max-w-[200px]">
-                    {targetVideo?.name}
-                </span>
-
-                <button
-                    type="button"
-                    onClick={() => {
-                        if (targetVideoUrl) {
-                            URL.revokeObjectURL(targetVideoUrl);
-                        }
-                        setTargetVideo(null);
-                        setTargetVideoUrl('');
-                    }}
-                    className="text-red-500 p-1 hover:bg-red-50 dark:hover:bg-red-950/20 rounded cursor-pointer"
-                >
-                    <FiTrash2 size={12} />
-                </button>
-            </div>
-
-            <video
-                src={targetVideoUrl}
-                controls
-                className="w-full rounded-lg max-h-40 object-cover animate-fade-in"
-            />
-        </div>
-    )}
-</div>
-
-                {/* 2. Upload file giọng nói */}
-                <div className="rounded-2xl border border-slate-300 bg-white p-3 dark:border-slate-700 dark:bg-slate-900 shadow-md">
-                    <p className="mb-3 text-xs font-semibold text-gray-600 dark:text-gray-300">2. File giọng nói có sẵn</p>
-                    <div>
-                        {!directAudioFile ? (
-                            <div
-                                onClick={() => audioInputRef.current?.click()}
-                                className="border border-dashed border-slate-300 dark:border-slate-750 rounded-xl bg-slate-50 dark:bg-slate-950/20 p-5 flex flex-col items-center justify-center cursor-pointer hover:border-[#5b6ef7] dark:hover:border-[#a78bfa] transition-colors"
-                            >
-                                <FiUploadCloud size={22} className="text-gray-400 mb-1.5" />
-                                <span className="text-xs text-gray-500 dark:text-gray-300 font-medium">Tải tệp giọng nói</span>
-                                <span className="text-[10px] text-gray-450 dark:text-gray-400 mt-0.5">Hỗ trợ MP3, WAV, M4A</span>
-                                <input
-                                    type="file"
-                                    ref={audioInputRef}
-                                    onChange={(e) => {
-                                        const file = e.target.files?.[0];
-                                        if (file) {
-                                            setDirectAudioFile(file);
-                                            setDirectAudioFileName(file.name);
-                                            setDirectAudioUrl(URL.createObjectURL(file));
-                                        }
-                                    }}
-                                    accept="audio/*"
-                                    className="hidden"
-                                />
-                            </div>
-                        ) : (
-                            <div className="p-3 bg-gray-50 dark:bg-gray-600 border border-gray-200 dark:border-gray-550 rounded-xl">
-                                <div className="flex justify-between items-center mb-1.5">
-                                    <span className="text-xs font-semibold text-gray-600 dark:text-gray-300 truncate max-w-[200px]">
-                                        {directAudioFileName}
-                                    </span>
-                                    <button type="button" onClick={handleClearDirectAudio} className="text-red-500 p-1 hover:bg-red-50 dark:hover:bg-red-950/20 rounded cursor-pointer">
-                                        <FiTrash2 size={12} />
-                                    </button>
-                                </div>
-                                <audio src={directAudioUrl} controls className="w-full h-8 animate-fade-in" />
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* 3. Phụ đề text */}
-                <div className="rounded-2xl border border-slate-300 bg-white p-3 dark:border-slate-700 dark:bg-slate-900 shadow-md">
-                    <div className="flex justify-between items-center mb-2">
-                        <p className="text-xs font-semibold text-gray-600 dark:text-gray-300">3. Văn bản muốn làm phụ đề</p>
-                        <span className={`text-[10px] font-semibold ${subtitleText.length > MAX_CHARS * 0.9 ? 'text-red-500' : 'text-gray-400'}`}>
-                            {subtitleText.length}/{MAX_CHARS}
-                        </span>
-                    </div>
-                    <textarea
-                        value={subtitleText}
-                        onChange={(e) => e.target.value.length <= MAX_CHARS && setSubtitleText(e.target.value)}
-                        placeholder="Nhập phụ đề chạy theo tiếng nói..."
-                        className="w-full h-24 p-2 text-sm text-gray-700 dark:text-gray-200 bg-transparent border border-gray-200 dark:border-gray-600 rounded-xl resize-none outline-none placeholder:text-gray-450 leading-relaxed mb-3"
+        <div className="flex flex-col lg:flex-row gap-8 items-stretch w-full">
+            {/* Cột trái: Nhập liệu (Workspace) */}
+            <div className="flex-1 flex flex-col gap-6">
+                {/* 2 Upload Boxes bên cạnh nhau */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
+                    <UploadBox
+                        label="1. Video gốc cần lồng tiếng & phụ đề"
+                        icon={<FiVideo size={22} />}
+                        preview={targetVideoUrl}
+                        isVideo
+                        onClick={() => videoInputRef.current?.click()}
+                        inputRef={videoInputRef}
+                        onChange={(e) => {
+                            if (e.target.files?.[0]) {
+                                const file = e.target.files[0];
+                                if (targetVideoUrl) URL.revokeObjectURL(targetVideoUrl);
+                                setTargetVideo(file);
+                                setTargetVideoUrl(URL.createObjectURL(file));
+                            }
+                        }}
+                        accept="video/*"
+                        hint="Hỗ trợ MP4, WebM (max 5s, 30MB)"
+                    />
+                    <UploadBox
+                        label="2. File giọng nói có sẵn"
+                        icon={<FiUploadCloud size={22} />}
+                        preview={directAudioUrl}
+                        isAudio
+                        audioName={directAudioFileName}
+                        onClick={() => audioInputRef.current?.click()}
+                        inputRef={audioInputRef}
+                        onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                                setDirectAudioFile(file);
+                                setDirectAudioFileName(file.name);
+                                setDirectAudioUrl(URL.createObjectURL(file));
+                            }
+                        }}
+                        accept="audio/*"
+                        hint="Hỗ trợ MP3, WAV, M4A"
                     />
                 </div>
 
-                {/* 4. Action Buttons */}
-                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-300 dark:border-slate-700 p-4 flex flex-col gap-3 shadow-md">
-                    {error === 'login-required' ? (
-                        <div className="p-3 bg-red-50 dark:bg-red-955/20 border border-red-200 dark:border-red-800 rounded-xl text-center">
-                            <p className="text-xs text-red-600 dark:text-red-400 mb-2 font-semibold">Cần đăng nhập để Lip Sync</p>
+                {/* Panel điều khiển */}
+                <div className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-3xl p-6 flex flex-col gap-4 shadow-xl">
+                    <div className="flex flex-col gap-2">
+                        <div className="flex justify-between items-center">
+                            <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200">3. Văn bản muốn làm phụ đề</h3>
+                            <span className={`text-[10px] font-semibold ${subtitleText.length > MAX_CHARS * 0.9 ? 'text-red-500' : 'text-slate-400'}`}>
+                                {subtitleText.length}/{MAX_CHARS}
+                            </span>
+                        </div>
+                        <textarea
+                            value={subtitleText}
+                            onChange={(e) => e.target.value.length <= MAX_CHARS && setSubtitleText(e.target.value)}
+                            placeholder="Nhập phụ đề chạy theo tiếng nói..."
+                            className="w-full h-24 p-3 text-xs text-slate-700 dark:text-slate-250 bg-slate-50/50 dark:bg-slate-950/20 border border-slate-200 dark:border-slate-750 rounded-xl resize-none outline-none focus:border-[#5b6ef7] dark:focus:border-[#a78bfa] transition-colors placeholder:text-slate-450 leading-relaxed"
+                        />
+                    </div>
+
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-2">
+                        <div className="text-left flex-1">
+                            <h3 className="text-base font-bold text-slate-800 dark:text-white">Cấu hình Lip Sync & Lồng tiếng</h3>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">AI tự động lồng tiếng, đồng bộ chuyển động khuôn môi của nhân vật và chạy phụ đề đồng bộ.</p>
+                        </div>
+                        {error === 'login-required' ? (
                             <button
                                 type="button"
                                 onClick={handleOpenLogin}
-                                className="w-full py-2.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer transition-colors shadow-sm animate-bounce"
+                                className="w-full md:w-auto px-8 py-3 bg-gradient-to-r from-red-500 to-red-650 hover:from-red-650 hover:to-red-700 text-white rounded-xl text-sm font-semibold flex items-center justify-center gap-1.5 cursor-pointer transition-all hover:scale-[1.03] animate-bounce shadow-md"
                             >
-                                <FiLogIn size={12} /> Đăng nhập ngay
+                                <FiLogIn size={15} /> Đăng nhập ngay
                             </button>
-                        </div>
-                    ) : (
-                        <button
-                            onClick={handleExecute}
-                            disabled={isLoading || !targetVideo || !directAudioFile}
-                            className="w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#5b6ef7] to-[#a78bfa] hover:from-[#4b5ee7] hover:to-[#906ef5] shadow-md shadow-[#5b6ef7]/20 disabled:from-gray-200 disabled:to-gray-300 disabled:text-gray-400 disabled:shadow-none disabled:cursor-not-allowed transition-all hover:scale-[1.02] transform duration-200 cursor-pointer flex items-center justify-center gap-1.5"
-                        >
-                            <FiCpu size={15} />
-                            {isLoading ? 'Đang xử lý...' : 'Bắt đầu lồng tiếng & phụ đề'}
-                        </button>
-                    )}
-
-                    {resultVideoSrc && (
-                        <div className="flex gap-2">
+                        ) : (
                             <button
-                                onClick={() => swapService.downloadResult(resultVideoSrc, 'lipsync-result.mp4')}
-                                className="flex-1 py-2.5 rounded-xl text-xs font-medium border border-[#5b6ef7] text-[#5b6ef7] hover:bg-[#5b6ef7]/10 dark:text-[#a78bfa] dark:border-[#a78bfa] dark:hover:bg-[#a78bfa]/10 transition-colors cursor-pointer"
+                                onClick={handleExecute}
+                                disabled={isLoading || !targetVideo || !directAudioFile}
+                                className="w-full md:w-auto px-8 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#5b6ef7] to-[#a78bfa] hover:from-[#4b5ee7] hover:to-[#906ef5] shadow-lg shadow-[#5b6ef7]/20 disabled:from-gray-200 disabled:to-gray-300 disabled:text-gray-400 disabled:shadow-none disabled:cursor-not-allowed transition-all hover:scale-[1.03] transform duration-200 cursor-pointer flex items-center justify-center gap-1.5"
                             >
-                               
-                               Tải xuống
+                                
+                                {isLoading ? 'Đang xử lý...' : 'Bắt đầu Lip Sync'}
                             </button>
-                            <button
-                                onClick={handleReset}
-                                className="flex-1 py-2.5 rounded-xl text-xs font-medium border border-slate-300 text-slate-500 hover:bg-slate-50 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-                            >
-                                Làm mới
-                            </button>
-                        </div>
-                    )}
+                        )}
+                    </div>
 
-                    {message && <p className={`text-xs text-center font-semibold leading-relaxed ${msgColor}`}>{message}</p>}
+                    {message && <p className={`text-xs text-center font-medium ${msgColor}`}>{message}</p>}
                     {error && error !== 'login-required' && <p className="text-xs text-center text-red-500 font-semibold">{error}</p>}
                 </div>
             </div>
 
-            {/* ===== CỘT PHẢI: Preview & Kết quả ===== */}
-            <div className="flex-1 min-w-[320px] bg-white dark:bg-slate-900 rounded-2xl border border-slate-300 dark:border-slate-700 overflow-hidden flex flex-col shadow-md">
-                <div className="relative flex-1 min-h-[480px] bg-gray-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden">
-                    {resultVideoSrc || targetVideoUrl ? (
-                        <div className="relative w-full h-full flex items-center justify-center bg-black">
-                            <video
-                                ref={resultVideoRef}
-                                src={resultVideoSrc || targetVideoUrl}
-                                controls
-                                autoPlay={!!resultVideoSrc}
-                                onTimeUpdate={handleTimeUpdate}
-                                onLoadedMetadata={handleLoadedMetadata}
-                                className="max-w-full max-h-[540px] object-contain"
-                            />
-                            {renderSubtitles()}
+            {/* Cột phải: Preview & Kết quả */}
+            <div className="w-full lg:w-[400px] w-500 xl:w-[700px] shrink-0 flex flex-col gap-6">
+                <div className="flex-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 overflow-hidden flex flex-col shadow-xl rounded-3xl min-h-[480px]">
+                    <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800/60 flex justify-between items-center bg-slate-50/50 dark:bg-slate-950/20">
+                        <span className="text-sm font-bold text-slate-700 dark:text-slate-200">Kết quả Lip Sync</span>
+                        {resultVideoSrc && (
+                            <span className="text-xs font-semibold text-green-600 dark:text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full">Hoàn thành</span>
+                        )}
+                    </div>
+
+                    <div className="relative flex-1 min-h-[380px] bg-slate-50 dark:bg-slate-950/30 flex items-center justify-center overflow-hidden">
+                        {resultVideoSrc || targetVideoUrl ? (
+                            <div className="relative w-full h-full flex items-center justify-center bg-black">
+                                <video
+                                    ref={resultVideoRef}
+                                    src={resultVideoSrc || targetVideoUrl}
+                                    controls
+                                    autoPlay={!!resultVideoSrc}
+                                    onTimeUpdate={handleTimeUpdate}
+                                    onLoadedMetadata={handleLoadedMetadata}
+                                    className="max-w-full max-h-[500px] object-contain animate-fade-in"
+                                />
+                                {renderSubtitles()}
+                            </div>
+                        ) : (
+                            <>
+                                <img
+                                    src={videoAI}
+                                    alt="Lip Sync demo"
+                                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${isLoading ? 'opacity-30' : 'opacity-65'}`}
+                                />
+                                {isLoading ? (
+                                    <SwapProcessingOverlay progress={progress} label={message || "AI đang xử lý..."} />
+                                ) : (
+                                    <span className="relative z-10 text-xs text-slate-750 dark:text-white bg-white/70 dark:bg-slate-900/60 px-4 py-2.5 rounded-full backdrop-blur-md font-medium border border-slate-200 dark:border-white/10 text-center max-w-[80%]">
+                                        Video kết quả sẽ hiển thị tại đây kèm phụ đề chạy đồng bộ
+                                    </span>
+                                )}
+                            </>
+                        )}
+                    </div>
+
+                    {resultVideoSrc && (
+                        <div className="p-4 border-t border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-950/20 flex gap-3">
+                            <button
+                                onClick={() => swapService.downloadResult(resultVideoSrc, 'lipsync-result.mp4')}
+                                className="flex-1 py-2.5 rounded-xl text-xs font-semibold border border-[#5b6ef7] text-[#5b6ef7] hover:bg-[#5b6ef7]/10 dark:text-[#a78bfa] dark:border-[#a78bfa] dark:hover:bg-[#a78bfa]/10 transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
+                            >
+                                Tải xuống
+                            </button>
+                            <button
+                                onClick={handleReset}
+                                className="flex-1 py-2.5 rounded-xl text-xs font-semibold border border-slate-300 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:border-slate-700 dark:hover:bg-slate-800 transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
+                            >
+                                Làm mới
+                            </button>
                         </div>
-                    ) : (
-                        <>
-                            <img
-                                src={videoAI}
-                                alt="Lip Sync demo"
-                                className={`absolute inset-0 w-full h-full object-cover transition-opacity ${isLoading ? 'opacity-45' : ''}`}
-                            />
-                            {isLoading ? (
-                                <SwapProcessingOverlay progress={progress} label={message || "AI đang xử lý..."} />
-                            ) : (
-                                <span className="relative z-10 text-xs text-white bg-black/50 px-4 py-2 rounded-full backdrop-blur-md font-medium">
-                                    Video kết quả sẽ hiển thị tại đây kèm phụ đề chạy đồng bộ
-                                </span>
-                            )}
-                        </>
                     )}
                 </div>
             </div>

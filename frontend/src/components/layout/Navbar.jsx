@@ -61,7 +61,7 @@ function Navbar() {
 
                 {/* LOGO */}
                 <h1
-                    className="text-xl font-bold"
+                    className="text-3xl font-bold"
                 >
                     Hyra AI
                 </h1>
@@ -69,7 +69,7 @@ function Navbar() {
                 {/* DARK MODE TOGGLE */}
                 <button
                     onClick={toggleDarkMode}
-                    className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all cursor-pointer text-base"
+                    className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all cursor-pointer text-2xl"
                 >
                     {darkMode ? <FiSun /> : <FiMoon />}
                 </button>
@@ -108,21 +108,19 @@ function Navbar() {
                                 flex
                                 items-center
                                 gap-3
-
+                                
                                 px-4
                                 py-2
-
                                 rounded-xl
 
                                 hover:bg-gray-100
                                 dark:hover:bg-gray-800
-
                                 transition-all
                             "
                         >
 
                             {/* NAME */}
-                            <span className="font-medium text-sm cursor-pointer">
+                            <span className="font-medium text-xl cursor-pointer">
                                 {user.userName || user.email}
                             </span>
 
