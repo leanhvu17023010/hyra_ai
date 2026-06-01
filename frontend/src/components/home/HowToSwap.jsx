@@ -14,8 +14,8 @@ const CONTENT = {
         title: 'Cách hoán đổi khuôn mặt trong video với Hyra AI',
         subtitle: 'AI thay thế khuôn mặt qua từng khung hình. Tạo ra video độc đáo chỉ trong vài bước đơn giản.',
         steps: [
-            { title: 'Chọn ảnh khuôn mặt',  desc: 'Tải lên ảnh chứa khuôn mặt bạn muốn ghép vào video. Nên chọn ảnh chụp thẳng, ánh sáng tốt và rõ nét để AI nhận diện chính xác.' },
             { title: 'Tải video gốc lên',    desc: 'Chọn video cần thay khuôn mặt. Hỗ trợ định dạng MP4, MOV, AVI. Tối đa 5 giây và 30MB để đảm bảo xử lý nhanh và hiệu quả.' },
+            { title: 'Chọn ảnh khuôn mặt',  desc: 'Tải lên ảnh chứa khuôn mặt bạn muốn ghép vào video. Nên chọn ảnh chụp thẳng, ánh sáng tốt và rõ nét để AI nhận diện chính xác.' },
             { title: 'AI xử lý từng frame',  desc: 'Nhấn "Bắt đầu Swap" và hệ thống AI sẽ tự động phân tích, thay thế khuôn mặt qua từng khung hình. Thời gian tùy theo độ dài video.' },
             { title: 'Xem và tải video về',  desc: 'Video kết quả tự phát sau khi xử lý xong. Nhấn "Tải xuống" để lưu file MP4 về máy và chia sẻ với bạn bè.' },
         ],

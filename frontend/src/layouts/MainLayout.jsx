@@ -37,10 +37,10 @@ function MainLayout(){
         }
     }, [darkMode]);
 
-    // Auto-redirect admin users to admin panel
+    // Auto-redirect admin users to admin panel upon landing on the homepage
     useEffect(() => {
         if (isInitialized && user && user.role && user.role.name === 'ADMIN') {
-            if (location.pathname !== '/admin') {
+            if (location.pathname === '/') {
                 navigate('/admin');
             }
         }
@@ -81,7 +81,7 @@ function MainLayout(){
                     />
                 )}
                 
-      170          {activeModal === 'register' && (
+                {activeModal === 'register' && (
                     <RegisterModal 
                         key="register-modal"
                         onClose={closeModal} 

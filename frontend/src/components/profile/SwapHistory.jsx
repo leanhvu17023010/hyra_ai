@@ -53,19 +53,19 @@ function SwapHistory({ history }) {
             )}
 
             <div className="mb-10 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <div className="h-10 w-1.5 bg-green-500 rounded-full" />
-                    <h2 className="text-2xl font-black text-gray-800 dark:text-white uppercase tracking-tight">
+                <div className="flex items-center gap-4">
+                    <div className="h-10 w-2 bg-green-500 rounded-full" />
+                    <h2 className="text-3xl font-black text-slate-800 dark:text-white uppercase tracking-wider">
                         Lịch sử Swap
                     </h2>
                 </div>
-                <span className="text-xl rounded-full bg-gray-100 px-4 py-1.5 font-black uppercase text-gray-500 dark:bg-gray-700 dark:text-gray-300">
+                <span className="text-sm rounded-full bg-slate-150/60 dark:bg-slate-800 px-4 py-1.5 font-bold text-slate-500 dark:text-slate-400">
                     {history.length} mục đã lưu
-                </span>
+                </span> 
             </div>
 
             {history.length > 0 ? (
-                <div className="grid gap-6 md:grid-cols-2">
+                <div className="grid gap-8 sm:grid-cols-2">
                     {history.map((item) => {
                         const isVideo =
                             item.mediaType === 'video' ||
@@ -78,9 +78,9 @@ function SwapHistory({ history }) {
                         return (
                             <div
                                 key={item.id}
-                                className="group overflow-hidden rounded-[24px] border border-gray-300 bg-white p-3 shadow-md transition-all hover:shadow-2xl hover:shadow-blue-500/10 dark:bg-gray-700/50 dark:border-gray-600"
+                                className="group overflow-hidden rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:shadow-md hover:border-slate-350 dark:bg-slate-900/60 dark:border-slate-800 dark:hover:border-slate-700"
                             >
-                                <div className="relative mb-4 aspect-video overflow-hidden rounded-[20px] bg-gray-100">
+                                <div className="relative mb-4 aspect-video overflow-hidden rounded-2xl bg-slate-100 dark:bg-slate-950">
                                     {isVideo ? (
                                         <video
                                             src={mediaSrc}
@@ -95,40 +95,40 @@ function SwapHistory({ history }) {
                                             className="h-full w-full object-cover"
                                         />
                                     )}
-                                    <div className="absolute inset-0 flex items-center justify-center gap-3 bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                                    <div className="absolute inset-0 flex items-center justify-center gap-3 bg-black/45 opacity-0 transition-opacity group-hover:opacity-100">
                                         <button
                                             type="button"
                                             onClick={() => setPreviewItem(item)}
-                                            className="rounded-xl bg-white p-3 text-gray-800 hover:scale-110"
+                                            className="rounded-xl bg-white p-2.5 text-slate-800 hover:scale-105 transition-transform"
                                         >
-                                            <FiEye />
+                                            <FiEye size={20} />
                                         </button>
                                         <button
                                             type="button"
                                             onClick={() => handleDownload(item)}
-                                            className="rounded-xl bg-blue-600 p-3 text-white hover:scale-110"
+                                            className="rounded-xl bg-[#5b6ef7] p-2.5 text-white hover:scale-105 transition-transform"
                                         >
-                                            <FiDownload />
+                                            <FiDownload size={20} />
                                         </button>
                                     </div>
                                 </div>
-                                <div className="px-2 pb-2 flex items-center justify-between">
+                                <div className="px-1.5 pb-1 flex items-center justify-between">
                                     <div>
                                         <div className="flex items-center gap-2">
                                             {isVideo ? (
-                                                <FiVideo className="text-blue-500 text-sm" />
+                                                <FiVideo className="text-slate-500 text-base" />
                                             ) : (
-                                                <FiImage className="text-blue-500 text-sm" />
+                                                <FiImage className="text-slate-500 text-base" />
                                             )}
-                                            <span className="font-bold text-xl text-gray-700 dark:text-gray-200">
+                                            <span className="font-bold text-xl text-slate-700 dark:text-slate-200">
                                                 {isVideo ? 'Video Swap' : 'Ảnh Swap'}
                                             </span>
                                         </div>
-                                        <p className="text-xl font-bold text-gray-400 mt-0.5">
+                                        <p className="text-sm font-semibold text-slate-400 mt-1">
                                             {dateLabel}
                                         </p>
                                     </div>
-                                    <div className="h-2 w-2 rounded-full bg-green-500" />
+                                    <div className="h-2.5 w-2.5 rounded-full bg-green-500 animate-pulse" />
                                 </div>
                             </div>
                         );
@@ -136,11 +136,11 @@ function SwapHistory({ history }) {
                 </div>
             ) : (
                 <div className="flex flex-col items-center justify-center py-24 text-center">
-                    <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gray-50 text-4xl text-gray-200 dark:bg-gray-700">
+                    <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-slate-100 text-3xl text-slate-400 dark:bg-slate-800/80">
                         <FiClock />
                     </div>
-                    <p className="font-bold text-gray-400">Bạn chưa có dữ liệu swap nào.</p>
-                    <p className="text-xs text-gray-300 mt-1">
+                    <p className="font-semibold text-sm text-slate-500 dark:text-slate-400">Bạn chưa có dữ liệu swap nào.</p>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
                         Hoàn tất một lần swap để thấy lịch sử tại đây.
                     </p>
                 </div>

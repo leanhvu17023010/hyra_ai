@@ -56,7 +56,9 @@ function Profile() {
     const menuItems = [
         { id: 'info', label: 'Thông tin tài khoản', icon: <FiUser /> },
         { id: 'password', label: 'Đổi mật khẩu', icon: <FiLock /> },
-        { id: 'history', label: 'Lịch sử Swap', icon: <FiClock /> },
+        ...(user?.role?.name === 'ADMIN' ? [] : [
+            { id: 'history', label: 'Lịch sử Swap', icon: <FiClock /> }
+        ])
     ];
 
     if (loading) {
