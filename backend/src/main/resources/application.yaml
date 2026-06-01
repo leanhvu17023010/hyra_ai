@@ -41,6 +41,10 @@ whisperx:
   api:
     url: http://172.16.0.200:8000
 
+ffmpeg:
+  api:
+    url: http://172.16.0.207:8000
+
 jwt:
   signerKey: "/nvphzRqEgduNfnKy2ztU3XBeojbmK8jzDivxOxLIGnl+D5GfkjyXdLq15xz9af/\n"
   valid-duration: 7200

@@ -33,23 +33,23 @@ public class FFmpegService {
             Path audioFile = Paths.get("uploads", megaTask.getXttsResultUrl().substring(9));
             Path srtFile = Paths.get("uploads", megaTask.getSrtResultUrl().substring(9));
 
-            // Gửi sang máy FFmpeg (Giả lập request)
-            /*
             MultipartBodyBuilder builder = new MultipartBodyBuilder();
             builder.part("video_file", new FileSystemResource(videoFile));
             builder.part("audio_file", new FileSystemResource(audioFile));
-            builder.part("srt_file", new FileSystemResource(srtFile));
+            builder.part("subtitle_file", new FileSystemResource(srtFile));
 
             byte[] videoBytes = ffmpegWebClient.post()
-                    .uri("/api/merge")
+                    .uri("/api/v1/process-mobile")
                     .contentType(MediaType.MULTIPART_FORM_DATA)
                     .bodyValue(builder.build())
                     .retrieve()
                     .bodyToMono(byte[].class)
                     .block(Duration.ofMinutes(10));
-            */
 
-            // TẠM THỜI GIẢ LẬP: Copy video file làm final result để tiếp tục luồng
+            if (videoBytes == null || videoBytes.length == 0) {
+                throw new IllegalStateException("Dữ liệu video trả về từ FFmpeg bị trống");
+            }
+
             String userId = megaTask.getUser().getId();
             String taskId = megaTask.getId();
             Path resultsDir = Paths.get("uploads", userId, "MegaTask", taskId);
@@ -59,14 +59,7 @@ public class FFmpegService {
             String finalFileName = "final_mega_" + taskId + ".mp4";
             Path resultPath = resultsDir.resolve(finalFileName);
             
-            // Giả lập xử lý mất thời gian
-            Thread.sleep(3000);
-            
-            if (Files.exists(videoFile)) {
-                Files.copy(videoFile, resultPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-            } else {
-                Files.createFile(resultPath); // tạo file trống nếu ko có để pass test
-            }
+            Files.write(resultPath, videoBytes);
 
             megaTask.setFinalResultUrl("/uploads/" + userId + "/MegaTask/" + taskId + "/" + finalFileName);
             megaTask.setProgress(100);
@@ -74,6 +67,11 @@ public class FFmpegService {
             megaTaskRepository.save(megaTask);
             log.info("==> FFmpeg hoàn tất, kết quả cuối cùng lưu tại: {}", megaTask.getFinalResultUrl());
 
+        } catch (org.springframework.web.reactive.function.client.WebClientResponseException wce) {
+            log.error("Lỗi HTTP từ máy FFmpeg ({}): {}", wce.getStatusCode(), wce.getResponseBodyAsString());
+            megaTask.setStatus("FAILED");
+            megaTaskRepository.save(megaTask);
+            throw new RuntimeException("FFmpeg processing failed: " + wce.getResponseBodyAsString(), wce);
         } catch (Exception e) {
             log.error("Lỗi trong quá trình xử lý FFmpeg: ", e);
             megaTask.setStatus("FAILED");

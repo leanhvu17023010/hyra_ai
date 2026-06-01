@@ -12,6 +12,7 @@ import com.hyra_ai.backend.repository.MediaRepository;
 import com.hyra_ai.backend.repository.MegaTaskRepository;
 import com.hyra_ai.backend.repository.UserRepository;
 import com.hyra_ai.backend.service.MegaWorkflowService;
+import com.hyra_ai.backend.service.StorageService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -30,6 +31,7 @@ public class MegaWorkflowController {
     MediaRepository mediaRepository;
     MegaTaskRepository megaTaskRepository;
     MegaWorkflowService megaWorkflowService;
+    StorageService storageService;
 
     private User currentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -101,5 +103,74 @@ public class MegaWorkflowController {
                 .message("Lấy trạng thái thành công")
                 .result(response)
                 .build();
+    }
+
+    @PostMapping("/upload-and-start")
+    public ApiResponse<String> uploadAndStart(
+            @RequestParam("targetVideo") org.springframework.web.multipart.MultipartFile targetVideoFile,
+            @RequestParam("voiceSample") org.springframework.web.multipart.MultipartFile voiceSampleFile,
+            @RequestParam(value = "sourceFace", required = false) org.springframework.web.multipart.MultipartFile sourceFaceFile,
+            @RequestParam("inputText") String inputText) {
+        
+        User user = currentUser();
+        String folder = user.getId() + "/library";
+
+        try {
+            if (inputText == null || inputText.trim().isEmpty()) {
+                throw new RuntimeException("Input text không được để trống");
+            }
+
+            // Lưu Target Video
+            String videoPath = storageService.store(targetVideoFile, folder);
+            Media targetVideo = mediaRepository.save(Media.builder()
+                    .fileName(targetVideoFile.getOriginalFilename())
+                    .fileType("VIDEO")
+                    .url("/uploads/" + videoPath)
+                    .build());
+
+            // Lưu Voice Sample
+            String voicePath = storageService.store(voiceSampleFile, folder);
+            Media voiceSample = mediaRepository.save(Media.builder()
+                    .fileName(voiceSampleFile.getOriginalFilename())
+                    .fileType("AUDIO")
+                    .url("/uploads/" + voicePath)
+                    .build());
+
+            // Lưu Source Face (nếu có)
+            Media sourceFace = null;
+            if (sourceFaceFile != null && !sourceFaceFile.isEmpty()) {
+                String facePath = storageService.store(sourceFaceFile, folder);
+                sourceFace = mediaRepository.save(Media.builder()
+                        .fileName(sourceFaceFile.getOriginalFilename())
+                        .fileType("IMAGE")
+                        .url("/uploads/" + facePath)
+                        .build());
+            }
+
+            MegaTask megaTask = MegaTask.builder()
+                    .user(user)
+                    .sourceFace(sourceFace)
+                    .targetVideo(targetVideo)
+                    .voiceSample(voiceSample)
+                    .inputText(inputText)
+                    .status("PENDING")
+                    .progress(0)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+
+            megaTask = megaTaskRepository.save(megaTask);
+
+            // Kích hoạt luồng chạy ngầm
+            megaWorkflowService.executeMegaWorkflow(megaTask);
+
+            return ApiResponse.<String>builder()
+                    .code(200)
+                    .message("Upload và khởi tạo Mega Workflow thành công")
+                    .result(megaTask.getId())
+                    .build();
+
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi upload file: " + e.getMessage(), e);
+        }
     }
 }
