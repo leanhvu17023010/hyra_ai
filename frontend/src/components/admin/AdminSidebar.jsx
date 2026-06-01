@@ -1,4 +1,4 @@
-import { FiGrid, FiUsers, FiLayers, FiList, FiServer, FiCreditCard, FiTerminal, FiLogOut, FiUser } from 'react-icons/fi';
+import { FiGrid, FiUsers, FiLayers, FiList,  FiLogOut } from 'react-icons/fi';
 import useAuthStore from '../../store/authStore';
 
 function AdminSidebar({ activeTab, setActiveTab }) {

@@ -8,32 +8,7 @@ import videoAI from '../../assets/Images/voice.jpg';
 
 const MAX_CHARS = 1000;
 
-function UploadBox({ label, icon, preview, isVideo, onClick, inputRef, onChange, accept, hint }) {
-    return (
-        <div className="rounded-2xl border border-slate-300 bg-white p-3 dark:border-slate-700 dark:bg-slate-900 shadow-md">
-            <p className="mb-2 text-sm font-semibold text-gray-600 dark:text-gray-300">
-                {label}
-            </p>
-            <div
-                className="mx-2 mb-2 h-36 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl bg-slate-50 dark:bg-slate-955/40 flex items-center justify-center cursor-pointer hover:border-[#5b6ef7] dark:hover:border-[#a78bfa] transition-colors overflow-hidden"
-                onClick={onClick}
-            >
-                <input type="file" accept={accept} className="hidden" ref={inputRef} onChange={onChange} />
-                {preview ? (
-                    isVideo
-                        ? <video src={preview} className="w-full h-full object-contain" muted playsInline />
-                        : <img src={preview} alt={label} className="w-full h-full object-contain" />
-                ) : (
-                    <div className="flex flex-col items-center gap-1 text-gray-400">
-                        {icon}
-                        <span className="text-xs">Nhấn để tải lên</span>
-                        <span className="text-[11px] text-gray-355">{hint}</span>
-                    </div>
-                )}
-            </div>
-        </div>
-    );
-}
+
 
 function VideoVoiceCloneLipSync() {
     // Inputs
@@ -283,30 +258,83 @@ function VideoVoiceCloneLipSync() {
         : 'text-[#5b6ef7] dark:text-[#a78bfa]';
 
     return (
-        <div className="flex gap-6 items-start w-full flex-wrap">
+        <div className="
+    grid
+    lg:grid-cols-[380px_1fr]
+    gap-6
+    w-full
+">
 
             {/* ===== CỘT TRÁI: Điều khiển lồng tiếng ===== */}
             <div className="flex flex-col gap-4 w-80 shrink-0">
                 
-                {/* 1. Chọn video gốc */}
-                <UploadBox
-                    label="1. Video gốc cần lồng tiếng & phụ đề"
-                    icon={<FiVideo size={22} />}
-                    preview={targetVideoUrl}
-                    isVideo
-                    onClick={() => videoInputRef.current?.click()}
-                    inputRef={videoInputRef}
-                    onChange={(e) => {
-                        if (e.target.files?.[0]) {
-                            const file = e.target.files[0];
-                            if (targetVideoUrl) URL.revokeObjectURL(targetVideoUrl);
-                            setTargetVideo(file);
-                            setTargetVideoUrl(URL.createObjectURL(file));
+{/* 1. Chọn video gốc */}
+<div className="rounded-2xl border border-slate-300 bg-white p-3 dark:border-slate-700 dark:bg-slate-900 shadow-md">
+    <p className="mb-3 text-xs font-semibold text-gray-600 dark:text-gray-300">
+        1. Video gốc cần lồng tiếng & phụ đề
+    </p>
+
+    {!targetVideoUrl ? (
+        <div
+            onClick={() => videoInputRef.current?.click()}
+            className="border border-dashed border-slate-300 dark:border-slate-750 rounded-xl bg-slate-50 dark:bg-slate-950/20 p-5 flex flex-col items-center justify-center cursor-pointer hover:border-[#5b6ef7] dark:hover:border-[#a78bfa] transition-colors"
+        >
+            <FiVideo size={22} className="text-gray-400 mb-1.5" />
+            <span className="text-xs text-gray-500 dark:text-gray-300 font-medium">
+                Tải video lên
+            </span>
+            <span className="text-[10px] text-gray-450 dark:text-gray-400 mt-0.5">
+                Hỗ trợ MP4, WebM (max 5s, 30MB)
+            </span>
+
+            <input
+                type="file"
+                ref={videoInputRef}
+                accept="video/*"
+                className="hidden"
+                onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                        if (targetVideoUrl) {
+                            URL.revokeObjectURL(targetVideoUrl);
                         }
+
+                        setTargetVideo(file);
+                        setTargetVideoUrl(URL.createObjectURL(file));
+                    }
+                }}
+            />
+        </div>
+    ) : (
+        <div className="p-3 bg-gray-50 dark:bg-gray-600 border border-gray-200 dark:border-gray-550 rounded-xl">
+            <div className="flex justify-between items-center mb-2">
+                <span className="text-xs font-semibold text-gray-600 dark:text-gray-300 truncate max-w-[200px]">
+                    {targetVideo?.name}
+                </span>
+
+                <button
+                    type="button"
+                    onClick={() => {
+                        if (targetVideoUrl) {
+                            URL.revokeObjectURL(targetVideoUrl);
+                        }
+                        setTargetVideo(null);
+                        setTargetVideoUrl('');
                     }}
-                    accept="video/*"
-                    hint="Hỗ trợ MP4, WebM (max 5s, 30MB)"
-                />
+                    className="text-red-500 p-1 hover:bg-red-50 dark:hover:bg-red-950/20 rounded cursor-pointer"
+                >
+                    <FiTrash2 size={12} />
+                </button>
+            </div>
+
+            <video
+                src={targetVideoUrl}
+                controls
+                className="w-full rounded-lg max-h-40 object-cover animate-fade-in"
+            />
+        </div>
+    )}
+</div>
 
                 {/* 2. Upload file giọng nói */}
                 <div className="rounded-2xl border border-slate-300 bg-white p-3 dark:border-slate-700 dark:bg-slate-900 shadow-md">
@@ -397,13 +425,14 @@ function VideoVoiceCloneLipSync() {
                                 onClick={() => swapService.downloadResult(resultVideoSrc, 'lipsync-result.mp4')}
                                 className="flex-1 py-2.5 rounded-xl text-xs font-medium border border-[#5b6ef7] text-[#5b6ef7] hover:bg-[#5b6ef7]/10 dark:text-[#a78bfa] dark:border-[#a78bfa] dark:hover:bg-[#a78bfa]/10 transition-colors cursor-pointer"
                             >
-                                ⬇ Tải xuống
+                               
+                               Tải xuống
                             </button>
                             <button
                                 onClick={handleReset}
                                 className="flex-1 py-2.5 rounded-xl text-xs font-medium border border-slate-300 text-slate-500 hover:bg-slate-50 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                             >
-                                🔄 Làm mới
+                                Làm mới
                             </button>
                         </div>
                     )}
