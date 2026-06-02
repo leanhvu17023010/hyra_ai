@@ -7,15 +7,17 @@ import swapService from '../../services/swapService';
 import SwapProcessingOverlay from './SwapProcessingOverlay';
 import { useWhisperTaskPolling } from '../../hooks/useWhisperTaskPolling';
 
-function UploadBox({ label, icon, preview, audioName, onClick, inputRef, onChange, accept, hint }) {
+function UploadBox({ label, icon, preview, audioName, onClick, inputRef, onChange, accept, hint, disabled }) {
     return (
-        <div className="rounded-3xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-5 shadow-lg flex flex-col flex-1">
+        <div className={`rounded-3xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-5 shadow-lg flex flex-col flex-1 ${disabled ? 'opacity-65' : ''}`}>
             <p className="mb-3 text-sm font-bold text-slate-700 dark:text-slate-200">{label}</p>
             <div
-                className="flex-1 min-h-[220px] border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl bg-slate-50 dark:bg-slate-950/40 flex flex-col items-center justify-center cursor-pointer hover:border-[#5b6ef7] dark:hover:border-[#a78bfa] hover:bg-slate-100/50 dark:hover:bg-slate-950/60 transition-all duration-300 overflow-hidden"
-                onClick={onClick}
+                className={`flex-1 min-h-[220px] border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl bg-slate-50 dark:bg-slate-950/40 flex flex-col items-center justify-center transition-all duration-300 overflow-hidden ${
+                    disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:border-[#5b6ef7] dark:hover:border-[#a78bfa] hover:bg-slate-100/50 dark:hover:bg-slate-950/60'
+                }`}
+                onClick={disabled ? null : onClick}
             >
-                <input type="file" accept={accept} className="hidden" ref={inputRef} onChange={onChange} />
+                <input type="file" accept={accept} className="hidden" ref={inputRef} onChange={onChange} disabled={disabled} />
                 {preview ? (
                     <div className="flex flex-col items-center justify-center gap-3 p-4 w-full h-full text-slate-700 dark:text-slate-200" onClick={(e) => e.stopPropagation()}>
                         <div className="w-12 h-12 rounded-full bg-[#5b6ef7]/5 dark:bg-[#a78bfa]/5 flex items-center justify-center text-[#5b6ef7] dark:text-[#a78bfa] mb-1">
@@ -206,6 +208,7 @@ function WhisperSubtitle() {
                         }}
                         accept="audio/*"
                         hint="Hỗ trợ MP3, WAV, M4A, OGG"
+                        disabled={isLoading}
                     />
 
                     {/* Điều khiển */}
