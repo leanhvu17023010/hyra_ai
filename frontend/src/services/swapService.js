@@ -61,32 +61,71 @@ const swapService = {
     },
 
     /**
-     * Lịch sử swap: ưu tiên BE, fallback localStorage.
+     * Lịch sử swap: gộp dữ liệu từ BE và localStorage (để hiển thị cả XTTS và Whisper).
      * @returns {Promise<{ result: SwapHistoryItem[] }>}
      */
     getSwapHistory: async () => {
+        let beHistory = [];
         try {
             const response = await api.get('/swap/tasks/history');
             if (Array.isArray(response.data?.result)) {
-                return response.data;
+                beHistory = response.data.result;
             }
         } catch {
-            /* BE chưa có endpoint — dùng local theo tài khoản */
+            /* BE chưa có endpoint hoặc lỗi */
         }
-        return { result: getSwapHistoryLocal() };
+
+        const localHistory = getSwapHistoryLocal();
+        const mergedMap = new Map();
+
+        // 1. Nạp local history
+        localHistory.forEach((item) => {
+            mergedMap.set(item.id, item);
+        });
+
+        // 2. Nạp BE history (ưu tiên BE nếu trùng ID)
+        beHistory.forEach((item) => {
+            mergedMap.set(item.id, {
+                ...item,
+                mediaType: item.mediaType || (isVideoResultUrl(item.resultUrl) ? 'video' : 'image'),
+            });
+        });
+
+        const mergedList = Array.from(mergedMap.values());
+
+        // 3. Sắp xếp theo ngày tạo mới nhất lên đầu
+        mergedList.sort((a, b) => {
+            const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            return dateB - dateA;
+        });
+
+        return { result: mergedList };
     },
 
     getStats: async () => {
+        let beStats = { imageSwapCount: 0, videoSwapCount: 0 };
         try {
             const response = await api.get('/swap/tasks/stats');
             if (response.data?.result != null && typeof response.data.result === 'object') {
-                return response.data;
+                beStats = response.data.result;
             }
         } catch {
             /* fallback */
         }
-        const history = getSwapHistoryLocal();
-        return { result: computeStatsFromHistory(history) };
+
+        const historyRes = await swapService.getSwapHistory();
+        const mergedHistory = historyRes.result || [];
+        const computedStats = computeStatsFromHistory(mergedHistory);
+
+        return {
+            result: {
+                imageSwapCount: Math.max(beStats.imageSwapCount || 0, computedStats.imageSwapCount || 0),
+                videoSwapCount: Math.max(beStats.videoSwapCount || 0, computedStats.videoSwapCount || 0),
+                audioCount: computedStats.audioCount || 0,
+                subtitleCount: computedStats.subtitleCount || 0,
+            },
+        };
     },
 
     downloadResult: async (resultUrl, filename = 'swap-result') => {

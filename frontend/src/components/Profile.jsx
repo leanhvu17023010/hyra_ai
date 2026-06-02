@@ -103,19 +103,19 @@ function Profile() {
                     {user?.role?.name !== 'ADMIN' && (
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full lg:w-auto">
                             <div className="bg-slate-800/40 border border-slate-700/50 backdrop-blur-md rounded-2xl p-4 text-center min-w-[110px]">
-                                <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Ảnh Swap</span>
+                                <span className="block text-[12px] font-bold text-slate-400 uppercase tracking-wider">Ảnh Swap</span>
                                 <span className="block text-2xl font-black text-[#5b6ef7] dark:text-[#a78bfa] mt-1">{stats.imageSwapCount || 0}</span>
                             </div>
                             <div className="bg-slate-800/40 border border-slate-700/50 backdrop-blur-md rounded-2xl p-4 text-center min-w-[110px]">
-                                <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Video Swap</span>
+                                <span className="block text-[12px] font-bold text-slate-400 uppercase tracking-wider">Video Swap</span>
                                 <span className="block text-2xl font-black text-[#5b6ef7] dark:text-[#a78bfa] mt-1">{stats.videoSwapCount || 0}</span>
                             </div>
                             <div className="bg-slate-800/40 border border-slate-700/50 backdrop-blur-md rounded-2xl p-4 text-center min-w-[110px]">
-                                <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Giọng nói</span>
+                                <span className="block text-[12px] font-bold text-slate-400 uppercase tracking-wider">Giọng nói</span>
                                 <span className="block text-2xl font-black text-[#5b6ef7] dark:text-[#a78bfa] mt-1">{stats.audioCount || 0}</span>
                             </div>
                             <div className="bg-slate-800/40 border border-slate-700/50 backdrop-blur-md rounded-2xl p-4 text-center min-w-[110px]">
-                                <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Phụ đề</span>
+                                <span className="block text-[12px] font-bold text-slate-400 uppercase tracking-wider">Phụ đề</span>
                                 <span className="block text-2xl font-black text-[#5b6ef7] dark:text-[#a78bfa] mt-1">{stats.subtitleCount || 0}</span>
                             </div>
                         </div>
@@ -130,7 +130,7 @@ function Profile() {
                         key={item.id}
                         type="button"
                         onClick={() => setActiveSection(item.id)}
-                        className={`pb-4 px-6 text-sm font-bold flex items-center gap-2 border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+                        className={`pb-4 px-6 text-xl font-bold flex items-center gap-2 border-b-2 transition-all cursor-pointer whitespace-nowrap ${
                             activeSection === item.id
                                 ? 'border-[#5b6ef7] text-[#5b6ef7] dark:border-[#a78bfa] dark:text-[#a78bfa]'
                                 : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-450 dark:hover:text-slate-200'
@@ -144,9 +144,9 @@ function Profile() {
                 <button
                     type="button"
                     onClick={handleLogout}
-                    className="ml-auto pb-4 px-6 text-sm font-bold flex items-center gap-2 text-red-500 hover:text-red-650 transition-all cursor-pointer whitespace-nowrap"
+                    className="ml-auto pb-4 px-6 text-xl font-bold flex items-center gap-2 text-red-500 hover:text-red-650 transition-all cursor-pointer whitespace-nowrap"
                 >
-                    <FiLogOut className="text-base" />
+                    <FiLogOut className="text-xl" />
                     <span>Đăng xuất</span>
                 </button>
             </div>
