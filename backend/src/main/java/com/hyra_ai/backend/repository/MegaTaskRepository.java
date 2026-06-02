@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MegaTaskRepository extends JpaRepository<MegaTask, String> {
+    java.util.List<MegaTask> findByCreatedAtBefore(java.time.LocalDateTime time);
 }

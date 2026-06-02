@@ -24,6 +24,9 @@ import java.util.List;
 public class MediaCleanupService {
 
     SwapTaskRepository swapTaskRepository;
+    com.hyra_ai.backend.repository.XttsTaskRepository xttsTaskRepository;
+    com.hyra_ai.backend.repository.WhisperTaskRepository whisperTaskRepository;
+    com.hyra_ai.backend.repository.MegaTaskRepository megaTaskRepository;
     MediaRepository mediaRepository;
 
     // Chạy lúc 00:00 mỗi ngày
@@ -32,66 +35,181 @@ public class MediaCleanupService {
     public void cleanupExpiredTasks() {
         log.info("Bắt đầu job dọn dẹp các task quá hạn...");
 
-        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
-        // Lấy tất cả task cũ hơn 7 ngày (tạm bỏ qua vụ filter status ở SQL để debug)
-        List<SwapTask> oldTasks = swapTaskRepository.findByCreateAtBefore(sevenDaysAgo);
-        
-//        log.info("Tìm thấy {} tasks cũ hơn 7 ngày trong Database.", oldTasks.size());
+        LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(3);
+        // Lấy tất cả task cũ hơn 3 ngày (tạm bỏ qua vụ filter status ở SQL để debug)
+        cleanupSwapTasks(threeDaysAgo);
+        cleanupXttsTasks(threeDaysAgo);
+        cleanupWhisperTasks(threeDaysAgo);
+        cleanupMegaTasks(threeDaysAgo);
 
+        log.info("Job dọn dẹp hoàn tất.");
+    }
+
+    private void cleanupSwapTasks(LocalDateTime threshold) {
+        List<SwapTask> oldTasks = swapTaskRepository.findByCreateAtBefore(threshold);
         int deletedCount = 0;
-
         for (SwapTask task : oldTasks) {
             Integer progress = task.getProgress();
-            boolean isFailedTask = (progress == null || progress == 0);
+            boolean isFailedTask = (progress == null || progress == 0 || "Failed".equalsIgnoreCase(task.getStatus()));
 
-            // Chỉ bỏ qua (continue) nếu task ĐÃ EXPIRED VÀ ĐỒNG THỜI KHÔNG PHẢI task lỗi.
-            // Nếu là task lỗi thì vẫn đi tiếp xuống dưới để Hard Delete.
             if ("EXPIRED".equals(task.getStatus()) && !isFailedTask) {
                 continue;
             }
 
             try {
-                // 1. Xoá file vật lý
                 if (task.getUser() != null) {
                     Path taskFolder = Paths.get("uploads", task.getUser().getId(), task.getId());
-                    File folder = taskFolder.toFile();
-                    if (folder.exists()) {
-                        FileSystemUtils.deleteRecursively(folder);
-                        log.info("Đã xoá thư mục vật lý của task: {}", task.getId());
-                    }
+                    FileSystemUtils.deleteRecursively(taskFolder.toFile());
                 }
 
-                // 2. Quyết định Xoá cứng (Hard Delete) hay Xoá mềm (Soft Delete)
                 var sourceImage = task.getSourceImage();
                 var targetMedia = task.getTargetMedia();
                 var audioMedia = task.getAudioMedia();
 
                 if (isFailedTask) {
-                    // Task bị lỗi từ đầu -> Xoá hẳn khỏi bảng SwapTask
                     swapTaskRepository.delete(task);
-                    log.info("Đã xoá vĩnh viễn (Hard Delete) task lỗi khỏi DB: {}", task.getId());
                 } else {
-                    // Task đã từng chạy thành công -> Giữ lại lịch sử (Soft Delete)
                     task.setSourceImage(null);
                     task.setTargetMedia(null);
                     task.setAudioMedia(null);
                     task.setResultUrl(null);
                     task.setStatus("EXPIRED");
-                    
                     swapTaskRepository.save(task);
                 }
 
-                // 3. Xoá các Media records khỏi database
                 if (sourceImage != null) mediaRepository.delete(sourceImage);
                 if (targetMedia != null) mediaRepository.delete(targetMedia);
                 if (audioMedia != null) mediaRepository.delete(audioMedia);
 
                 deletedCount++;
             } catch (Exception e) {
-                log.error("Lỗi khi dọn dẹp task: {}", task.getId(), e);
+                log.error("Lỗi khi dọn dẹp SwapTask: {}", task.getId(), e);
             }
         }
+        log.info("Đã xử lý {} SwapTasks.", deletedCount);
+    }
 
-        log.info("Job dọn dẹp hoàn tất. Đã xử lý {} tasks.", deletedCount);
+    private void cleanupXttsTasks(LocalDateTime threshold) {
+        List<com.hyra_ai.backend.entity.XttsTask> oldTasks = xttsTaskRepository.findByCreateAtBefore(threshold);
+        int deletedCount = 0;
+        for (com.hyra_ai.backend.entity.XttsTask task : oldTasks) {
+            Integer progress = task.getProgress();
+            boolean isFailedTask = (progress == null || progress == 0 || "Failed".equalsIgnoreCase(task.getStatus()));
+
+            if ("EXPIRED".equals(task.getStatus()) && !isFailedTask) {
+                continue;
+            }
+
+            try {
+                if (task.getUser() != null) {
+                    Path taskFolder = Paths.get("uploads", task.getUser().getId(), "XttsTask", task.getId());
+                    FileSystemUtils.deleteRecursively(taskFolder.toFile());
+                }
+
+                var speakerWav = task.getSpeakerWav();
+
+                if (isFailedTask) {
+                    xttsTaskRepository.delete(task);
+                } else {
+                    task.setSpeakerWav(null);
+                    task.setResultUrl(null);
+                    task.setStatus("EXPIRED");
+                    xttsTaskRepository.save(task);
+                }
+
+                if (speakerWav != null) mediaRepository.delete(speakerWav);
+
+                deletedCount++;
+            } catch (Exception e) {
+                log.error("Lỗi khi dọn dẹp XttsTask: {}", task.getId(), e);
+            }
+        }
+        log.info("Đã xử lý {} XttsTasks.", deletedCount);
+    }
+
+    private void cleanupWhisperTasks(LocalDateTime threshold) {
+        List<com.hyra_ai.backend.entity.WhisperTask> oldTasks = whisperTaskRepository.findByCreateAtBefore(threshold);
+        int deletedCount = 0;
+        for (com.hyra_ai.backend.entity.WhisperTask task : oldTasks) {
+            Integer progress = task.getProgress();
+            boolean isFailedTask = (progress == null || progress == 0 || "Failed".equalsIgnoreCase(task.getStatus()));
+
+            if ("EXPIRED".equals(task.getStatus()) && !isFailedTask) {
+                continue;
+            }
+
+            try {
+                if (task.getUser() != null) {
+                    Path taskFolder = Paths.get("uploads", task.getUser().getId(), "WhisperTask", task.getId());
+                    FileSystemUtils.deleteRecursively(taskFolder.toFile());
+                }
+
+                var audioMedia = task.getAudioMedia();
+
+                if (isFailedTask) {
+                    whisperTaskRepository.delete(task);
+                } else {
+                    task.setAudioMedia(null);
+                    task.setResultSrtUrl(null);
+                    task.setResultTxtUrl(null);
+                    task.setStatus("EXPIRED");
+                    whisperTaskRepository.save(task);
+                }
+
+                if (audioMedia != null) mediaRepository.delete(audioMedia);
+
+                deletedCount++;
+            } catch (Exception e) {
+                log.error("Lỗi khi dọn dẹp WhisperTask: {}", task.getId(), e);
+            }
+        }
+        log.info("Đã xử lý {} WhisperTasks.", deletedCount);
+    }
+
+    private void cleanupMegaTasks(LocalDateTime threshold) {
+        List<com.hyra_ai.backend.entity.MegaTask> oldTasks = megaTaskRepository.findByCreatedAtBefore(threshold);
+        int deletedCount = 0;
+        for (com.hyra_ai.backend.entity.MegaTask task : oldTasks) {
+            Integer progress = task.getProgress();
+            boolean isFailedTask = (progress == null || progress == 0 || "FAILED".equalsIgnoreCase(task.getStatus()));
+
+            if ("EXPIRED".equals(task.getStatus()) && !isFailedTask) {
+                continue;
+            }
+
+            try {
+                if (task.getUser() != null) {
+                    Path taskFolder = Paths.get("uploads", task.getUser().getId(), "MegaTask", task.getId());
+                    FileSystemUtils.deleteRecursively(taskFolder.toFile());
+                }
+
+                var sourceFace = task.getSourceFace();
+                var targetVideo = task.getTargetVideo();
+                var voiceSample = task.getVoiceSample();
+
+                if (isFailedTask) {
+                    megaTaskRepository.delete(task);
+                } else {
+                    task.setSourceFace(null);
+                    task.setTargetVideo(null);
+                    task.setVoiceSample(null);
+                    task.setSwapResultUrl(null);
+                    task.setXttsResultUrl(null);
+                    task.setSrtResultUrl(null);
+                    task.setFinalResultUrl(null);
+                    task.setStatus("EXPIRED");
+                    megaTaskRepository.save(task);
+                }
+
+                if (sourceFace != null) mediaRepository.delete(sourceFace);
+                if (targetVideo != null) mediaRepository.delete(targetVideo);
+                if (voiceSample != null) mediaRepository.delete(voiceSample);
+
+                deletedCount++;
+            } catch (Exception e) {
+                log.error("Lỗi khi dọn dẹp MegaTask: {}", task.getId(), e);
+            }
+        }
+        log.info("Đã xử lý {} MegaTasks.", deletedCount);
     }
 }

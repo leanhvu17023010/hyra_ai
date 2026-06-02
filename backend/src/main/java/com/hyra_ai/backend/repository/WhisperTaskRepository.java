@@ -12,4 +12,6 @@ public interface WhisperTaskRepository extends JpaRepository<WhisperTask, String
     
     @Query("SELECT w FROM WhisperTask w WHERE w.user.id = :userId ORDER BY w.createAt DESC")
     List<WhisperTask> findWithResultByUserId(@Param("userId") String userId, Pageable pageable);
+
+    List<WhisperTask> findByCreateAtBefore(java.time.LocalDateTime time);
 }
