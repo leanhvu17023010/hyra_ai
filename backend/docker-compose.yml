@@ -4,9 +4,10 @@ services:
   mysql:
     image: mysql:8.0
     container_name: hyra_mysql
+    env_file: .env
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: hyra_ai
+      MYSQL_ROOT_PASSWORD: ${DBMS_PASSWORD:-root}
+      MYSQL_DATABASE: ${DB_NAME:-hyra_ai}
     ports:
       - "3306:3306"
     volumes:
@@ -21,16 +22,14 @@ services:
   backend:
     build: .
     container_name: hyra_backend
+    env_file: .env
     ports:
       - "8080:8080"
     environment:
-      # Ghi đè URL kết nối DB để trỏ về container mysql
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/hyra_ai?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: root
+      # Ghi đè URL kết nối DB để trỏ về container mysql thay vì localhost trong .env
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${DB_NAME:-hyra_ai}?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       
       # Ghi đè các biến môi trường khi deploy nếu cần
-      # BREVO_API_KEY: "your_real_api_key_here"
       # APP_FRONTEND_BASE_URL: "https://your-frontend-domain.com"
       
       # Bạn có thể trỏ lại IP của các máy chủ AI tại đây nếu chúng khác IP trên local
