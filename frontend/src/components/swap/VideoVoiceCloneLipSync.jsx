@@ -221,7 +221,7 @@ function VideoVoiceCloneLipSync() {
                 swapService.saveCompletedTaskToHistory(_taskId, task.finalResultUrl, 'video');
                 
                 setProgress(100);
-                setMessage('Hoàn thành lồng tiếng & đồng bộ khẩu hình môi!');
+                setMessage('Hoàn thành lồng tiếng & ghép phụ đề video!');
                 setIsLoading(false);
             } catch {
                 setMessage('Tải tệp kết quả thất bại.');
@@ -454,7 +454,7 @@ function VideoVoiceCloneLipSync() {
                             <>
                                 <img
                                     src={videoAI}
-                                    alt="Lip Sync demo"
+                                    alt="Lồng tiếng & Phụ đề demo"
                                     className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${isLoading ? 'opacity-30' : 'opacity-65'}`}
                                 />
                                 {isLoading ? (
@@ -506,7 +506,7 @@ function VideoVoiceCloneLipSync() {
 
                             <div className="flex gap-3">
                                 <button
-                                    onClick={() => swapService.downloadResult(resultVideoSrc, 'lipsync-result.mp4')}
+                                    onClick={() => swapService.downloadResult(resultVideoSrc, 'longtieng-phude-result.mp4')}
                                     className="flex-1 py-2.5 rounded-xl text-xs font-semibold border border-[#5b6ef7] text-[#5b6ef7] hover:bg-[#5b6ef7]/10 dark:text-[#a78bfa] dark:border-[#a78bfa] dark:hover:bg-[#a78bfa]/10 transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
                                 >
                                     Tải video hoàn chỉnh (Blob)

@@ -1,6 +1,5 @@
 import { useState } from "react"
 import { FcGoogle } from "react-icons/fc"
-import { FaGithub } from "react-icons/fa"
 import { useGoogleLogin } from "@react-oauth/google"
 import axios from "axios"
 import authService from "../../services/authService"
@@ -100,17 +99,6 @@ function LoginModal({ onClose, onSwitch }) {
       setLoading(false)
     }
   }
-  const handleGithubLogin = () => {
-    const clientId = import.meta.env.VITE_GITHUB_CLIENT_ID;
-    const redirectUri = `${window.location.origin}/oauth/callback/github`;
-    const scope = "user:email";
-
-      window.location.href = `
-      https://github.com/login/oauth/authorize?
-      client_id=${clientId}
-      &redirect_uri=${encodeURIComponent(redirectUri)}
-      &scope=${scope}`;
-  }
 
   // Không cần kiểm tra !open ở đây vì modal được render có điều kiện từ MainLayout
 
@@ -197,36 +185,7 @@ function LoginModal({ onClose, onSwitch }) {
           <FcGoogle className="w-6 h-6"></FcGoogle>
           Đăng nhập bằng Google
         </button>
- 
-         {/* GITHUB */}
-        <button
-          onClick={handleGithubLogin}
-          className="
-            w-full
-            py-4
-            
-            rounded-2xl
 
-            border
-            border-zinc-300
-            dark:border-zinc-700
-            flex
-            items-center
-            justify-center
-            gap-3
-            text-lg
-            font-medium
-            hover:bg-zinc-100
-            dark:hover:bg-zinc-700
-            dark:text-white
-            transition-all
-            duration-300
-            cursor-pointer
-          "
-        >
-          <FaGithub className="w-6 h-6 text-black dark:text-white" />
-          Đăng nhập bằng GitHub
-        </button>
 
         <div className=" flex items-center gap-4 my-8 ">
 
