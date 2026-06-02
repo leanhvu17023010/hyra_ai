@@ -6,6 +6,7 @@ services:
     container_name: hyra_mysql
     env_file: .env
     environment:
+      TZ: Asia/Ho_Chi_Minh
       MYSQL_ROOT_PASSWORD: ${DBMS_PASSWORD:-root}
       MYSQL_DATABASE: ${DB_NAME:-hyra_ai}
     ports:
@@ -14,10 +15,12 @@ services:
       - mysql_data:/var/lib/mysql
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD"]
       timeout: 20s
       retries: 10
     restart: unless-stopped
+    networks:
+      - hyra_net
 
   backend:
     build: .
@@ -26,8 +29,9 @@ services:
     ports:
       - "8080:8080"
     environment:
+      TZ: Asia/Ho_Chi_Minh
       # Ghi đè URL kết nối DB để trỏ về container mysql thay vì localhost trong .env
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${DB_NAME:-hyra_ai}?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${DB_NAME:-hyra_ai}?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true
       
       # Ghi đè các biến môi trường khi deploy nếu cần
       # APP_FRONTEND_BASE_URL: "https://your-frontend-domain.com"
@@ -44,6 +48,12 @@ services:
     volumes:
       # Mount thư mục uploads ra ngoài máy chủ thật để tránh mất file khi khởi động lại container
       - ./uploads:/app/uploads
+    networks:
+      - hyra_net
+
+networks:
+  hyra_net:
+    driver: bridge
 
 volumes:
   mysql_data:
