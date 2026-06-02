@@ -23,7 +23,6 @@ function TextToSpeech() {
     
     // AI Processing States
     const [isLoading, setIsLoading] = useState(false);
-    const [progress, setProgress] = useState(0);
     const [message, setMessage] = useState('');
 
     const fileInputRef = useRef(null);
@@ -133,22 +132,18 @@ function TextToSpeech() {
 
         try {
             setIsLoading(true);
-            setProgress(10);
             setMessage('Đang khởi tạo tác vụ hoán đổi giọng nói...');
 
             const createRes = await xttsService.createTtsTask();
             const taskId = createRes.result;
             if (!taskId) throw new Error('Không khởi tạo được task XTTS');
 
-            setProgress(30);
             setMessage('Đang tải tệp âm thanh mẫu lên hệ thống...');
             await xttsService.uploadVoiceToTtsTask(audioFile, taskId);
 
-            setProgress(50);
             setMessage('Bắt đầu xử lý nhân bản giọng nói AI...');
             await xttsService.processTtsTask(taskId, text, 'vi');
 
-            setProgress(70);
             setMessage('Hệ thống AI đang tạo file âm thanh của bạn...');
             
             let pollAttempts = 0;
@@ -169,7 +164,6 @@ function TextToSpeech() {
 
                     if (taskData.status === 'Complete') {
                         clearInterval(pollInterval);
-                        setProgress(100);
                         setMessage('Hoàn tất hoán đổi giọng đọc AI!');
                         
                         // Lưu lịch sử
@@ -194,7 +188,7 @@ function TextToSpeech() {
                         setError('Tác vụ nhân bản giọng nói thất bại trên máy chủ AI.');
                     } else {
                         // Vẫn đang xử lý (Pending / Processing)
-                        setMessage(`Đang sinh âm thanh... Vui lòng đợi (${pollAttempts}s)`);
+                        setMessage('Đang sinh âm thanh... Vui lòng đợi');
                     }
                 } catch (pollErr) {
                     console.error('Lỗi khi kiểm tra trạng thái XTTS:', pollErr);
@@ -403,18 +397,11 @@ function TextToSpeech() {
                                 <div className="w-10 h-10 border-4 border-[#5b6ef7]/20 border-t-[#5b6ef7] dark:border-t-[#a78bfa] rounded-full animate-spin" />
                                 <div className="text-center">
                                     <p className="text-sm font-bold text-[#5b6ef7] dark:text-[#a78bfa]">
-                                        Đang xử lý... {progress}%
+                                        Đang xử lý...
                                     </p>
                                     <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 max-w-[200px] leading-tight">
                                         {message}
                                     </p>
-                                </div>
-                                {/* Thanh progress nhỏ */}
-                                <div className="w-full bg-gray-150 dark:bg-gray-800 h-1.5 rounded-full overflow-hidden mt-1">
-                                    <div
-                                        className="h-full bg-gradient-to-r from-[#5b6ef7] to-[#a78bfa] transition-all duration-300"
-                                        style={{ width: `${progress}%` }}
-                                    />
                                 </div>
                             </div>
                         ) : (
