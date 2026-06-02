@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { FiLogIn, FiVolume2, FiCopy, FiFileText, FiDownload, FiCheck, FiRefreshCw } from 'react-icons/fi';
+import { FiLogIn, FiVolume2, FiCopy, FiFileText, FiDownload, FiCheck } from 'react-icons/fi';
 import whisperService from '../../services/whisperService';
 import api from '../../services/api';
 import swapService from '../../services/swapService';
@@ -57,9 +57,7 @@ function WhisperSubtitle() {
         srtUrl: ''
     });
 
-    // Lịch sử
-    const [history, setHistory] = useState([]);
-    const [historyLoading, setHistoryLoading] = useState(false);
+
 
     const audioInputRef = useRef(null);
 
@@ -72,33 +70,7 @@ function WhisperSubtitle() {
         return () => revokeUrls();
     }, [revokeUrls]);
 
-    // Tải lịch sử
-    const fetchHistory = async () => {
-        if (!localStorage.getItem('token')) return;
-        setHistoryLoading(true);
-        try {
-            const res = await whisperService.getHistory();
-            if (res.code === 200) {
-                setHistory(res.result || []);
-            }
-        } catch (err) {
-            console.error('Không thể lấy lịch sử Whisper:', err);
-        } finally {
-            setHistoryLoading(false);
-        }
-    };
 
-    useEffect(() => {
-        let active = true;
-        setTimeout(() => {
-            if (active) {
-                fetchHistory();
-            }
-        }, 0);
-        return () => {
-            active = false;
-        };
-    }, []);
 
     // Copy kịch bản
     const handleCopy = () => {
@@ -131,7 +103,7 @@ function WhisperSubtitle() {
                 setProgress(100);
                 setMessage('Hoàn thành trích xuất phụ đề!');
                 setIsLoading(false);
-                fetchHistory(); // Làm mới lịch sử
+
             } catch {
                 setMessage('Hoàn tất nhưng không thể đọc file kết quả.');
                 setIsLoading(false);
@@ -183,30 +155,7 @@ function WhisperSubtitle() {
         }
     };
 
-    // Chọn từ lịch sử để xem lại
-    const handleSelectHistory = async (task) => {
-        if (!task.resultTxtUrl) return;
-        setError('');
-        setResultText('Đang tải kết quả...');
-        setDownloadUrls({
-            txtUrl: task.resultTxtUrl ? `${import.meta.env.VITE_API_BASE_URL || ''}${task.resultTxtUrl}` : '',
-            srtUrl: task.resultSrtUrl ? `${import.meta.env.VITE_API_BASE_URL || ''}${task.resultSrtUrl}` : ''
-        });
 
-        // Set audio url để phát
-        if (task.audioUrl) {
-            setAudioUrl(`${import.meta.env.VITE_API_BASE_URL || ''}${task.audioUrl}`);
-            setAudioFileName('Tệp âm thanh lịch sử');
-            setAudioFile(true); // Dummy to activate play UI
-        }
-
-        try {
-            const textRes = await api.get(task.resultTxtUrl, { responseType: 'text' });
-            setResultText(textRes.data);
-        } catch {
-            setResultText('Không thể tải tệp văn bản từ máy chủ.');
-        }
-    };
 
     const handleReset = () => {
         stopPolling();
@@ -353,50 +302,7 @@ function WhisperSubtitle() {
                 </div>
             </div>
 
-            {/* Lịch sử trích xuất phụ đề */}
-            {localStorage.getItem('token') && (
-                <div className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-3xl p-6 shadow-xl w-full">
-                    <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200">Lịch sử tạo phụ đề</h3>
-                        <button
-                            onClick={fetchHistory}
-                            disabled={historyLoading}
-                            className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-slate-500"
-                        >
-                            <FiRefreshCw className={historyLoading ? 'animate-spin' : ''} />
-                        </button>
-                    </div>
 
-                    {historyLoading && history.length === 0 ? (
-                        <p className="text-xs text-center text-slate-400 py-4">Đang tải lịch sử...</p>
-                    ) : history.length === 0 ? (
-                        <p className="text-xs text-center text-slate-400 py-4">Không có tác vụ cũ nào.</p>
-                    ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[220px] overflow-y-auto pr-2">
-                            {history.map((item) => (
-                                <div
-                                    key={item.id}
-                                    onClick={() => handleSelectHistory(item)}
-                                    className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20 hover:border-[#5b6ef7] dark:hover:border-[#a78bfa] cursor-pointer transition-all duration-200 flex flex-col justify-between"
-                                >
-                                    <div className="flex justify-between items-start gap-2">
-                                        <span className="text-[10px] text-slate-400 font-semibold">{item.createdAt || 'N/A'}</span>
-                                        <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-green-500/10 text-green-600 dark:text-green-400">
-                                            {item.status}
-                                        </span>
-                                    </div>
-                                    <p className="text-xs font-semibold text-slate-750 dark:text-slate-250 truncate mt-2">
-                                        ID Task: {item.id}
-                                    </p>
-                                    <span className="text-[10px] text-[#5b6ef7] dark:text-[#a78bfa] hover:underline mt-2">
-                                        Nhấp để tải lại phụ đề & nghe âm thanh
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            )}
         </div>
     );
 }
