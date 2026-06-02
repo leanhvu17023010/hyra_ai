@@ -87,7 +87,7 @@ function VerifyModal({ email, otpMode, userName, password, onClose, onSwitch }) 
       } else {
         setError(response.message || "Không thể gửi lại mã")
       }
-    } catch (err) {
+    } catch {
       setError("Đã có lỗi xảy ra.")
     } finally {
       setLoading(false)

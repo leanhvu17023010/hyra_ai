@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { FiPlay, FiSquare, FiRefreshCw, FiVolume2, FiMic, FiUploadCloud, FiTrash2, FiCpu, FiLogIn } from 'react-icons/fi';
-import swapService from '../../services/swapService';
+import xttsService from '../../services/xttsService';
+import { resolveMediaUrl } from '../../utils/mediaUrl';
 import SwapProcessingOverlay from './SwapProcessingOverlay';
 
 const MAX_CHARS = 1000;
@@ -10,7 +11,6 @@ function TextToSpeech() {
     const [isPlaying, setIsPlaying] = useState(false);
     const [error, setError] = useState('');
     const [swapDone, setSwapDone] = useState(false); // đánh dấu swap đã hoàn tất
-    const [swapText, setSwapText] = useState('');   // lưu text đã swap để phát lại
     
     // Voice Swap / Voice Clone States
     const [sourceType, setSourceType] = useState('upload'); // 'upload' | 'record'
@@ -19,6 +19,7 @@ function TextToSpeech() {
     const [isRecording, setIsRecording] = useState(false);
     const [recordingTime, setRecordingTime] = useState(0);
     const [recordedUrl, setRecordedUrl] = useState(null);
+    const [resultAudioUrl, setResultAudioUrl] = useState('');
     
     // AI Processing States
     const [isLoading, setIsLoading] = useState(false);
@@ -29,6 +30,7 @@ function TextToSpeech() {
     const mediaRecorderRef = useRef(null);
     const audioChunksRef = useRef([]);
     const timerRef = useRef(null);
+    const audioPlayerRef = useRef(null);
 
     useEffect(() => {
         return () => {
@@ -91,7 +93,7 @@ function TextToSpeech() {
             timerRef.current = setInterval(() => {
                 setRecordingTime((prev) => prev + 1);
             }, 1000);
-        } catch (err) {
+        } catch {
             setError('Không thể truy cập microphone. Vui lòng cấp quyền thiết bị.');
         }
     };
@@ -131,75 +133,102 @@ function TextToSpeech() {
 
         try {
             setIsLoading(true);
-            setProgress(0);
-            setMessage('Đang khởi tạo tác vụ hoán đổi...');
+            setProgress(10);
+            setMessage('Đang khởi tạo tác vụ hoán đổi giọng nói...');
 
-            const { result: taskId } = await swapService.createSwapTask();
-            if (!taskId) throw new Error('Khởi tạo thất bại');
+            const createRes = await xttsService.createTtsTask();
+            const taskId = createRes.result;
+            if (!taskId) throw new Error('Không khởi tạo được task XTTS');
 
+            setProgress(30);
             setMessage('Đang tải tệp âm thanh mẫu lên hệ thống...');
-            await swapService.uploadMediaToTask(audioFile, taskId, 'audio');
+            await xttsService.uploadVoiceToTtsTask(audioFile, taskId);
 
-            // Giả lập tiến trình xử lý giọng nói AI
-            let currentProgress = 0;
-            const interval = setInterval(() => {
-                currentProgress += 10;
-                if (currentProgress >= 100) {
-                    clearInterval(interval);
-                    setProgress(100);
-                    setMessage('Hoàn tất hoán đổi giọng đọc AI!');
+            setProgress(50);
+            setMessage('Bắt đầu xử lý nhân bản giọng nói AI...');
+            await xttsService.processTtsTask(taskId, text, 'vi');
 
-                    setTimeout(() => {
-                        setIsLoading(false);
-                        setSwapDone(true);
-                        setSwapText(text); // lưu lại text để phát lại
-                        const utterance = new SpeechSynthesisUtterance(text);
-                        utterance.lang = 'vi-VN';
-                        utterance.pitch = 1.15;
-                        utterance.rate = 0.95;
-                        utterance.onend = () => setIsPlaying(false);
-                        utterance.onerror = () => setIsPlaying(false);
-                        window.speechSynthesis.cancel();
-                        window.speechSynthesis.speak(utterance);
-                        setIsPlaying(true);
-                    }, 500);
-                } else {
-                    setProgress(currentProgress);
-                    setMessage(`Đang nhân bản và cấu hình giọng nói... ${currentProgress}%`);
+            setProgress(70);
+            setMessage('Hệ thống AI đang tạo file âm thanh của bạn...');
+            
+            let pollAttempts = 0;
+            const maxPollAttempts = 120; // 3 phút tối đa
+            
+            const pollInterval = setInterval(async () => {
+                pollAttempts++;
+                if (pollAttempts > maxPollAttempts) {
+                    clearInterval(pollInterval);
+                    setIsLoading(false);
+                    setError('Quá thời gian xử lý tác vụ (timeout). Vui lòng thử lại.');
+                    return;
                 }
-            }, 300);
+
+                try {
+                    const statusRes = await xttsService.getTtsTaskStatus(taskId);
+                    const taskData = statusRes.result;
+
+                    if (taskData.status === 'Complete') {
+                        clearInterval(pollInterval);
+                        setProgress(100);
+                        setMessage('Hoàn tất hoán đổi giọng đọc AI!');
+                        
+                        setTimeout(() => {
+                            setIsLoading(false);
+                            setSwapDone(true);
+                            setResultAudioUrl(taskData.resultUrl);
+                            
+                            // Phát âm thanh tự động
+                            setTimeout(() => {
+                                if (audioPlayerRef.current) {
+                                    audioPlayerRef.current.play().catch(e => console.log('Auto-play error:', e));
+                                    setIsPlaying(true);
+                                }
+                            }, 200);
+                        }, 500);
+                    } else if (taskData.status === 'Failed') {
+                        clearInterval(pollInterval);
+                        setIsLoading(false);
+                        setError('Tác vụ nhân bản giọng nói thất bại trên máy chủ AI.');
+                    } else {
+                        // Vẫn đang xử lý (Pending / Processing)
+                        setMessage(`Đang sinh âm thanh... Vui lòng đợi (${pollAttempts}s)`);
+                    }
+                } catch (pollErr) {
+                    console.error('Lỗi khi kiểm tra trạng thái XTTS:', pollErr);
+                }
+            }, 1500);
 
         } catch (err) {
+            console.error('Lỗi quy trình XTTS:', err);
             setIsLoading(false);
-            setError('Xử lý tác vụ AI thất bại. Vui lòng thử lại.');
+            setError(err.response?.data?.message || 'Xử lý tác vụ XTTS thất bại. Vui lòng thử lại.');
         }
     };
 
     const handleStop = () => {
-        window.speechSynthesis.cancel();
+        if (audioPlayerRef.current) {
+            audioPlayerRef.current.pause();
+        }
         setIsPlaying(false);
     };
 
     const handleReplay = () => {
-        if (!swapText) return;
-        const utterance = new SpeechSynthesisUtterance(swapText);
-        utterance.lang = 'vi-VN';
-        utterance.pitch = 1.15;
-        utterance.rate = 0.95;
-        utterance.onend = () => setIsPlaying(false);
-        utterance.onerror = () => setIsPlaying(false);
-        window.speechSynthesis.cancel();
-        window.speechSynthesis.speak(utterance);
-        setIsPlaying(true);
+        if (audioPlayerRef.current) {
+            audioPlayerRef.current.play().catch(e => console.log('Replay error:', e));
+            setIsPlaying(true);
+        }
     };
 
     const handleReset = () => {
-        window.speechSynthesis.cancel();
+        if (audioPlayerRef.current) {
+            audioPlayerRef.current.pause();
+            audioPlayerRef.current.currentTime = 0;
+        }
         setText('');
         setError('');
         setIsPlaying(false);
         setSwapDone(false);
-        setSwapText('');
+        setResultAudioUrl('');
         handleClearAudio();
     };
 
@@ -422,7 +451,7 @@ function TextToSpeech() {
                                         </button>
                                         <button
                                             type="button"
-                                            onClick={() => { setSwapDone(false); setSwapText(''); }}
+                                            onClick={() => { setSwapDone(false); }}
                                             disabled={!text.trim() || !audioFile || isRecording}
                                             className="w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#5b6ef7] to-[#a78bfa] hover:from-[#4b5ee7] hover:to-[#906ef5] disabled:from-gray-200 disabled:to-gray-300 disabled:text-gray-400 disabled:shadow-none disabled:cursor-not-allowed transition-all hover:scale-[1.02] transform duration-200 flex items-center justify-center gap-2 cursor-pointer"
                                         >
@@ -454,6 +483,16 @@ function TextToSpeech() {
                     </div>
                 </div>
             </div>
+            {resultAudioUrl && (
+                <audio
+                    ref={audioPlayerRef}
+                    src={resolveMediaUrl(resultAudioUrl)}
+                    onPlay={() => setIsPlaying(true)}
+                    onPause={() => setIsPlaying(false)}
+                    onEnded={() => setIsPlaying(false)}
+                    className="hidden"
+                />
+            )}
         </div>
     );
 }

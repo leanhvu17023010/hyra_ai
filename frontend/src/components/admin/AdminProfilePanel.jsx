@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FiUser, FiLock, FiShield, FiMail, FiEye, FiEyeOff, FiActivity, FiKey } from 'react-icons/fi';
+import { FiLock, FiShield, FiMail, FiEye, FiEyeOff, FiKey } from 'react-icons/fi';
 import userService from '../../services/userService';
 
 function AdminProfilePanel({ user }) {

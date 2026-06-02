@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
-import { FiUploadCloud, FiCpu, FiLogIn, FiVideo, FiImage } from 'react-icons/fi';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { FiUploadCloud, FiLogIn, FiVideo, FiImage } from 'react-icons/fi';
 import swapService from '../../services/swapService';
 import megaWorkflowService from '../../services/megaWorkflowService';
 import api from '../../services/api';
@@ -122,18 +122,18 @@ function VideoVoiceCloneLipSync() {
     const resultVideoRef = useRef(null);
 
     // Clean up temporary object URLs on unmount/reset
-    const revokeUrls = () => {
+    const revokeUrls = useCallback(() => {
         if (targetVideoUrl) URL.revokeObjectURL(targetVideoUrl);
         if (voiceSampleUrl) URL.revokeObjectURL(voiceSampleUrl);
         if (sourceFaceUrl) URL.revokeObjectURL(sourceFaceUrl);
-    };
+    }, [targetVideoUrl, voiceSampleUrl, sourceFaceUrl]);
 
     // Auto cleanup of urls on unmount
     useEffect(() => {
         return () => {
             revokeUrls();
         };
-    }, [targetVideoUrl, voiceSampleUrl, sourceFaceUrl]);
+    }, [revokeUrls]);
 
     const handleTimeUpdate = () => {
         if (resultVideoRef.current) {
@@ -223,7 +223,7 @@ function VideoVoiceCloneLipSync() {
                 setProgress(100);
                 setMessage('Hoàn thành lồng tiếng & đồng bộ khẩu hình môi!');
                 setIsLoading(false);
-            } catch (err) {
+            } catch {
                 setMessage('Tải tệp kết quả thất bại.');
                 setIsLoading(false);
             }
@@ -472,44 +472,36 @@ function VideoVoiceCloneLipSync() {
                         <div className="p-5 border-t border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-950/20 flex flex-col gap-4">
                             {/* Danh sách các nút tải độc lập tài nguyên */}
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                                <a
-                                    href={downloadUrls.finalResult}
-                                    download="final_video.mp4"
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="py-2 rounded-lg text-[10px] font-semibold bg-[#5b6ef7]/10 text-[#5b6ef7] dark:text-[#a78bfa] hover:bg-[#5b6ef7]/20 transition-colors text-center border border-dashed border-[#5b6ef7]/40"
+                                <button
+                                    type="button"
+                                    onClick={() => swapService.downloadResult(downloadUrls.finalResult, 'final_video.mp4')}
+                                    className="py-2 rounded-lg text-[10px] font-semibold bg-[#5b6ef7]/10 text-[#5b6ef7] dark:text-[#a78bfa] hover:bg-[#5b6ef7]/20 transition-colors text-center border border-dashed border-[#5b6ef7]/40 cursor-pointer"
                                 >
                                     🎬 Video hoàn chỉnh
-                                </a>
+                                </button>
                                 {downloadUrls.swapResult && (
-                                    <a
-                                        href={downloadUrls.swapResult}
-                                        download="swap_video.mp4"
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="py-2 rounded-lg text-[10px] font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-650 dark:text-slate-350 transition-colors text-center border border-slate-300 dark:border-slate-700"
+                                    <button
+                                        type="button"
+                                        onClick={() => swapService.downloadResult(downloadUrls.swapResult, 'swap_video.mp4')}
+                                        className="py-2 rounded-lg text-[10px] font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-650 dark:text-slate-350 transition-colors text-center border border-slate-300 dark:border-slate-700 cursor-pointer"
                                     >
                                         👤 Video Swap Mặt
-                                    </a>
+                                    </button>
                                 )}
-                                <a
-                                    href={downloadUrls.xttsResult}
-                                    download="audio_voice.wav"
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="py-2 rounded-lg text-[10px] font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-650 dark:text-slate-350 transition-colors text-center border border-slate-300 dark:border-slate-700"
+                                <button
+                                    type="button"
+                                    onClick={() => swapService.downloadResult(downloadUrls.xttsResult, 'audio_voice.wav')}
+                                    className="py-2 rounded-lg text-[10px] font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-650 dark:text-slate-350 transition-colors text-center border border-slate-300 dark:border-slate-700 cursor-pointer"
                                 >
                                     🎵 File Audio XTTS
-                                </a>
-                                <a
-                                    href={downloadUrls.srtResult}
-                                    download="subtitles.srt"
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="py-2 rounded-lg text-[10px] font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-650 dark:text-slate-350 transition-colors text-center border border-slate-300 dark:border-slate-700"
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => swapService.downloadResult(downloadUrls.srtResult, 'subtitles.srt')}
+                                    className="py-2 rounded-lg text-[10px] font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-650 dark:text-slate-350 transition-colors text-center border border-slate-300 dark:border-slate-700 cursor-pointer"
                                 >
                                     📝 File Phụ Đề SRT
-                                </a>
+                                </button>
                             </div>
 
                             <div className="flex gap-3">

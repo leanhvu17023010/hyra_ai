@@ -1,7 +1,8 @@
-import { useState, useRef, useEffect } from 'react';
-import { FiUploadCloud, FiCpu, FiLogIn, FiVolume2, FiCopy, FiFileText, FiDownload, FiCheck, FiRefreshCw } from 'react-icons/fi';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { FiLogIn, FiVolume2, FiCopy, FiFileText, FiDownload, FiCheck, FiRefreshCw } from 'react-icons/fi';
 import whisperService from '../../services/whisperService';
 import api from '../../services/api';
+import swapService from '../../services/swapService';
 
 import SwapProcessingOverlay from './SwapProcessingOverlay';
 import { useWhisperTaskPolling } from '../../hooks/useWhisperTaskPolling';
@@ -63,13 +64,13 @@ function WhisperSubtitle() {
     const audioInputRef = useRef(null);
 
     // Dọn dẹp URL tạm thời
-    const revokeUrls = () => {
+    const revokeUrls = useCallback(() => {
         if (audioUrl) URL.revokeObjectURL(audioUrl);
-    };
+    }, [audioUrl]);
 
     useEffect(() => {
         return () => revokeUrls();
-    }, [audioUrl]);
+    }, [revokeUrls]);
 
     // Tải lịch sử
     const fetchHistory = async () => {
@@ -88,7 +89,15 @@ function WhisperSubtitle() {
     };
 
     useEffect(() => {
-        fetchHistory();
+        let active = true;
+        setTimeout(() => {
+            if (active) {
+                fetchHistory();
+            }
+        }, 0);
+        return () => {
+            active = false;
+        };
     }, []);
 
     // Copy kịch bản
@@ -123,7 +132,7 @@ function WhisperSubtitle() {
                 setMessage('Hoàn thành trích xuất phụ đề!');
                 setIsLoading(false);
                 fetchHistory(); // Làm mới lịch sử
-            } catch (err) {
+            } catch {
                 setMessage('Hoàn tất nhưng không thể đọc file kết quả.');
                 setIsLoading(false);
             }
@@ -194,7 +203,7 @@ function WhisperSubtitle() {
         try {
             const textRes = await api.get(task.resultTxtUrl, { responseType: 'text' });
             setResultText(textRes.data);
-        } catch (err) {
+        } catch {
             setResultText('Không thể tải tệp văn bản từ máy chủ.');
         }
     };
@@ -318,24 +327,20 @@ function WhisperSubtitle() {
 
                         {resultText && (
                             <div className="p-4 border-t border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-950/20 flex gap-3">
-                                <a
-                                    href={downloadUrls.srtUrl}
-                                    download="subtitles.srt"
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="flex-1 py-2.5 rounded-xl text-xs font-semibold border border-[#5b6ef7] text-[#5b6ef7] hover:bg-[#5b6ef7]/10 dark:text-[#a78bfa] dark:border-[#a78bfa] dark:hover:bg-[#a78bfa]/10 transition-colors text-center flex items-center justify-center gap-1.5 shadow-sm"
+                                <button
+                                    type="button"
+                                    onClick={() => swapService.downloadResult(downloadUrls.srtUrl, 'subtitles.srt')}
+                                    className="flex-1 py-2.5 rounded-xl text-xs font-semibold border border-[#5b6ef7] text-[#5b6ef7] hover:bg-[#5b6ef7]/10 dark:text-[#a78bfa] dark:border-[#a78bfa] dark:hover:bg-[#a78bfa]/10 transition-colors text-center flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
                                 >
                                     <FiDownload /> Tải File SRT
-                                </a>
-                                <a
-                                    href={downloadUrls.txtUrl}
-                                    download="script.txt"
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="flex-1 py-2.5 rounded-xl text-xs font-semibold border border-slate-350 text-slate-650 hover:bg-slate-100 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-800 transition-colors text-center flex items-center justify-center gap-1.5 shadow-sm"
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => swapService.downloadResult(downloadUrls.txtUrl, 'script.txt')}
+                                    className="flex-1 py-2.5 rounded-xl text-xs font-semibold border border-slate-350 text-slate-650 hover:bg-slate-100 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-800 transition-colors text-center flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
                                 >
                                     <FiFileText /> Tải File TXT
-                                </a>
+                                </button>
                                 <button
                                     onClick={handleReset}
                                     className="px-4 py-2.5 rounded-xl text-xs font-semibold border border-slate-300 text-slate-500 hover:bg-slate-100 dark:text-slate-450 dark:border-slate-750 dark:hover:bg-slate-800 transition-colors"

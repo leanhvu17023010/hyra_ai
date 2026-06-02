@@ -11,9 +11,17 @@ function ProfileInfo({ user, stats }) {
     const [message, setMessage] = useState({ text: '', type: '' });
 
     useEffect(() => {
+        let active = true;
         if (user) {
-            setUserName(user.userName || '');
+            setTimeout(() => {
+                if (active) {
+                    setUserName(user.userName || '');
+                }
+            }, 0);
         }
+        return () => {
+            active = false;
+        };
     }, [user]);
 
     // Automatically clear status message after 3 seconds
