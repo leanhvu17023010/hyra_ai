@@ -253,7 +253,8 @@ function TextToSpeech() {
                         value={text}
                         onChange={(e) => e.target.value.length <= MAX_CHARS && setText(e.target.value)}
                         placeholder="Nhập nội dung văn bản bạn muốn chuyển đổi tại đây..."
-                        className="w-full min-h-[220px] p-5 text-lg text-gray-700 dark:text-gray-200 bg-transparent resize-none outline-none placeholder:text-gray-400 leading-relaxed"
+                        disabled={isLoading}
+                        className="w-full min-h-[220px] p-5 text-lg text-gray-700 dark:text-gray-200 bg-transparent resize-none outline-none placeholder:text-gray-400 leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed"
                     />
                 </div>
 
@@ -268,8 +269,9 @@ function TextToSpeech() {
                     <div className="flex bg-gray-100 dark:bg-gray-600 p-1 rounded-xl mb-4">
                         <button
                             type="button"
+                            disabled={isLoading}
                             onClick={() => { setSourceType('upload'); handleClearAudio(); }}
-                            className={`flex-1 py-1.5 text-sm font-semibold rounded-lg transition-all cursor-pointer ${
+                            className={`flex-1 py-1.5 text-sm font-semibold rounded-lg transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
                                 sourceType === 'upload'
                                     ? 'bg-white dark:bg-gray-700 shadow-sm text-[#5b6ef7] dark:text-[#a78bfa]'
                                     : 'text-gray-500 dark:text-gray-300 hover:text-gray-700'
@@ -279,8 +281,9 @@ function TextToSpeech() {
                         </button>
                         <button
                             type="button"
+                            disabled={isLoading}
                             onClick={() => { setSourceType('record'); handleClearAudio(); }}
-                            className={`flex-1 py-1.5 text-sm font-semibold rounded-lg transition-all cursor-pointer ${
+                            className={`flex-1 py-1.5 text-sm font-semibold rounded-lg transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
                                 sourceType === 'record'
                                     ? 'bg-white dark:bg-gray-700 shadow-sm text-[#5b6ef7] dark:text-[#a78bfa]'
                                     : 'text-gray-500 dark:text-gray-300 hover:text-gray-700'
@@ -295,8 +298,10 @@ function TextToSpeech() {
                         <div>
                             {!audioFile ? (
                                 <div
-                                    onClick={() => fileInputRef.current?.click()}
-                                    className="border-2 border-dashed border-slate-300 dark:border-slate-750 rounded-xl bg-slate-50 dark:bg-slate-950/25 p-6 flex flex-col items-center justify-center cursor-pointer hover:border-[#5b6ef7] dark:hover:border-[#a78bfa] transition-colors"
+                                    onClick={() => !isLoading && fileInputRef.current?.click()}
+                                    className={`border-2 border-dashed border-slate-300 dark:border-slate-750 rounded-xl bg-slate-50 dark:bg-slate-950/25 p-6 flex flex-col items-center justify-center transition-colors ${
+                                        isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-[#5b6ef7] dark:hover:border-[#a78bfa]'
+                                    }`}
                                 >
                                     <FiUploadCloud size={24} className="text-gray-400 mb-2" />
                                     <span className="text-sm text-gray-500 dark:text-gray-300 text-center font-medium">Tải tệp âm thanh</span>
@@ -307,6 +312,7 @@ function TextToSpeech() {
                                         onChange={handleFileChange}
                                         accept="audio/*"
                                         className="hidden"
+                                        disabled={isLoading}
                                     />
                                 </div>
                             ) : (
@@ -317,8 +323,9 @@ function TextToSpeech() {
                                         </span>
                                         <button
                                             type="button"
+                                            disabled={isLoading}
                                             onClick={handleClearAudio}
-                                            className="text-red-500 hover:bg-red-50 p-1.5 rounded-lg dark:hover:bg-red-950/30 cursor-pointer"
+                                            className="text-red-500 hover:bg-red-50 p-1.5 rounded-lg dark:hover:bg-red-950/30 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             <FiTrash2 size={14} />
                                         </button>
@@ -333,8 +340,11 @@ function TextToSpeech() {
                             {!audioFile && !isRecording ? (
                                 <button
                                     type="button"
+                                    disabled={isLoading}
                                     onClick={startRecording}
-                                    className="w-full border-2 border-dashed border-slate-300 dark:border-slate-750 rounded-xl bg-slate-50 dark:bg-slate-950/25 py-8 flex flex-col items-center justify-center cursor-pointer hover:border-[#5b6ef7] dark:hover:border-[#a78bfa] transition-colors"
+                                    className={`w-full border-2 border-dashed border-slate-300 dark:border-slate-750 rounded-xl bg-slate-50 dark:bg-slate-950/25 py-8 flex flex-col items-center justify-center transition-colors ${
+                                        isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-[#5b6ef7] dark:hover:border-[#a78bfa]'
+                                    }`}
                                 >
                                     <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-950/20 flex items-center justify-center text-[#5b6ef7] dark:text-[#a78bfa] mb-2">
                                         <FiMic size={20} />
@@ -365,8 +375,9 @@ function TextToSpeech() {
                                         </span>
                                         <button
                                             type="button"
+                                            disabled={isLoading}
                                             onClick={handleClearAudio}
-                                            className="text-red-500 hover:bg-red-50 p-1.5 rounded-lg dark:hover:bg-red-950/30 cursor-pointer"
+                                            className="text-red-500 hover:bg-red-50 p-1.5 rounded-lg dark:hover:bg-red-950/30 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             <FiTrash2 size={14} />
                                         </button>
@@ -480,7 +491,7 @@ function TextToSpeech() {
                                         <button
                                             type="button"
                                             onClick={() => { setSwapDone(false); }}
-                                            disabled={!text.trim() || !audioFile || isRecording}
+                                            disabled={!text.trim() || !audioFile || isRecording || isLoading}
                                             className="w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#5b6ef7] to-[#a78bfa] hover:from-[#4b5ee7] hover:to-[#906ef5] disabled:from-gray-200 disabled:to-gray-300 disabled:text-gray-400 disabled:shadow-none disabled:cursor-not-allowed transition-all hover:scale-[1.02] transform duration-200 flex items-center justify-center gap-2 cursor-pointer"
                                         >
                                             <FiCpu size={14} /> Swap lại
@@ -490,10 +501,19 @@ function TextToSpeech() {
                                     <button
                                         type="button"
                                         onClick={handleExecute}
-                                        disabled={!text.trim() || !audioFile || isRecording}
+                                        disabled={!text.trim() || !audioFile || isRecording || isLoading}
                                         className="w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#5b6ef7] to-[#a78bfa] hover:from-[#4b5ee7] hover:to-[#906ef5] disabled:from-gray-200 disabled:to-gray-300 disabled:text-gray-400 disabled:shadow-none disabled:cursor-not-allowed transition-all hover:scale-[1.02] transform duration-200 flex items-center justify-center gap-2 cursor-pointer"
                                     >
-                                       <FiPlay size={14} />Chuyển đổi giọng nói AI 
+                                        {isLoading ? (
+                                            <>
+                                                <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                                                Đang chuyển đổi giọng đọc...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <FiPlay size={14} /> Chuyển đổi giọng nói AI
+                                            </>
+                                        )}
                                     </button>
                                 )}
                             </>
@@ -501,7 +521,8 @@ function TextToSpeech() {
                         <button
                             type="button"
                             onClick={handleReset}
-                            className="w-full py-2 rounded-xl text-sm font-medium border border-slate-300 text-slate-500 hover:bg-slate-50 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-800 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                            disabled={isLoading}
+                            className="w-full py-2 rounded-xl text-sm font-medium border border-slate-300 text-slate-500 hover:bg-slate-50 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                         >
                             <FiRefreshCw size={12} /> Thiết lập lại từ đầu
                         </button>
