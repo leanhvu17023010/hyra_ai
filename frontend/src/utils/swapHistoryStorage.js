@@ -52,11 +52,15 @@ export function computeStatsFromHistory(history) {
         (acc, item) => {
             if (item.mediaType === 'video') {
                 acc.videoSwapCount += 1;
+            } else if (item.mediaType === 'audio') {
+                acc.audioCount += 1;
+            } else if (item.mediaType === 'subtitle') {
+                acc.subtitleCount += 1;
             } else {
                 acc.imageSwapCount += 1;
             }
             return acc;
         },
-        { imageSwapCount: 0, videoSwapCount: 0 }
+        { imageSwapCount: 0, videoSwapCount: 0, audioCount: 0, subtitleCount: 0 }
     );
 }

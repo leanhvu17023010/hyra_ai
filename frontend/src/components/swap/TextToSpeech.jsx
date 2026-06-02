@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { FiPlay, FiSquare, FiRefreshCw, FiVolume2, FiMic, FiUploadCloud, FiTrash2, FiCpu, FiLogIn } from 'react-icons/fi';
 import xttsService from '../../services/xttsService';
 import { resolveMediaUrl } from '../../utils/mediaUrl';
-import SwapProcessingOverlay from './SwapProcessingOverlay';
+import swapService from '../../services/swapService';
 
 const MAX_CHARS = 1000;
 
@@ -172,6 +172,9 @@ function TextToSpeech() {
                         setProgress(100);
                         setMessage('Hoàn tất hoán đổi giọng đọc AI!');
                         
+                        // Lưu lịch sử
+                        swapService.saveCompletedTaskToHistory(taskId, taskData.resultUrl, 'audio');
+
                         setTimeout(() => {
                             setIsLoading(false);
                             setSwapDone(true);
@@ -234,7 +237,6 @@ function TextToSpeech() {
 
     return (
         <div className="flex gap-6 items-start w-full flex-wrap">
-            {isLoading && <SwapProcessingOverlay progress={progress} message={message} />}
 
             {/* ===== CỘT TRÁI: Nhập liệu (Văn bản & Giọng mẫu) ===== */}
             <div className="flex-1 max-w-[740px] min-w-[320px] flex flex-col gap-4">
@@ -383,43 +385,59 @@ function TextToSpeech() {
                 {/* 1. Trạng thái phát */}
                 <div className="rounded-2xl border border-slate-300 bg-white p-4 dark:border-slate-700 dark:bg-slate-900 shadow-md">
                     <p className="mb-2 text-lg font-semibold text-gray-600 dark:text-gray-300">Trạng thái phát</p>
-                    <div className="flex flex-col items-center gap-3 py-3">
-                        <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
-                            isPlaying
-                                ? 'bg-gradient-to-r from-[#5b6ef7] to-[#a78bfa] shadow-lg shadow-[#5b6ef7]/20 scale-105'
-                                : 'bg-gray-100 dark:bg-gray-600'
-                        }`}>
-                            <FiVolume2 className={isPlaying ? "text-white" : "text-gray-400 dark:text-gray-300"} size={22} />
-                        </div>
-                        <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
-                            {isPlaying ? 'Đang phát...' : 'Sẵn sàng'}
-                        </p>
-
-                        {/* Sóng âm giả lập hoặc trình phát nhạc thực tế */}
-                        {resultAudioUrl ? (
-                            <div className="w-full mt-2">
-                                <audio
-                                    ref={audioPlayerRef}
-                                    src={resolveMediaUrl(resultAudioUrl)}
-                                    controls
-                                    onPlay={() => setIsPlaying(true)}
-                                    onPause={() => setIsPlaying(false)}
-                                    onEnded={() => setIsPlaying(false)}
-                                    className="w-full h-10 outline-none rounded-lg bg-gray-50 dark:bg-slate-800"
-                                />
+                    <div className="flex flex-col items-center gap-3 py-3 w-full">
+                        {isLoading ? (
+                            <div className="flex flex-col items-center w-full py-4 gap-3">
+                                {/* Vòng quay tải */}
+                                <div className="w-10 h-10 border-4 border-[#5b6ef7]/20 border-t-[#5b6ef7] dark:border-t-[#a78bfa] rounded-full animate-spin" />
+                                <div className="text-center">
+                                    <p className="text-sm font-bold text-[#5b6ef7] dark:text-[#a78bfa]">
+                                        Đang xử lý... {progress}%
+                                    </p>
+                                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 max-w-[200px] leading-tight">
+                                        {message}
+                                    </p>
+                                </div>
+                                {/* Thanh progress nhỏ */}
+                                <div className="w-full bg-gray-150 dark:bg-gray-800 h-1.5 rounded-full overflow-hidden mt-1">
+                                    <div
+                                        className="h-full bg-gradient-to-r from-[#5b6ef7] to-[#a78bfa] transition-all duration-300"
+                                        style={{ width: `${progress}%` }}
+                                    />
+                                </div>
                             </div>
                         ) : (
-                            <div className="flex items-end justify-center gap-[3px] h-6 w-full px-2">
-                                {Array.from({ length: 20 }).map((_, i) => (
-                                    <div
-                                        key={i}
-                                        className="flex-1 rounded-full bg-gray-200 dark:bg-gray-500"
-                                        style={{
-                                            height: `${3 + Math.abs(Math.sin(i * 0.5)) * 4}px`,
-                                        }}
-                                    />
-                                ))}
-                            </div>
+                            <>
+                                <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
+                                    isPlaying
+                                        ? 'bg-gradient-to-r from-[#5b6ef7] to-[#a78bfa] shadow-lg shadow-[#5b6ef7]/20 scale-105'
+                                        : 'bg-gray-100 dark:bg-gray-600'
+                                }`}>
+                                    <FiVolume2 className={isPlaying ? "text-white" : "text-gray-400 dark:text-gray-300"} size={22} />
+                                </div>
+                                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                                    {isPlaying ? 'Đang phát...' : 'Sẵn sàng'}
+                                </p>
+
+                                {/* Sóng âm giả lập hoặc trình phát nhạc thực tế */}
+                                {resultAudioUrl ? (
+                                    <div className="w-full mt-2">
+                                        <audio
+                                            ref={audioPlayerRef}
+                                            src={resolveMediaUrl(resultAudioUrl)}
+                                            controls
+                                            onPlay={() => setIsPlaying(true)}
+                                            onPause={() => setIsPlaying(false)}
+                                            onEnded={() => setIsPlaying(false)}
+                                            className="w-full h-10 outline-none rounded-lg bg-gray-50 dark:bg-slate-800"
+                                        />
+                                    </div>
+                                ) : (
+                                    <p className="text-xs text-gray-400 dark:text-gray-500 italic mt-1.5">
+                                        Chờ tạo âm thanh...
+                                    </p>
+                                )}
+                            </>
                         )}
                     </div>
                 </div>

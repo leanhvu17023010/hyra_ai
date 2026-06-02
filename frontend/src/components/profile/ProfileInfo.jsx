@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { FiImage, FiVideo, FiEdit2, FiCheck, FiX } from 'react-icons/fi';
+import { FiEdit2, FiCheck, FiX } from 'react-icons/fi';
 import userService from '../../services/userService';
 import useAuthStore from '../../store/authStore';
 
-function ProfileInfo({ user, stats }) {
+function ProfileInfo({ user }) {
     const { fetchUser } = useAuthStore();
     const [isEditing, setIsEditing] = useState(false);
     const [userName, setUserName] = useState(user?.userName || '');
@@ -116,30 +116,7 @@ function ProfileInfo({ user, stats }) {
             )}
 
 
-            {/* Hide stats block for ADMIN users to keep it clean */}
-            {user?.role?.name !== 'ADMIN' && (
-                <div className="grid gap-8 sm:grid-cols-2 pt-8">
-                    <div className="rounded-3xl border border-blue-100 bg-blue-50/20 p-8 dark:border-blue-950 dark:bg-blue-950/20">
-                        <div className="flex items-center gap-3.5 text-blue-600 dark:text-blue-400">
-                            <FiImage className="text-2xl" />
-                            <span className="text-xl font-bold uppercase tracking-wider">Swap ảnh</span>
-                        </div>
-                        <p className="mt-4 text-4xl font-black text-slate-800 dark:text-white">
-                            {stats.imageSwapCount}
-                        </p>
-                    </div>
-                    <div className="rounded-3xl border border-indigo-100 bg-indigo-50/20 p-8 dark:border-indigo-950 dark:bg-indigo-950/20">
-                        <div className="flex items-center gap-3.5 text-indigo-600 dark:text-indigo-400">
-                            <FiVideo className="text-2xl" />
-                            <span className="text-xl font-bold uppercase tracking-wider">Swap video</span>
-                        </div>
-                        <p className="mt-4 text-4xl font-black text-slate-800 dark:text-white">
-                            {stats.videoSwapCount}
-                        </p>
-                    </div>
-                </div>
-                
-            )}
+
                         {/* Action Buttons Row - Positioned at the bottom-right */}
             <div className="flex justify-end pt-4 border-t border-slate-100 dark:border-slate-800/80">
                 {isEditing ? (
