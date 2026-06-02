@@ -3,6 +3,7 @@ const TABS = [
     { id: 'video', label: 'Video hoán đổi khuôn mặt' },
     { id: 'tts',   label: 'Chuyển văn bản thành âm thanh' },
     { id: 'lipsync', label: 'Lồng tiếng & Lip Sync' },
+    { id: 'whisper', label: 'Tự động tạo phụ đề' },
 ];
 
 function SwapTabs({ tab, setTab }) {

@@ -1,12 +1,50 @@
 import { useState, useRef, useEffect } from 'react';
-import { FiUploadCloud, FiCpu, FiLogIn, FiVideo } from 'react-icons/fi';
+import { FiUploadCloud, FiCpu, FiLogIn, FiVideo, FiImage } from 'react-icons/fi';
 import swapService from '../../services/swapService';
+import megaWorkflowService from '../../services/megaWorkflowService';
+import api from '../../services/api';
 
 import SwapProcessingOverlay from './SwapProcessingOverlay';
-import { useSwapTaskPolling } from '../../hooks/useSwapTaskPolling';
+import { useMegaTaskPolling } from '../../hooks/useMegaTaskPolling';
 import videoAI from '../../assets/Images/voice.jpg';
 
 const MAX_CHARS = 1000;
+
+// Trình phân tách tệp phụ đề SRT sang JSON để render thời gian thực
+const parseSRT = (srtText) => {
+    if (!srtText) return [];
+    const cleanText = srtText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    const parts = cleanText.split('\n\n');
+    const subs = [];
+
+    const timeToSeconds = (timeStr) => {
+        const parts = timeStr.trim().split(':');
+        if (parts.length < 3) return 0;
+        const secondsParts = parts[2].split(',');
+        const h = parseFloat(parts[0]);
+        const m = parseFloat(parts[1]);
+        const s = parseFloat(secondsParts[0]);
+        const ms = parseFloat(secondsParts[1] || 0) / 1000;
+        return h * 3600 + m * 60 + s + ms;
+    };
+
+    for (const part of parts) {
+        const lines = part.trim().split('\n');
+        if (lines.length >= 3) {
+            const timeLine = lines[1];
+            if (timeLine.includes(' --> ')) {
+                const [startStr, endStr] = timeLine.split(' --> ');
+                const text = lines.slice(2).join(' ');
+                subs.push({
+                    startTime: timeToSeconds(startStr),
+                    endTime: timeToSeconds(endStr),
+                    text: text
+                });
+            }
+        }
+    }
+    return subs;
+};
 
 function UploadBox({ label, icon, preview, isVideo, isAudio, audioName, onClick, inputRef, onChange, accept, hint }) {
     return (
@@ -50,14 +88,17 @@ function VideoVoiceCloneLipSync() {
     const [targetVideo, setTargetVideo] = useState(null);
     const [targetVideoUrl, setTargetVideoUrl] = useState(null);
     
-    const [directAudioFile, setDirectAudioFile] = useState(null);
-    const [directAudioFileName, setDirectAudioFileName] = useState('');
-    const [directAudioUrl, setDirectAudioUrl] = useState(null);
+    const [voiceSample, setVoiceSample] = useState(null);
+    const [voiceSampleName, setVoiceSampleName] = useState('');
+    const [voiceSampleUrl, setVoiceSampleUrl] = useState(null);
+
+    const [sourceFace, setSourceFace] = useState(null);
+    const [sourceFaceUrl, setSourceFaceUrl] = useState(null);
 
     // Subtitle / Caption System
     const [subtitleText, setSubtitleText] = useState('');
     const [currentTime, setCurrentTime] = useState(0);
-    const [duration, setDuration] = useState(0);
+    const [parsedSubtitles, setParsedSubtitles] = useState([]);
 
     // Processing UI States
     const [isLoading, setIsLoading] = useState(false);
@@ -66,15 +107,25 @@ function VideoVoiceCloneLipSync() {
     const [error, setError] = useState('');
     const [resultVideoSrc, setResultVideoSrc] = useState(null);
 
+    // Lưu các URLs tải xuống cho người dùng
+    const [downloadUrls, setDownloadUrls] = useState({
+        swapResult: '',
+        xttsResult: '',
+        srtResult: '',
+        finalResult: ''
+    });
+
     // Refs
     const videoInputRef = useRef(null);
-    const audioInputRef = useRef(null);
+    const voiceInputRef = useRef(null);
+    const faceInputRef = useRef(null);
     const resultVideoRef = useRef(null);
 
     // Clean up temporary object URLs on unmount/reset
     const revokeUrls = () => {
         if (targetVideoUrl) URL.revokeObjectURL(targetVideoUrl);
-        if (directAudioUrl) URL.revokeObjectURL(directAudioUrl);
+        if (voiceSampleUrl) URL.revokeObjectURL(voiceSampleUrl);
+        if (sourceFaceUrl) URL.revokeObjectURL(sourceFaceUrl);
     };
 
     // Auto cleanup of urls on unmount
@@ -82,7 +133,7 @@ function VideoVoiceCloneLipSync() {
         return () => {
             revokeUrls();
         };
-    }, [targetVideoUrl, directAudioUrl]);
+    }, [targetVideoUrl, voiceSampleUrl, sourceFaceUrl]);
 
     const handleTimeUpdate = () => {
         if (resultVideoRef.current) {
@@ -90,37 +141,85 @@ function VideoVoiceCloneLipSync() {
         }
     };
 
-    const handleLoadedMetadata = () => {
-        if (resultVideoRef.current) {
-            setDuration(resultVideoRef.current.duration || 5);
-        }
+    const handleClearVoiceSample = () => {
+        setVoiceSample(null);
+        setVoiceSampleName('');
+        if (voiceSampleUrl) URL.revokeObjectURL(voiceSampleUrl);
+        setVoiceSampleUrl(null);
+        if (voiceInputRef.current) voiceInputRef.current.value = '';
     };
 
-
-    const handleClearDirectAudio = () => {
-        setDirectAudioFile(null);
-        setDirectAudioFileName('');
-        if (directAudioUrl) URL.revokeObjectURL(directAudioUrl);
-        setDirectAudioUrl(null);
-        if (audioInputRef.current) audioInputRef.current.value = '';
+    const handleClearSourceFace = () => {
+        setSourceFace(null);
+        if (sourceFaceUrl) URL.revokeObjectURL(sourceFaceUrl);
+        setSourceFaceUrl(null);
+        if (faceInputRef.current) faceInputRef.current.value = '';
     };
 
-    // Poll SwapTask
-    const { startPolling, stopPolling } = useSwapTaskPolling({
-        onProgress: (pct) => {
+    // Định nghĩa hàm render phụ đề
+    const renderSubtitles = () => {
+        if (parsedSubtitles.length === 0) return null;
+        const activeSub = parsedSubtitles.find(
+            (sub) => currentTime >= sub.startTime && currentTime <= sub.endTime
+        );
+        if (!activeSub) return null;
+        return (
+            <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 bg-black/75 px-4 py-2 rounded-xl border border-white/10 text-center max-w-[90%] pointer-events-none animate-fade-in z-20">
+                <p className="text-white text-sm font-semibold">{activeSub.text}</p>
+            </div>
+        );
+    };
+
+    // Poll MegaTask
+    const { startPolling, stopPolling } = useMegaTaskPolling({
+        onProgress: (pct, task) => {
             setProgress(pct);
-            setMessage(`Đang lồng tiếng & khớp chuyển động môi... ${pct}%`);
+            
+            // Map tiến trình với UI trực quan hơn
+            if (task?.status === 'PROCESSING_STEP_1') {
+                setMessage(`1. Đang hoán đổi khuôn mặt & nhân bản giọng nói... ${pct}%`);
+            } else if (task?.status === 'TRANSCRIBING') {
+                setMessage(`2. Đang phân tích và tạo phụ đề video... ${pct}%`);
+            } else if (task?.status === 'MERGING') {
+                setMessage(`3. Đang ghép phụ đề và âm thanh mới vào video... ${pct}%`);
+            } else {
+                setMessage(`Đang xử lý luồng AI... ${pct}%`);
+            }
         },
         onComplete: async (_taskId, task) => {
-            if (!task?.resultUrl) {
+            if (!task?.finalResultUrl) {
                 setMessage('Không tìm thấy tệp kết quả sau khi hoàn tất.');
                 setIsLoading(false);
                 return;
             }
             try {
-                const blobUrl = await swapService.getResultBlobUrlFromPath(task.resultUrl);
-                swapService.saveCompletedTaskToHistory(_taskId, task.resultUrl, 'video');
+                // Tải phụ đề SRT về và parse để chạy preview
+                if (task.srtResultUrl) {
+                    try {
+                        const srtRes = await api.get(task.srtResultUrl, { responseType: 'text' });
+                        const subs = parseSRT(srtRes.data);
+                        setParsedSubtitles(subs);
+                    } catch (e) {
+                        console.error('Không thể parse phụ đề:', e);
+                    }
+                }
+
+                // Tải blob video kết quả cuối cùng
+                const blobUrl = await swapService.getResultBlobUrlFromPath(task.finalResultUrl);
                 setResultVideoSrc(blobUrl);
+
+                // Lưu lại các URL tài nguyên để người dùng tải độc lập nếu thích
+                const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '';
+                setDownloadUrls({
+                    swapResult: task.swapResultUrl ? `${apiBaseUrl}${task.swapResultUrl}` : '',
+                    xttsResult: task.xttsResultUrl ? `${apiBaseUrl}${task.xttsResultUrl}` : '',
+                    srtResult: task.srtResultUrl ? `${apiBaseUrl}${task.srtResultUrl}` : '',
+                    finalResult: `${apiBaseUrl}${task.finalResultUrl}`
+                });
+
+                // Lưu lịch sử local
+                swapService.saveCompletedTaskToHistory(_taskId, task.finalResultUrl, 'video');
+                
                 setProgress(100);
                 setMessage('Hoàn thành lồng tiếng & đồng bộ khẩu hình môi!');
                 setIsLoading(false);
@@ -130,7 +229,7 @@ function VideoVoiceCloneLipSync() {
             }
         },
         onFailed: () => {
-            setMessage('Đồng bộ chuyển động môi thất bại. Vui lòng kiểm tra lại tệp video/audio.');
+            setMessage('Quá trình xử lý Mega Workflow thất bại. Vui lòng thử lại.');
             setIsLoading(false);
         },
         onTimeout: () => {
@@ -144,8 +243,11 @@ function VideoVoiceCloneLipSync() {
         if (!targetVideo) {
             return setError('Vui lòng chọn video cần lồng tiếng.');
         }
-        if (!directAudioFile) {
-            return setError('Vui lòng cung cấp file giọng nói.');
+        if (!voiceSample) {
+            return setError('Vui lòng cung cấp file giọng nói mẫu.');
+        }
+        if (!subtitleText.trim()) {
+            return setError('Vui lòng nhập văn bản muốn lồng tiếng & làm phụ đề.');
         }
         if (!localStorage.getItem('token')) {
             return setError('login-required');
@@ -155,23 +257,26 @@ function VideoVoiceCloneLipSync() {
         setIsLoading(true);
         setProgress(0);
         setResultVideoSrc(null);
+        setParsedSubtitles([]);
 
         try {
-            // Khởi tạo SwapTask
-            setMessage('1/3 Đang khởi tạo tác vụ...');
-            const { result: swapTaskId } = await swapService.createSwapTask();
+            setMessage('Đang kết nối server và upload file...');
+            
+            // Gọi API upload gộp duy nhất của Mega Workflow
+            const response = await megaWorkflowService.uploadAndStart(
+                targetVideo,
+                voiceSample,
+                sourceFace, // Có thể có hoặc null
+                subtitleText
+            );
 
-            // Tải video gốc lên làm target
-            setMessage('2/3 Đang tải video gốc lên...');
-            await swapService.uploadMediaToTask(targetVideo, swapTaskId, 'target');
-
-            // Tải file audio lên làm source audio
-            setMessage('3/3 Đang tải tệp giọng nói lên...');
-            await swapService.uploadMediaToTask(directAudioFile, swapTaskId, 'audio');
-
-            // Bắt đầu polling kết quả video
-            setMessage('Đang xử lý lồng tiếng và khớp khẩu hình khuôn mặt... 0%');
-            startPolling(swapTaskId);
+            if (response.code === 200) {
+                const taskId = response.result;
+                setMessage('Khởi tạo thành công, đang chạy luồng AI...');
+                startPolling(taskId);
+            } else {
+                throw new Error(response.message || 'Lỗi khi khởi chạy quy trình');
+            }
 
         } catch (err) {
             stopPolling();
@@ -186,12 +291,20 @@ function VideoVoiceCloneLipSync() {
         setTargetVideo(null);
         setTargetVideoUrl(null);
         setSubtitleText('');
-        handleClearDirectAudio();
+        handleClearVoiceSample();
+        handleClearSourceFace();
         setIsLoading(false);
         setProgress(0);
         setMessage('');
         setError('');
         setResultVideoSrc(null);
+        setParsedSubtitles([]);
+        setDownloadUrls({
+            swapResult: '',
+            xttsResult: '',
+            srtResult: '',
+            finalResult: ''
+        });
     };
 
     const handleOpenLogin = () => {
@@ -206,10 +319,10 @@ function VideoVoiceCloneLipSync() {
         <div className="flex flex-col lg:flex-row gap-8 items-stretch w-full">
             {/* Cột trái: Nhập liệu (Workspace) */}
             <div className="flex-1 flex flex-col gap-6">
-                {/* 2 Upload Boxes bên cạnh nhau */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
+                {/* 3 Upload Boxes bên cạnh nhau */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 flex-1">
                     <UploadBox
-                        label="1. Video gốc cần lồng tiếng & phụ đề"
+                        label="1. Video gốc cần xử lý"
                         icon={<FiVideo size={22} />}
                         preview={targetVideoUrl}
                         isVideo
@@ -224,22 +337,41 @@ function VideoVoiceCloneLipSync() {
                             }
                         }}
                         accept="video/*"
-                        hint="Hỗ trợ MP4, WebM (max 5s, 30MB)"
+                        hint="Hỗ trợ MP4, WebM"
                     />
+                    
                     <UploadBox
-                        label="2. File giọng nói có sẵn"
+                        label="2. Khuôn mặt cần đổi (Tùy chọn)"
+                        icon={<FiImage size={22} />}
+                        preview={sourceFaceUrl}
+                        onClick={() => faceInputRef.current?.click()}
+                        inputRef={faceInputRef}
+                        onChange={(e) => {
+                            if (e.target.files?.[0]) {
+                                const file = e.target.files[0];
+                                if (sourceFaceUrl) URL.revokeObjectURL(sourceFaceUrl);
+                                setSourceFace(file);
+                                setSourceFaceUrl(URL.createObjectURL(file));
+                            }
+                        }}
+                        accept="image/*"
+                        hint="Ảnh khuôn mặt mới .PNG, .JPG"
+                    />
+
+                    <UploadBox
+                        label="3. File giọng nói mẫu"
                         icon={<FiUploadCloud size={22} />}
-                        preview={directAudioUrl}
+                        preview={voiceSampleUrl}
                         isAudio
-                        audioName={directAudioFileName}
-                        onClick={() => audioInputRef.current?.click()}
-                        inputRef={audioInputRef}
+                        audioName={voiceSampleName}
+                        onClick={() => voiceInputRef.current?.click()}
+                        inputRef={voiceInputRef}
                         onChange={(e) => {
                             const file = e.target.files?.[0];
                             if (file) {
-                                setDirectAudioFile(file);
-                                setDirectAudioFileName(file.name);
-                                setDirectAudioUrl(URL.createObjectURL(file));
+                                setVoiceSample(file);
+                                setVoiceSampleName(file.name);
+                                setVoiceSampleUrl(URL.createObjectURL(file));
                             }
                         }}
                         accept="audio/*"
@@ -251,7 +383,7 @@ function VideoVoiceCloneLipSync() {
                 <div className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-3xl p-6 flex flex-col gap-4 shadow-xl">
                     <div className="flex flex-col gap-2">
                         <div className="flex justify-between items-center">
-                            <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200">3. Văn bản muốn làm phụ đề</h3>
+                            <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200">4. Văn bản muốn lồng tiếng & chạy phụ đề</h3>
                             <span className={`text-[10px] font-semibold ${subtitleText.length > MAX_CHARS * 0.9 ? 'text-red-500' : 'text-slate-400'}`}>
                                 {subtitleText.length}/{MAX_CHARS}
                             </span>
@@ -259,15 +391,17 @@ function VideoVoiceCloneLipSync() {
                         <textarea
                             value={subtitleText}
                             onChange={(e) => e.target.value.length <= MAX_CHARS && setSubtitleText(e.target.value)}
-                            placeholder="Nhập phụ đề chạy theo tiếng nói..."
+                            placeholder="Nhập kịch bản muốn lồng tiếng ở đây (Tiếng Việt)..."
                             className="w-full h-24 p-3 text-xs text-slate-700 dark:text-slate-250 bg-slate-50/50 dark:bg-slate-950/20 border border-slate-200 dark:border-slate-750 rounded-xl resize-none outline-none focus:border-[#5b6ef7] dark:focus:border-[#a78bfa] transition-colors placeholder:text-slate-450 leading-relaxed"
                         />
                     </div>
 
                     <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-2">
                         <div className="text-left flex-1">
-                            <h3 className="text-base font-bold text-slate-800 dark:text-white">Cấu hình Lip Sync & Lồng tiếng</h3>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">AI tự động lồng tiếng, đồng bộ chuyển động khuôn môi của nhân vật và chạy phụ đề đồng bộ.</p>
+                            <h3 className="text-base font-bold text-slate-800 dark:text-white">Cấu hình Mega Workflow</h3>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                                AI tự động đổi mặt, nhân bản giọng lồng tiếng, sinh phụ đề khớp và ghép thành video hoàn chỉnh.
+                            </p>
                         </div>
                         {error === 'login-required' ? (
                             <button
@@ -280,11 +414,10 @@ function VideoVoiceCloneLipSync() {
                         ) : (
                             <button
                                 onClick={handleExecute}
-                                disabled={isLoading || !targetVideo || !directAudioFile}
+                                disabled={isLoading || !targetVideo || !voiceSample || !subtitleText.trim()}
                                 className="w-full md:w-auto px-8 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#5b6ef7] to-[#a78bfa] hover:from-[#4b5ee7] hover:to-[#906ef5] shadow-lg shadow-[#5b6ef7]/20 disabled:from-gray-200 disabled:to-gray-300 disabled:text-gray-400 disabled:shadow-none disabled:cursor-not-allowed transition-all hover:scale-[1.03] transform duration-200 cursor-pointer flex items-center justify-center gap-1.5"
                             >
-                                
-                                {isLoading ? 'Đang xử lý...' : 'Bắt đầu Lip Sync'}
+                                {isLoading ? 'Đang xử lý...' : 'Bắt đầu xử lý Video'}
                             </button>
                         )}
                     </div>
@@ -298,7 +431,7 @@ function VideoVoiceCloneLipSync() {
             <div className="w-full lg:w-[400px] w-500 xl:w-[700px] shrink-0 flex flex-col gap-6">
                 <div className="flex-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 overflow-hidden flex flex-col shadow-xl rounded-3xl min-h-[480px]">
                     <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800/60 flex justify-between items-center bg-slate-50/50 dark:bg-slate-950/20">
-                        <span className="text-sm font-bold text-slate-700 dark:text-slate-200">Kết quả Lip Sync</span>
+                        <span className="text-sm font-bold text-slate-700 dark:text-slate-200">Kết quả Video hoàn chỉnh</span>
                         {resultVideoSrc && (
                             <span className="text-xs font-semibold text-green-600 dark:text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full">Hoàn thành</span>
                         )}
@@ -313,7 +446,6 @@ function VideoVoiceCloneLipSync() {
                                     controls
                                     autoPlay={!!resultVideoSrc}
                                     onTimeUpdate={handleTimeUpdate}
-                                    onLoadedMetadata={handleLoadedMetadata}
                                     className="max-w-full max-h-[500px] object-contain animate-fade-in"
                                 />
                                 {renderSubtitles()}
@@ -329,7 +461,7 @@ function VideoVoiceCloneLipSync() {
                                     <SwapProcessingOverlay progress={progress} label={message || "AI đang xử lý..."} />
                                 ) : (
                                     <span className="relative z-10 text-xs text-slate-750 dark:text-white bg-white/70 dark:bg-slate-900/60 px-4 py-2.5 rounded-full backdrop-blur-md font-medium border border-slate-200 dark:border-white/10 text-center max-w-[80%]">
-                                        Video kết quả sẽ hiển thị tại đây kèm phụ đề chạy đồng bộ
+                                        Video kết quả hoàn chỉnh sẽ hiển thị tại đây cùng phụ đề chạy đồng bộ
                                     </span>
                                 )}
                             </>
@@ -337,19 +469,63 @@ function VideoVoiceCloneLipSync() {
                     </div>
 
                     {resultVideoSrc && (
-                        <div className="p-4 border-t border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-950/20 flex gap-3">
-                            <button
-                                onClick={() => swapService.downloadResult(resultVideoSrc, 'lipsync-result.mp4')}
-                                className="flex-1 py-2.5 rounded-xl text-xs font-semibold border border-[#5b6ef7] text-[#5b6ef7] hover:bg-[#5b6ef7]/10 dark:text-[#a78bfa] dark:border-[#a78bfa] dark:hover:bg-[#a78bfa]/10 transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
-                            >
-                                Tải xuống
-                            </button>
-                            <button
-                                onClick={handleReset}
-                                className="flex-1 py-2.5 rounded-xl text-xs font-semibold border border-slate-300 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:border-slate-700 dark:hover:bg-slate-800 transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
-                            >
-                                Làm mới
-                            </button>
+                        <div className="p-5 border-t border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-950/20 flex flex-col gap-4">
+                            {/* Danh sách các nút tải độc lập tài nguyên */}
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                <a
+                                    href={downloadUrls.finalResult}
+                                    download="final_video.mp4"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="py-2 rounded-lg text-[10px] font-semibold bg-[#5b6ef7]/10 text-[#5b6ef7] dark:text-[#a78bfa] hover:bg-[#5b6ef7]/20 transition-colors text-center border border-dashed border-[#5b6ef7]/40"
+                                >
+                                    🎬 Video hoàn chỉnh
+                                </a>
+                                {downloadUrls.swapResult && (
+                                    <a
+                                        href={downloadUrls.swapResult}
+                                        download="swap_video.mp4"
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="py-2 rounded-lg text-[10px] font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-650 dark:text-slate-350 transition-colors text-center border border-slate-300 dark:border-slate-700"
+                                    >
+                                        👤 Video Swap Mặt
+                                    </a>
+                                )}
+                                <a
+                                    href={downloadUrls.xttsResult}
+                                    download="audio_voice.wav"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="py-2 rounded-lg text-[10px] font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-650 dark:text-slate-350 transition-colors text-center border border-slate-300 dark:border-slate-700"
+                                >
+                                    🎵 File Audio XTTS
+                                </a>
+                                <a
+                                    href={downloadUrls.srtResult}
+                                    download="subtitles.srt"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="py-2 rounded-lg text-[10px] font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-650 dark:text-slate-350 transition-colors text-center border border-slate-300 dark:border-slate-700"
+                                >
+                                    📝 File Phụ Đề SRT
+                                </a>
+                            </div>
+
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => swapService.downloadResult(resultVideoSrc, 'lipsync-result.mp4')}
+                                    className="flex-1 py-2.5 rounded-xl text-xs font-semibold border border-[#5b6ef7] text-[#5b6ef7] hover:bg-[#5b6ef7]/10 dark:text-[#a78bfa] dark:border-[#a78bfa] dark:hover:bg-[#a78bfa]/10 transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
+                                >
+                                    Tải video hoàn chỉnh (Blob)
+                                </button>
+                                <button
+                                    onClick={handleReset}
+                                    className="flex-1 py-2.5 rounded-xl text-xs font-semibold border border-slate-300 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:border-slate-700 dark:hover:bg-slate-800 transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
+                                >
+                                    Làm mới
+                                </button>
+                            </div>
                         </div>
                     )}
                 </div>

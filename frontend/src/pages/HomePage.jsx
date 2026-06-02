@@ -4,6 +4,7 @@ import ImageSwap from "../components/swap/ImageSwap";
 import VideoSwap from "../components/swap/VideoSwap";
 import TextToSpeech from "../components/swap/TextToSpeech";
 import VideoVoiceCloneLipSync from "../components/swap/VideoVoiceCloneLipSync";
+import WhisperSubtitle from "../components/swap/WhisperSubtitle";
 import HowToSwap from "../components/home/HowToSwap";
 import Introduction from "../components/home/Introduction";
 import HeroSection from "../components/home/HeroSection";
@@ -56,6 +57,7 @@ function HomePage() {
                             {tab === 'video' && <VideoSwap />}
                             {tab === 'tts'   && <TextToSpeech />}
                             {tab === 'lipsync' && <VideoVoiceCloneLipSync />}
+                            {tab === 'whisper' && <WhisperSubtitle />}
                         </motion.div>
                     </AnimatePresence>
                 </div>

@@ -17,7 +17,12 @@ import { motion } from "framer-motion"
 
 function LoginModal({ onClose, onSwitch }) {
   const [showPass, setShowPass] = useState(false)
-  const [email, setEmail] = useState("")
+  const [rememberMe, setRememberMe] = useState(() => {
+    return localStorage.getItem("rememberMe") === "true"
+  })
+  const [email, setEmail] = useState(() => {
+    return localStorage.getItem("rememberedEmail") || ""
+  })
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState({})
@@ -73,6 +78,13 @@ function LoginModal({ onClose, onSwitch }) {
     try {
       const result = await authService.login(email, password)
       if (result.result.authenticated) {
+        if (rememberMe) {
+          localStorage.setItem("rememberMe", "true")
+          localStorage.setItem("rememberedEmail", email)
+        } else {
+          localStorage.removeItem("rememberMe")
+          localStorage.removeItem("rememberedEmail")
+        }
         const user = await useAuthStore.getState().fetchUser()
         onClose()
         if (user && user.role && user.role.name === 'ADMIN') {
@@ -335,12 +347,17 @@ function LoginModal({ onClose, onSwitch }) {
               flex
               items-center
               gap-2
-
               text-zinc-500
+              cursor-pointer
             "
           >
 
-            <input type="checkbox" />
+            <input 
+              type="checkbox" 
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="cursor-pointer rounded border-zinc-300 dark:border-zinc-700 text-blue-800 focus:ring-blue-800"
+            />
 
             Ghi nhớ tôi
 
