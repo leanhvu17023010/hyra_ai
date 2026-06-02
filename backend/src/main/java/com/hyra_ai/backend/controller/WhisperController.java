@@ -16,6 +16,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import com.hyra_ai.backend.entity.Media;
+import com.hyra_ai.backend.repository.MediaRepository;
+import com.hyra_ai.backend.service.StorageService;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 
 @RestController
@@ -26,6 +31,8 @@ public class WhisperController {
 
     WhisperTaskRepository whisperTaskRepository;
     UserRepository userRepository;
+    MediaRepository mediaRepository;
+    StorageService storageService;
     WhisperXService whisperXService;
 
     private User currentUser() {
@@ -52,6 +59,36 @@ public class WhisperController {
                 .message("Bắt đầu xử lý Whisper thành công")
                 .result(taskId)
                 .build();
+    }
+
+    @PostMapping("/upload-and-start")
+    public ApiResponse<String> uploadAndStart(@RequestParam("file") MultipartFile file) {
+        User user = currentUser();
+        String folder = user.getId() + "/library";
+
+        try {
+            // 1. Tạo task mới
+            WhisperTask task = whisperXService.createTask();
+
+            // 2. Lưu file upload
+            String filePath = storageService.store(file, folder);
+            Media audioMedia = mediaRepository.save(Media.builder()
+                    .fileName(file.getOriginalFilename())
+                    .fileType("AUDIO")
+                    .url("/uploads/" + filePath)
+                    .build());
+
+            // 3. Gắn Media vào Task và bắt đầu xử lý ngầm
+            whisperXService.attachAndProcess(task.getId(), audioMedia);
+
+            return ApiResponse.<String>builder()
+                    .code(200)
+                    .message("Upload và khởi tạo Whisper thành công")
+                    .result(task.getId())
+                    .build();
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi upload và xử lý Whisper: " + e.getMessage(), e);
+        }
     }
 
     @GetMapping("/tasks/{taskId}/status")
