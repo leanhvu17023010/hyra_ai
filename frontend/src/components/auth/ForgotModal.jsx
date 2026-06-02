@@ -8,7 +8,6 @@ function ForgotModal({ onClose, onSwitch }) {
   const [email, setEmail] = useState("")
   const [errors, setErrors] = useState({})
   const [globalError, setGlobalError] = useState("")
-  const [message, setMessage] = useState("")
   const [loading, setLoading] = useState(false)
 
   const handleResetPassword = async () => {
@@ -127,14 +126,6 @@ function ForgotModal({ onClose, onSwitch }) {
           </div>
         )}
 
-        {message && (
-          <div className="mb-4 p-3 bg-green-100 text-green-600 rounded-xl text-sm text-center">
-            {message}
-          </div>
-        )}
-
-        {!message && (
-          <>
             <div className="relative mb-8 py-2">
               <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-xl text-zinc-400" />
               <input
@@ -172,8 +163,6 @@ function ForgotModal({ onClose, onSwitch }) {
             >
               {loading ? "Đang xử lý..." : "Gửi yêu cầu"}
             </button>
-          </>
-        )}
 
         <div className="text-center mt-8 py-2">
             <span

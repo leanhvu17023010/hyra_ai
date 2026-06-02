@@ -25,7 +25,7 @@ function AdminDashboard() {
     const [activeTab, setActiveTab] = useState('dashboard');
 
     // Swap Time Configuration State
-    const [swapTimeConfig, setSwapTimeConfig] = useState({
+    const [swapTimeConfig] = useState({
         maxVideoDuration: 30,
         executionTimeout: 300,
         retentionPeriod: 24,
@@ -85,9 +85,17 @@ function AdminDashboard() {
     };
 
     useEffect(() => {
+        let active = true;
         if (user && user.role && user.role.name === 'ADMIN') {
-            fetchUsers();
+            setTimeout(() => {
+                if (active) {
+                    fetchUsers();
+                }
+            }, 0);
         }
+        return () => {
+            active = false;
+        };
     }, [user]);
 
     const handleOpenEdit = (u) => {
@@ -138,21 +146,6 @@ function AdminDashboard() {
         }
     };
 
-    const handleSaveSwapTimeConfig = async (e) => {
-        e.preventDefault();
-        setActionLoading(true);
-        setError('');
-        setMessage('');
-        try {
-            // Giả lập lưu vào backend
-            await new Promise((resolve) => setTimeout(resolve, 800));
-            setMessage('Cập nhật cấu hình thời gian swap thành công!');
-        } catch (err) {
-            setError('Không thể cập nhật cấu hình thời gian swap.');
-        } finally {
-            setActionLoading(false);
-        }
-    };
 
     // Filtered users list
     const filteredUsers = Array.isArray(users) ? users.filter(u => {
@@ -269,9 +262,6 @@ function AdminDashboard() {
                             )}
                             {activeTab === 'tasks' && <TasksPanel />}
                             {activeTab === 'queues' && <QueuesPanel />}
-                            {activeTab === 'gpus' && <GPUMonitorPanel />}
-                            {activeTab === 'payments' && <PaymentsPanel />}
-                            {activeTab === 'logs' && <LogsPanel />}
                         </div>
                     )}
                 </main>

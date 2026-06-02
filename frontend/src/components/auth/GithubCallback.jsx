@@ -9,6 +9,7 @@ function GithubCallback() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    let active = true;
     const code = searchParams.get("code");
 
     if (code) {
@@ -26,18 +27,25 @@ function GithubCallback() {
               window.location.href = '/';
             }
           } else {
-            setError("Xác thực GitHub thất bại.");
+            if (active) setError("Xác thực GitHub thất bại.");
           }
         } catch (err) {
           console.error("Lỗi đăng nhập GitHub:", err);
-          setError(err.response?.data?.message || "Đăng nhập bằng GitHub thất bại. Vui lòng thử lại.");
+          if (active) setError(err.response?.data?.message || "Đăng nhập bằng GitHub thất bại. Vui lòng thử lại.");
         }
       };
 
       handleGithubLogin();
     } else {
-      setError("Không tìm thấy mã code xác thực từ GitHub.");
+      setTimeout(() => {
+        if (active) {
+          setError("Không tìm thấy mã code xác thực từ GitHub.");
+        }
+      }, 0);
     }
+    return () => {
+      active = false;
+    };
   }, [searchParams, navigate]);
 
   return (
