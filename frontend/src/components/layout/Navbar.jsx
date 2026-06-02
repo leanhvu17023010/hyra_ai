@@ -4,10 +4,10 @@ import {
     FiUser,
     FiLogOut,
     FiSun,
-    FiMoon
+    FiMoon,
+    FiShield
 } from "react-icons/fi";
 
-import userService from "../../services/userService";
 import authService from "../../services/authService";
 import { Link } from "react-router-dom";
 import useUIStore from "../../store/uiStore";
@@ -57,11 +57,11 @@ function Navbar() {
 
             {/* LEFT: LOGO + DARK MODE */}
             <div className="flex items-center gap-3">
-            <Link to="/" >
+            <Link to={user && user.role && user.role.name === 'ADMIN' ? "/admin" : "/"} >
 
                 {/* LOGO */}
                 <h1
-                    className="text-xl font-bold"
+                    className="text-3xl font-bold"
                 >
                     Hyra AI
                 </h1>
@@ -69,7 +69,7 @@ function Navbar() {
                 {/* DARK MODE TOGGLE */}
                 <button
                     onClick={toggleDarkMode}
-                    className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all cursor-pointer text-base"
+                    className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all cursor-pointer text-2xl"
                 >
                     {darkMode ? <FiSun /> : <FiMoon />}
                 </button>
@@ -108,21 +108,19 @@ function Navbar() {
                                 flex
                                 items-center
                                 gap-3
-
+                                
                                 px-4
                                 py-2
-
                                 rounded-xl
 
                                 hover:bg-gray-100
                                 dark:hover:bg-gray-800
-
                                 transition-all
                             "
                         >
 
                             {/* NAME */}
-                            <span className="font-medium text-sm cursor-pointer">
+                            <span className="font-medium text-xl cursor-pointer">
                                 {user.userName || user.email}
                             </span>
 
@@ -196,6 +194,26 @@ function Navbar() {
                                     <FiUser className="text-lg" />
                                     Thông tin tài khoản</Link>
 
+                                {user.role && user.role.name === 'ADMIN' && (
+                                    <Link to="/admin"
+                                        className="
+                                            w-full
+                                            flex
+                                            items-center
+                                            gap-3
+                                            text-left
+                                            px-5
+                                            py-3
+                                            hover:bg-gray-100
+                                            dark:hover:bg-gray-800
+                                            cursor-pointer
+                                            transition-all
+                                        "
+                                    >
+                                        <FiShield className="text-lg text-purple-650 dark:text-purple-400" />
+                                        Trang quản trị
+                                    </Link>
+                                )}
 
                                 {/* LOGOUT */}
                                 <button

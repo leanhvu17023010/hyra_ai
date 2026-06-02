@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { FiChevronDown } from 'react-icons/fi';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const FAQS = [
     {
@@ -31,12 +32,7 @@ function FAQItem({ q, a }) {
             <button
                 type="button"
                 onClick={() => setOpen(!open)}
-                className="w-full flex items-
-                
-                
-                
-                
-                center justify-between px-8 py-6 text-left cursor-pointer"
+                className="w-full flex items-center justify-between px-8 py-6 text-left cursor-pointer"
             >
                 <span className="font-semibold text-slate-800 dark:text-white text-base">{q}</span>
                 <FiChevronDown
@@ -44,11 +40,21 @@ function FAQItem({ q, a }) {
                     size={22}
                 />
             </button>
-            {open && (
-                <div className="px-6 pb-5 text-sm text-slate-500 dark:text-slate-400 leading-relaxed border-t border-slate-100 dark:border-slate-800/80 pt-4">
-                    {a}
-                </div>
-            )}
+            <AnimatePresence initial={false}>
+                {open && (
+                    <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.25, ease: 'easeInOut' }}
+                        className="overflow-hidden"
+                    >
+                        <div className="px-8 pb-6 text-sm text-slate-500 dark:text-slate-400 leading-relaxed border-t border-slate-100 dark:border-slate-800/80 pt-4">
+                            {a}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

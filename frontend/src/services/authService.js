@@ -48,6 +48,15 @@ const authService = {
             newPassword
         });
         return response.data;
+    },
+    loginWithGithub: async (code) => {
+        const response = await api.post('/auth/github', {
+            code
+        });
+        if (response.data?.result?.token) {
+            localStorage.setItem('token', response.data.result.token);
+        }
+        return response.data;
     }
 };
 

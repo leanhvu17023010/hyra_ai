@@ -120,3 +120,4 @@ Chạy backend app:
 ```bash
 docker run --name hyra-backend --network hyra-network -p 8080:8080 -e spring.datasource.url=jdbc:mysql://mysql-db:3306/hyra_ai -e spring.datasource.username=root -e spring.datasource.password=root hyra-ai-backend:latest
 ```
+
