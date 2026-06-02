@@ -47,9 +47,11 @@ public class SecurityConfig {
     };
 
     private final CustomJwtDecoder customJwtDecoder;
+    private final ApiKeyAuthFilter apiKeyAuthFilter;
 
-    public SecurityConfig(CustomJwtDecoder customJwtDecoder) {
+    public SecurityConfig(CustomJwtDecoder customJwtDecoder, com.hyra_ai.backend.repository.ApiKeyRepository apiKeyRepository) {
         this.customJwtDecoder = customJwtDecoder;
+        this.apiKeyAuthFilter = new ApiKeyAuthFilter(apiKeyRepository);
     }
 
     // Cấu hình security: Quản lý quyền truy cập endpoint
@@ -59,7 +61,10 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET,PUBLIC_GET_ENDPOINTS).permitAll()
                 .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS).permitAll()
                 .anyRequest()
-                .authenticated()); // Tất cả request khác đều buộc phải có JWT hợp lệ
+                .authenticated()); // Tất cả request khác đều buộc phải có JWT hợp lệ hoặc API Key
+
+        // Thêm filter API Key trước JWT auth
+        httpSecurity.addFilterBefore(apiKeyAuthFilter, org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter.class);
 
         httpSecurity.oauth2ResourceServer(
                 oauth2 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer

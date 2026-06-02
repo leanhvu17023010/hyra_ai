@@ -1,22 +1,24 @@
-# Stage 1: build
-# Start with a Maven image that includes JDK 21
-FROM maven:3.9.8-amazoncorretto-21 AS build
-
-# Copy source code and pom.xml file to /app folder
+# Stage 1: Build the application
+FROM maven:3.9.6-eclipse-temurin-21 AS builder
 WORKDIR /app
+
+# Copy the pom.xml file to download dependencies
 COPY pom.xml .
+RUN mvn dependency:go-offline -B
+
+# Copy the source code and build the application
 COPY src ./src
+RUN mvn clean package -DskipTests
 
-# Build source code with maven
-RUN mvn package -DskipTests
-
-#Stage 2: create image
-# Start with Amazon Correto JDK 21
-FROM amazoncorretto:21.0.4
-
-# Set working folder to App and copy complied file from above step
+# Stage 2: Run the application
+FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
 
-# Command to run the application
+# Copy the built jar file from the builder stage
+COPY --from=builder /app/target/*.jar app.jar
+
+# Expose port 8080
+EXPOSE 8080
+
+# Run the jar file
 ENTRYPOINT ["java", "-jar", "app.jar"]

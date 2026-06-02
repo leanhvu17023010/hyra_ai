@@ -62,6 +62,40 @@ public class XttsController {
                 .build();
     }
 
+    @PostMapping("/upload-and-start")
+    public ApiResponse<String> uploadAndStart(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("text") String text,
+            @RequestParam(value = "language", defaultValue = "vi") String language) {
+        
+        User user = currentUser();
+        String folder = user.getId() + "/library";
+        
+        try {
+            // 1. Tạo task mới
+            XttsTask task = xttsService.createTask();
+            
+            // 2. Lưu file upload
+            String filePath = storageService.store(file, folder);
+            Media voiceMedia = mediaRepository.save(Media.builder()
+                    .fileName(file.getOriginalFilename())
+                    .fileType("AUDIO")
+                    .url("/uploads/" + filePath)
+                    .build());
+                    
+            // 3. Gắn Media vào Task và bắt đầu xử lý ngầm
+            xttsService.attachAndProcess(task.getId(), text, language, voiceMedia);
+            
+            return ApiResponse.<String>builder()
+                    .code(200)
+                    .message("Upload và khởi tạo XTTS thành công")
+                    .result(task.getId())
+                    .build();
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi upload và xử lý XTTS: " + e.getMessage(), e);
+        }
+    }
+
     @GetMapping("/tasks/{taskId}/status")
     public ApiResponse<XttsTaskResponse> getTaskStatus(@PathVariable("taskId") String taskId) {
         User user = currentUser();
