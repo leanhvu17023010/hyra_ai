@@ -100,6 +100,9 @@ function WhisperSubtitle() {
                     setResultText(textRes.data);
                 }
 
+                // Lưu lịch sử
+                swapService.saveCompletedTaskToHistory(_taskId, task.resultTxtUrl || task.resultSrtUrl, 'subtitle');
+
                 setProgress(100);
                 setMessage('Hoàn thành trích xuất phụ đề!');
                 setIsLoading(false);
