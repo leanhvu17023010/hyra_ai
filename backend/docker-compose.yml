@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: hyra_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: hyra_ai
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    restart: unless-stopped
+
+  backend:
+    build: .
+    container_name: hyra_backend
+    ports:
+      - "8080:8080"
+    environment:
+      # Ghi đè URL kết nối DB để trỏ về container mysql
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/hyra_ai?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      
+      # Ghi đè các biến môi trường khi deploy nếu cần
+      # BREVO_API_KEY: "your_real_api_key_here"
+      # APP_FRONTEND_BASE_URL: "https://your-frontend-domain.com"
+      
+      # Bạn có thể trỏ lại IP của các máy chủ AI tại đây nếu chúng khác IP trên local
+      # FACEFUSION_BASE_URL: "http://172.16.1.75:8000"
+      # XTTS_BASE_URL: "http://172.16.1.75:8020"
+      # WHISPERX_API_URL: "http://172.16.0.200:8000"
+      # FFMPEG_API_URL: "http://172.16.0.207:8000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+    volumes:
+      # Mount thư mục uploads ra ngoài máy chủ thật để tránh mất file khi khởi động lại container
+      - ./uploads:/app/uploads
+
+volumes:
+  mysql_data:
