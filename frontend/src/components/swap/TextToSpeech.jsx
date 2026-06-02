@@ -237,7 +237,7 @@ function TextToSpeech() {
             {isLoading && <SwapProcessingOverlay progress={progress} message={message} />}
 
             {/* ===== CỘT TRÁI: Nhập liệu (Văn bản & Giọng mẫu) ===== */}
-            <div className="flex-1 min-w-[320px] flex flex-col gap-4">
+            <div className="flex-1 max-w-[740px] min-w-[320px] flex flex-col gap-4">
                 
                 {/* 1. Nhập văn bản */}
                 <div className="rounded-2xl border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-900 overflow-hidden flex flex-col shadow-md">
@@ -378,7 +378,7 @@ function TextToSpeech() {
             </div>
 
             {/* ===== CỘT PHẢI: Trạng thái & Điều khiển hành động ===== */}
-            <div className="w-80 shrink-0 flex flex-col gap-4">
+            <div className="w-150 shrink-0 flex flex-col gap-4">
                 
                 {/* 1. Trạng thái phát */}
                 <div className="rounded-2xl border border-slate-300 bg-white p-4 dark:border-slate-700 dark:bg-slate-900 shadow-md">
@@ -395,22 +395,32 @@ function TextToSpeech() {
                             {isPlaying ? 'Đang phát...' : 'Sẵn sàng'}
                         </p>
 
-                        {/* Sóng âm giả lập */}
-                        <div className="flex items-end justify-center gap-[3px] h-6 w-full px-2">
-                            {Array.from({ length: 20 }).map((_, i) => (
-                                <div
-                                    key={i}
-                                    className={`flex-1 rounded-full transition-all duration-200 ${
-                                        isPlaying ? 'bg-[#5b6ef7]' : 'bg-gray-200 dark:bg-gray-500'
-                                    }`}
-                                    style={{
-                                        height: isPlaying
-                                            ? `${8 + Math.abs(Math.sin(i * 0.7)) * 14}px`
-                                            : `${3 + Math.abs(Math.sin(i * 0.5)) * 4}px`,
-                                    }}
+                        {/* Sóng âm giả lập hoặc trình phát nhạc thực tế */}
+                        {resultAudioUrl ? (
+                            <div className="w-full mt-2">
+                                <audio
+                                    ref={audioPlayerRef}
+                                    src={resolveMediaUrl(resultAudioUrl)}
+                                    controls
+                                    onPlay={() => setIsPlaying(true)}
+                                    onPause={() => setIsPlaying(false)}
+                                    onEnded={() => setIsPlaying(false)}
+                                    className="w-full h-10 outline-none rounded-lg bg-gray-50 dark:bg-slate-800"
                                 />
-                            ))}
-                        </div>
+                            </div>
+                        ) : (
+                            <div className="flex items-end justify-center gap-[3px] h-6 w-full px-2">
+                                {Array.from({ length: 20 }).map((_, i) => (
+                                    <div
+                                        key={i}
+                                        className="flex-1 rounded-full bg-gray-200 dark:bg-gray-500"
+                                        style={{
+                                            height: `${3 + Math.abs(Math.sin(i * 0.5)) * 4}px`,
+                                        }}
+                                    />
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -465,7 +475,7 @@ function TextToSpeech() {
                                         disabled={!text.trim() || !audioFile || isRecording}
                                         className="w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#5b6ef7] to-[#a78bfa] hover:from-[#4b5ee7] hover:to-[#906ef5] disabled:from-gray-200 disabled:to-gray-300 disabled:text-gray-400 disabled:shadow-none disabled:cursor-not-allowed transition-all hover:scale-[1.02] transform duration-200 flex items-center justify-center gap-2 cursor-pointer"
                                     >
-                                        AI Swap Giọng nói
+                                       <FiPlay size={14} />Chuyển đổi giọng nói AI 
                                     </button>
                                 )}
                             </>
@@ -483,16 +493,6 @@ function TextToSpeech() {
                     </div>
                 </div>
             </div>
-            {resultAudioUrl && (
-                <audio
-                    ref={audioPlayerRef}
-                    src={resolveMediaUrl(resultAudioUrl)}
-                    onPlay={() => setIsPlaying(true)}
-                    onPause={() => setIsPlaying(false)}
-                    onEnded={() => setIsPlaying(false)}
-                    className="hidden"
-                />
-            )}
         </div>
     );
 }
