@@ -72,7 +72,7 @@ public class XttsService {
         task.setStatus("Processing");
         XttsTask savedTask = xttsTaskRepository.save(task);
 
-        processTts(savedTask);
+        java.util.concurrent.CompletableFuture.runAsync(() -> processTts(savedTask));
     }
 
     public XttsTask startTts(String taskId, TtsRequest request) {
@@ -89,7 +89,7 @@ public class XttsService {
         task.setStatus("Processing");
 
         XttsTask savedTask = xttsTaskRepository.save(task);
-        processTts(savedTask);
+        java.util.concurrent.CompletableFuture.runAsync(() -> processTts(savedTask));
 
         return savedTask;
     }

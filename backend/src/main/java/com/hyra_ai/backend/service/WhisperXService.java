@@ -60,6 +60,22 @@ public class WhisperXService {
         whisperTaskRepository.save(task);
     }
 
+    public void attachAndProcess(String taskId, Media audioMedia) {
+        WhisperTask task = whisperTaskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy task Whisper với ID: " + taskId));
+
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (task.getUser() == null || !task.getUser().getEmail().equals(email)) {
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+
+        task.setAudioMedia(audioMedia);
+        task.setStatus("Processing");
+        WhisperTask savedTask = whisperTaskRepository.save(task);
+
+        java.util.concurrent.CompletableFuture.runAsync(() -> processWhisperAsync(savedTask));
+    }
+
     public WhisperTask startWhisper(String taskId) {
         WhisperTask task = whisperTaskRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy task Whisper với ID: " + taskId));
@@ -71,7 +87,7 @@ public class WhisperXService {
 
         task.setStatus("Processing");
         WhisperTask savedTask = whisperTaskRepository.save(task);
-        processWhisperAsync(savedTask);
+        java.util.concurrent.CompletableFuture.runAsync(() -> processWhisperAsync(savedTask));
 
         return savedTask;
     }
@@ -155,7 +171,11 @@ public class WhisperXService {
             Path wavFile = Paths.get("uploads", wavRelativePath);
 
             MultipartBodyBuilder builder = new MultipartBodyBuilder();
-            builder.part("file", new FileSystemResource(wavFile)); // Sửa "audio_file" thành "file"
+            builder.part("file", new FileSystemResource(wavFile));
+
+            if (megaTask.getInputText() != null && !megaTask.getInputText().trim().isEmpty()) {
+                builder.part("text", megaTask.getInputText());
+            }
 
             byte[] zipBytes = whisperXWebClient.post()
                     .uri("/transcribe")
