@@ -131,6 +131,7 @@ public class XttsController {
                 .speakerWavUrl(t.getSpeakerWav() != null ? t.getSpeakerWav().getUrl() : null)
                 .language(t.getLanguage())
                 .status(t.getStatus())
+                .progress(t.getProgress() != null ? t.getProgress() : 0)
                 .resultUrl(t.getResultUrl())
                 .createdAt(t.getCreateAt() != null ? t.getCreateAt().toString() : null)
                 .build();
