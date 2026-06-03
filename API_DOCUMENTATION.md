@@ -70,6 +70,26 @@ Tất cả các đường dẫn dưới đây cần được ghép với **Base 
 }
 ```
 
+#### 3. Hướng dẫn test bằng Postman (Dành cho Lập trình viên)
+
+**Bước 1: Test Upload & Khởi tạo (upload-and-start)**
+1. Mở Postman, tạo một Request mới.
+2. Chọn Method là **POST**, nhập URL: `http://localhost:8080/hyra_ai/xtts/upload-and-start` (thay localhost bằng tên miền của bạn nếu cần).
+3. Sang tab **Headers**, thêm Key: `Authorization`, Value: `Bearer <token_jwt_của_bạn>`. (Lưu ý: Tuỳ vào cấu hình bảo mật, có thể dùng `x-api-key`).
+4. Sang tab **Body**, chọn loại **form-data**.
+5. Thêm các trường dữ liệu sau:
+   - Key: `text` | Value: `Xin chào thế giới` (Đổi type của ô Key sang Text).
+   - Key: `language` | Value: `vi` (Đổi type sang Text).
+   - Key: `file` | Ở ô Value bấm nút chọn file, chọn một file `.wav` giọng đọc mẫu trong máy tính của bạn (Nhớ trỏ chuột vào ô Key `file` và chọn type là **File** thay vì Text).
+6. Bấm **Send**. Bạn sẽ nhận được `result` là một chuỗi Task ID (VD: `abc-123`).
+
+**Bước 2: Test Polling Lấy tiến độ (status)**
+1. Tạo một Request mới, Method là **GET**.
+2. URL: `http://localhost:8080/hyra_ai/xtts/tasks/<Task_ID_Lấy_Từ_Bước_1>/status`
+3. Chuyển sang tab **Headers**, gắn `Authorization` hoặc `x-api-key` tương tự Bước 1.
+4. Bấm **Send** liên tục mỗi 3 giây để xem trường `progress` tăng từ `0` -> `100`.
+5. Khi `status` chuyển thành `Complete`, lấy giá trị của `resultUrl` ghép với Base URL để tải/nghe kết quả.
+
 ---
 
 ### B. Dịch vụ Bóc Băng Văn Bản (WhisperX)
