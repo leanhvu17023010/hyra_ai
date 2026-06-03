@@ -2,6 +2,7 @@ import { Outlet, useNavigate, useLocation } from "react-router-dom"
 import { useEffect } from "react";
 import Navbar from "../components/layout/Navbar"
 import Footer from "../components/layout/Footer"
+import HomePage from "../pages/HomePage";
 
 import LoginModal from "../components/auth/LoginModal";
 import RegisterModal from "../components/auth/RegisterModal";
@@ -119,8 +120,12 @@ function MainLayout(){
                     />
                 )}
             </AnimatePresence>
-            <main className="flex-1 flex justify-center pt-10 pb-20">
-                <Outlet/> 
+            <main className="flex-1 flex justify-center pt-10 pb-20 w-full">
+                {/* Luôn giữ HomePage mounted ở nền để tránh mất trạng thái xử lý AI khi đổi trang */}
+                <div className={location.pathname === '/' ? 'w-full flex justify-center' : 'hidden'}>
+                    <HomePage />
+                </div>
+                <Outlet /> 
             </main>
             <Footer />
         </div>

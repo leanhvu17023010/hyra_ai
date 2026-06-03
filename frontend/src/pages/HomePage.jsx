@@ -10,7 +10,7 @@ import Introduction from "../components/home/Introduction";
 import HeroSection from "../components/home/HeroSection";
 import StatsSection from "../components/home/StatsSection";
 import FAQSection from "../components/home/FAQSection";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 function HomePage() {
     const [tab, setTab] = useState('video');
@@ -45,21 +45,50 @@ function HomePage() {
 
                 {/* Tab panel */}
                 <div className="w-full min-h-[500px]">
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key={tab}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            transition={{ duration: 0.3, ease: "easeInOut" }}
-                        >
-                            {tab === 'image' && <ImageSwap />}
-                            {tab === 'video' && <VideoSwap />}
-                            {tab === 'tts'   && <TextToSpeech />}
-                            {tab === 'lipsync' && <VideoVoiceCloneLipSync />}
-                            {tab === 'whisper' && <WhisperSubtitle />}
-                        </motion.div>
-                    </AnimatePresence>
+                    <motion.div 
+                        className={tab === 'image' ? 'block' : 'hidden'}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: tab === 'image' ? 1 : 0, y: tab === 'image' ? 0 : 10 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        <ImageSwap />
+                    </motion.div>
+
+                    <motion.div 
+                        className={tab === 'video' ? 'block' : 'hidden'}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: tab === 'video' ? 1 : 0, y: tab === 'video' ? 0 : 10 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        <VideoSwap />
+                    </motion.div>
+
+                    <motion.div 
+                        className={tab === 'tts' ? 'block' : 'hidden'}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: tab === 'tts' ? 1 : 0, y: tab === 'tts' ? 0 : 10 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        <TextToSpeech />
+                    </motion.div>
+
+                    <motion.div 
+                        className={tab === 'lipsync' ? 'block' : 'hidden'}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: tab === 'lipsync' ? 1 : 0, y: tab === 'lipsync' ? 0 : 10 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        <VideoVoiceCloneLipSync />
+                    </motion.div>
+
+                    <motion.div 
+                        className={tab === 'whisper' ? 'block' : 'hidden'}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: tab === 'whisper' ? 1 : 0, y: tab === 'whisper' ? 0 : 10 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        <WhisperSubtitle />
+                    </motion.div>
                 </div>
             </div>
 
