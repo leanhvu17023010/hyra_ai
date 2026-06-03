@@ -62,11 +62,11 @@ function ProfileInfo({ user }) {
     };
 
     return (
-        <div className="space-y-12">
-            <div className="grid gap-10 md:grid-cols-2">
+        <div className="w-full space-y-8 py-2">
+            <div className="grid gap-6 md:grid-cols-2">
                 {/* Username Input / Text */}
-                <div className="space-y-4">
-                    <label className="text-xl font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-450 dark:text-slate-550">
                         Họ và tên hiển thị
                     </label>
 
@@ -75,23 +75,23 @@ function ProfileInfo({ user }) {
                             type="text"
                             value={userName}
                             onChange={(e) => setUserName(e.target.value)}
-                            className="text-xl w-full rounded-2xl border border-slate-200 bg-slate-50 py-5 px-6 font-semibold outline-none focus:border-[#5b6ef7] dark:bg-slate-900/60 dark:text-white dark:border-slate-800"
+                            className="text-sm w-full rounded-xl border border-slate-200 bg-slate-50 dark:bg-slate-950/40 dark:text-white dark:border-slate-800/80 py-3.5 px-4 font-semibold outline-none focus:border-[#5b6ef7] focus:ring-2 focus:ring-[#5b6ef7]/10 transition-all duration-200"
                             placeholder="Nhập họ và tên hiển thị mới"
                             disabled={loading}
                         />
                     ) : (
-                        <div className="text-xl rounded-2xl font-bold py-5 px-6 text-slate-800 bg-slate-50 border border-slate-200 dark:bg-slate-900/60 dark:text-slate-200 dark:border-slate-800">
+                        <div className="text-sm rounded-xl font-bold py-3.5 px-4 text-slate-800 dark:text-slate-200 bg-slate-50 border border-slate-200 dark:bg-slate-950/40 dark:border-slate-800/80">
                             {user?.userName || 'Chưa thiết lập'}
                         </div>
                     )}
                 </div>
 
                 {/* Email (Read-Only) */}
-                <div className="space-y-4">
-                    <label className="text-xl font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-450 dark:text-slate-550">
                         Email đăng ký
                     </label>
-                    <div className="text-xl rounded-2xl font-bold py-5 px-6 text-slate-450 bg-slate-50/50 border border-slate-200/80 dark:bg-slate-900/40 dark:text-slate-500 dark:border-slate-800/80 cursor-not-allowed">
+                    <div className="text-sm rounded-xl font-semibold py-3.5 px-4 text-slate-500 dark:text-slate-400 bg-slate-100/50 border border-slate-250/80 dark:bg-slate-950/20 dark:border-slate-800/80 cursor-not-allowed">
                         {user?.email}
                     </div>
                 </div>
@@ -99,7 +99,7 @@ function ProfileInfo({ user }) {
 
             {/* Notification message */}
             {message.text && (
-                <div className={`p-4 rounded-xl text-sm font-semibold border animate-fade-in flex items-center justify-between ${
+                <div className={`p-4 rounded-xl text-xs font-semibold border animate-fade-in flex items-center justify-between ${
                     message.type === 'success' 
                         ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
                         : 'bg-red-500/10 text-red-500 border-red-500/20'
@@ -108,19 +108,17 @@ function ProfileInfo({ user }) {
                     <button 
                         type="button"
                         onClick={() => setMessage({ text: '', type: '' })}
-                        className="text-lg font-bold leading-none hover:opacity-75 cursor-pointer ml-3 px-1.5 py-0.5 rounded hover:bg-slate-500/10"
+                        className="text-base font-bold leading-none hover:opacity-75 cursor-pointer ml-3 px-1.5 py-0.5 rounded hover:bg-slate-500/10"
                     >
                         ×
                     </button>
                 </div>
             )}
 
-
-
-                        {/* Action Buttons Row - Positioned at the bottom-right */}
-            <div className="flex justify-end pt-4 border-t border-slate-100 dark:border-slate-800/80">
+            {/* Action Buttons Row - Positioned at the bottom-right */}
+            <div className="flex justify-end pt-6 border-t border-slate-100 dark:border-slate-800/80">
                 {isEditing ? (
-                    <div className="flex gap-4">
+                    <div className="flex gap-3">
                         <button
                             type="button"
                             onClick={() => {
@@ -129,7 +127,7 @@ function ProfileInfo({ user }) {
                                 setMessage({ text: '', type: '' });
                             }}
                             disabled={loading}
-                            className="px-6 py-3.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-650 dark:text-slate-200 rounded-2xl text-sm font-bold transition-all flex items-center gap-2 cursor-pointer"
+                            className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-650 dark:text-slate-200 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer"
                         >
                             <FiX /> Hủy
                         </button>
@@ -137,7 +135,7 @@ function ProfileInfo({ user }) {
                             type="button"
                             onClick={handleSave}
                             disabled={loading}
-                            className="px-6 py-3.5 bg-gradient-to-r from-[#5b6ef7] to-[#8b5cf6] text-white rounded-2xl text-sm font-bold transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                            className="px-5 py-2.5 bg-gradient-to-r from-[#5b6ef7] to-[#8b5cf6] text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
                         >
                             <FiCheck /> {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
                         </button>
@@ -145,13 +143,12 @@ function ProfileInfo({ user }) {
                 ) : (
                     <button 
                         onClick={() => setIsEditing(true)}
-                        className="px-6 py-3.5 bg-[#5b6ef7]/10 hover:bg-[#5b6ef7]/20 dark:bg-[#a78bfa]/10 dark:hover:bg-[#a78bfa]/20 text-[#5b6ef7] dark:text-[#a78bfa] rounded-2xl text-sm font-bold transition-all flex items-center gap-2 cursor-pointer"
+                        className="px-5 py-2.5 bg-[#5b6ef7]/10 hover:bg-[#5b6ef7]/20 dark:bg-[#a78bfa]/10 dark:hover:bg-[#a78bfa]/20 text-[#5b6ef7] dark:text-[#a78bfa] rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer"
                     >
-                        <FiEdit2 size={15} /> Chỉnh sửa thông tin
+                        <FiEdit2 size={13} /> Chỉnh sửa thông tin
                     </button>
                 )}
             </div>
-
         </div>
     );
 }

@@ -108,7 +108,7 @@ function SwapHistory({ history }) {
         <div>
             {previewItem && (
                 <div
-                    className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4"
+                    className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4"
                     onClick={() => setPreviewItem(null)}
                 >
                     <div
@@ -118,7 +118,7 @@ function SwapHistory({ history }) {
                         <button
                             type="button"
                             onClick={() => setPreviewItem(null)}
-                            className="absolute -top-12 right-0 rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
+                            className="absolute -top-14 right-0 rounded-full bg-slate-900/60 hover:bg-slate-800/80 p-2.5 text-white border border-slate-700/50 backdrop-blur-sm transition-all hover:scale-105"
                         >
                             <FiX className="text-2xl" />
                         </button>
@@ -136,11 +136,11 @@ function SwapHistory({ history }) {
                                         src={previewMediaUrl}
                                         controls
                                         autoPlay
-                                        className="max-h-[85vh] w-full rounded-2xl bg-black"
+                                        className="max-h-[80vh] mx-auto rounded-3xl bg-slate-950 border border-slate-850 shadow-2xl"
                                     />
                                 ) : /* 2. Audio Player Dialog */
                                 (previewItem.mediaType === 'audio' || previewItem.resultUrl?.endsWith('.wav') || previewItem.resultUrl?.endsWith('.mp3')) ? (
-                                    <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 flex flex-col items-center gap-4 max-w-md mx-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 flex flex-col items-center gap-4 max-w-md mx-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
                                         <div className="w-16 h-16 rounded-full bg-gradient-to-r from-[#5b6ef7] to-[#a78bfa] flex items-center justify-center text-white shadow-lg">
                                             <FiVolume2 size={32} />
                                         </div>
@@ -150,7 +150,7 @@ function SwapHistory({ history }) {
                                     </div>
                                 ) : /* 3. Subtitle / Text Viewer */
                                 (previewItem.mediaType === 'subtitle' || previewItem.resultUrl?.endsWith('.srt') || previewItem.resultUrl?.endsWith('.txt')) ? (
-                                    <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 flex flex-col gap-4 max-w-2xl mx-auto shadow-2xl h-[70vh]" onClick={(e) => e.stopPropagation()}>
+                                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 flex flex-col gap-4 max-w-2xl mx-auto shadow-2xl h-[70vh]" onClick={(e) => e.stopPropagation()}>
                                         <div className="flex justify-between items-center border-b border-slate-150 dark:border-slate-800 pb-3">
                                             <div className="flex items-center gap-2">
                                                 <FiFileText className="text-[#5b6ef7] dark:text-[#a78bfa] text-xl" />
@@ -173,7 +173,7 @@ function SwapHistory({ history }) {
                                     <img
                                         src={previewMediaUrl}
                                         alt="Kết quả"
-                                        className="max-h-[85vh] w-full rounded-2xl object-contain bg-black"
+                                        className="max-h-[80vh] mx-auto rounded-3xl object-contain bg-slate-950 border border-slate-850 shadow-2xl"
                                     />
                                 )}
                             </>
@@ -182,25 +182,25 @@ function SwapHistory({ history }) {
                 </div>
             )}
 
-            <div className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex flex-col gap-1.5">
-                    <div className="flex items-center gap-4">
-                        <div className="h-10 w-2 bg-green-500 rounded-full" />
-                        <h2 className="text-3xl font-black text-slate-800 dark:text-white uppercase tracking-wider">
-                            Lịch sử Hoạt động
-                        </h2>
+            <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#5b6ef7] to-[#4a5ce6] text-white shadow-md shadow-[#5b6ef7]/15">
+                        <FiClock className="text-xl" />
                     </div>
-                    <p className="text-xs font-semibold text-amber-600 dark:text-amber-450 ml-6 flex items-center gap-1.5">
-                        * Máy chủ tự động dọn dẹp các tệp kết quả và hết hạn sau 3 ngày lưu trữ để tối ưu hóa bộ nhớ.
-                    </p>
+                    <div>
+                        <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Lịch sử hoạt động</h2>
+                        <p className="text-xs text-slate-450 dark:text-slate-500 mt-0.5">
+                            Các tệp kết quả sẽ tự động hết hạn và dọn dẹp sau 3 ngày lưu trữ để tối ưu hóa bộ nhớ
+                        </p>
+                    </div>
                 </div>
-                <span className="text-sm rounded-full bg-slate-150/60 dark:bg-slate-800 px-4 py-1.5 font-bold text-slate-500 dark:text-slate-400 self-start md:self-auto">
+                <span className="text-xs rounded-xl bg-slate-50 dark:bg-slate-950/60 dark:text-slate-400 dark:border-slate-800 border border-slate-200 px-4 py-2.5 font-bold text-slate-500 self-start md:self-auto shadow-sm">
                     {activeHistory.length} mục đã lưu
                 </span> 
             </div>
 
             {activeHistory.length > 0 ? (
-                <div className="grid gap-8 sm:grid-cols-2">
+                <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
                     {activeHistory.map((item) => {
                         const isVideo =
                             item.mediaType === 'video' ||
@@ -252,20 +252,20 @@ function SwapHistory({ history }) {
                                             className="h-full w-full object-cover"
                                         />
                                     )}
-                                    <div className="absolute inset-0 flex items-center justify-center gap-3 bg-black/45 opacity-0 transition-opacity group-hover:opacity-100">
+                                    <div className="absolute inset-0 flex items-center justify-center gap-3 bg-black/40 backdrop-blur-[2px] opacity-0 transition-all duration-200 group-hover:opacity-100">
                                         <button
                                             type="button"
                                             onClick={() => setPreviewItem(item)}
-                                            className="rounded-xl bg-white p-2.5 text-slate-800 hover:scale-105 transition-transform"
+                                            className="rounded-xl bg-white p-2.5 text-slate-800 hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer"
                                         >
-                                            <FiEye size={20} />
+                                            <FiEye size={18} />
                                         </button>
                                         <button
                                             type="button"
                                             onClick={() => handleDownload(item)}
-                                            className="rounded-xl bg-[#5b6ef7] p-2.5 text-white hover:scale-105 transition-transform"
+                                            className="rounded-xl bg-gradient-to-r from-[#5b6ef7] to-[#4a5ce6] p-2.5 text-white hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer"
                                         >
-                                            <FiDownload size={20} />
+                                            <FiDownload size={18} />
                                         </button>
                                     </div>
                                 </div>
@@ -273,23 +273,23 @@ function SwapHistory({ history }) {
                                     <div>
                                         <div className="flex items-center gap-2">
                                             {isVideo ? (
-                                                <FiVideo className="text-slate-500 text-base" />
+                                                <FiVideo className="text-slate-500 text-sm" />
                                             ) : isAudio ? (
-                                                <FiVolume2 className="text-slate-500 text-base" />
+                                                <FiVolume2 className="text-slate-500 text-sm" />
                                             ) : isSubtitle ? (
-                                                <FiFileText className="text-slate-500 text-base" />
+                                                <FiFileText className="text-slate-500 text-sm" />
                                             ) : (
-                                                <FiImage className="text-slate-500 text-base" />
+                                                <FiImage className="text-slate-500 text-sm" />
                                             )}
-                                            <span className="font-bold text-xl text-slate-700 dark:text-slate-200">
+                                            <span className="font-bold text-base text-slate-700 dark:text-slate-200">
                                                 {isVideo ? 'Video Swap' : isAudio ? 'Giọng nói XTTS' : isSubtitle ? 'Phụ đề Whisper' : 'Ảnh Swap'}
                                             </span>
                                         </div>
-                                        <p className="text-sm font-semibold text-slate-400 mt-1">
+                                        <p className="text-xs font-semibold text-slate-450 dark:text-slate-500 mt-1">
                                             {dateLabel}
                                         </p>
                                     </div>
-                                    <div className="h-2.5 w-2.5 rounded-full bg-green-500 animate-pulse" />
+                                    <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
                                 </div>
                             </div>
                         );
