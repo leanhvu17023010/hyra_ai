@@ -18,6 +18,7 @@ public class XttsTaskResponse {
     String speakerWavUrl;
     String language;
     String status;
+    Integer progress;
     String resultUrl;
     String createdAt;
 }

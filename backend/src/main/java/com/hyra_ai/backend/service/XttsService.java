@@ -18,12 +18,18 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.codec.ServerSentEvent;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDateTime;
+
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 
 @Service
 @RequiredArgsConstructor
@@ -94,21 +100,30 @@ public class XttsService {
         return savedTask;
     }
 
+
+
     @Async
     public void processTts(XttsTask task) {
+        ObjectMapper objectMapper = new ObjectMapper();
         try {
-            log.info("==> Bắt đầu quy trình XTTS cho Task: {}", task.getId());
+            log.info("==> Bắt đầu quy trình XTTS (SSE Polling) cho Task: {}", task.getId());
             task.setStatus("Processing");
+            task.setProgress(0);
             xttsTaskRepository.save(task);
 
+            Path voiceFile;
             if (task.getSpeakerWav() == null) {
-                throw new IllegalStateException("Không tìm thấy file giọng nói mẫu cho task");
+                log.info("Task {}: Không có file giọng mẫu, tự động sử dụng uploads/defaults/default_voice.wav", task.getId());
+                voiceFile = Paths.get("uploads", "defaults", "default_voice.wav");
+                if (!Files.exists(voiceFile)) {
+                    throw new IllegalStateException("Hệ thống yêu cầu giọng mẫu, nhưng file mặc định (uploads/defaults/default_voice.wav) không tồn tại!");
+                }
+            } else {
+                // 1. Lấy đường dẫn file vật lý của speaker_wav
+                String speakerWavUrl = task.getSpeakerWav().getUrl();
+                String relativePath = speakerWavUrl.substring(9); // Cắt bỏ "/uploads/"
+                voiceFile = Paths.get("uploads", relativePath);
             }
-
-            // 1. Lấy đường dẫn file vật lý của speaker_wav
-            String speakerWavUrl = task.getSpeakerWav().getUrl();
-            String relativePath = speakerWavUrl.substring(9); // Cắt bỏ "/uploads/"
-            Path voiceFile = Paths.get("uploads", relativePath);
 
             // 2. Tạo thư mục tạm thời cho task nếu chưa có
             String userId = task.getUser().getId();
@@ -118,46 +133,102 @@ public class XttsService {
                 Files.createDirectories(taskDir);
             }
 
-            // 3. Tạo file text.txt từ chuỗi văn bản
-            Path textFile = taskDir.resolve("text.txt");
+            // 3. Lấy text
             String textContent = task.getText() != null ? task.getText() : "";
             if (textContent.trim().isEmpty()) {
                 throw new IllegalStateException("Nội dung văn bản (text) không được để trống");
             }
-            Files.writeString(textFile, textContent);
 
-            // 4. Chuẩn bị MultipartBody gửi sang XTTS
+            // 4. Chuẩn bị MultipartBody gửi sang XTTS theo đúng tài liệu
             MultipartBodyBuilder builder = new MultipartBodyBuilder();
-            builder.part("text_file", new FileSystemResource(textFile));
-            builder.part("speaker_wav", new FileSystemResource(voiceFile));
+            builder.part("text", textContent);
+            builder.part("speaker_file", new FileSystemResource(voiceFile))
+                   .filename(voiceFile.getFileName().toString());
             builder.part("language", task.getLanguage());
 
-            // 5. Gọi sang API XTTS
-            byte[] bytes = xttsWebClient.post()
-                    .uri("/tts_to_audio/") // Thêm dấu gạch chéo cuối để tránh lỗi 307 Redirect của FastAPI
+            // 5. Gọi sang API XTTS (endpoint tts_with_progress không có gạch chéo)
+            xttsWebClient.post()
+                    .uri("/tts_with_progress")
                     .contentType(MediaType.MULTIPART_FORM_DATA)
                     .bodyValue(builder.build())
                     .retrieve()
-                    .bodyToMono(byte[].class)
-                    .block(Duration.ofMinutes(10));
+                    .bodyToFlux(new ParameterizedTypeReference<ServerSentEvent<String>>() {})
+                    .subscribe(
+                            event -> {
+                                try {
+                                    String jsonData = event.data();
+                                    if (jsonData != null) {
+                                        JsonNode jsonNode = objectMapper.readTree(jsonData);
+                                        if (jsonNode.has("progress")) {
+                                            int currentProgress = jsonNode.get("progress").asInt();
+                                            log.info("Task {}: Progress {}%", taskId, currentProgress);
+                                            
+                                            // Cập nhật DB cho Frontend lấy qua API Polling
+                                            task.setProgress(currentProgress);
+                                            xttsTaskRepository.save(task);
 
-            if (bytes == null || bytes.length == 0) {
-                throw new IllegalStateException("Dữ liệu âm thanh từ XTTS bị trống");
-            }
+                                            // Nếu xong 100%, kéo file về
+                                            if (currentProgress == 100 && jsonNode.has("audio_url")) {
+                                                log.info("Task {}: Đã 100%, tiến hành tải file âm thanh từ Python...", taskId);
+                                                String audioPath = jsonNode.get("audio_url").asText();
+                                                String fullUrl = "http://172.16.1.75:8020" + audioPath;
 
-            // 6. Ghi file kết quả vật lý
-            Path resultPath = taskDir.resolve("result.wav");
-            Files.write(resultPath, bytes);
+                                                // Dùng WebClient cấu hình bộ đệm 100MB để lấy file lớn
+                                                WebClient fileWebClient = WebClient.builder()
+                                                        .exchangeStrategies(ExchangeStrategies.builder()
+                                                                .codecs(configurer -> configurer
+                                                                        .defaultCodecs()
+                                                                        .maxInMemorySize( 100 * 1024 * 1024))
+                                                                .build())
+                                                        .build();
 
-            // 7. Cập nhật kết quả vào DB
-            task.setResultUrl("/uploads/" + userId + "/XttsTask/" + taskId + "/result.wav");
-            task.setStatus("Complete");
-            task.setProgress(100);
-            xttsTaskRepository.save(task);
-            log.info("==> XTTS hoàn tất, file âm thanh được lưu tại: {}", task.getResultUrl());
+                                                fileWebClient.get()
+                                                        .uri(fullUrl)
+                                                        .retrieve()
+                                                        .bodyToMono(byte[].class)
+                                                        .subscribe(
+                                                            audioBytes -> {
+                                                                try {
+                                                                    if (audioBytes != null && audioBytes.length > 0) {
+                                                                        Path resultPath = taskDir.resolve("result.wav");
+                                                                        Files.write(resultPath, audioBytes);
+
+                                                                        task.setResultUrl("/uploads/" + userId + "/XttsTask/" + taskId + "/result.wav");
+                                                                        task.setStatus("Complete");
+                                                                        xttsTaskRepository.save(task);
+                                                                        log.info("==> XTTS hoàn tất, file âm thanh được lưu tại: {}", task.getResultUrl());
+                                                                    } else {
+                                                                        log.error("Không thể tải byte[] từ Python (file trống)");
+                                                                    }
+                                                                } catch (Exception ex) {
+                                                                    log.error("Lỗi khi ghi file wav: ", ex);
+                                                                }
+                                                            },
+                                                            err -> {
+                                                                log.error("Lỗi khi tải file âm thanh từ Python: ", err);
+                                                            }
+                                                        );
+                                            }
+                                        }
+                                    }
+                                } catch (Exception e) {
+                                    log.error("Lỗi khi xử lý event SSE hoặc tải file cho task: " + taskId, e);
+                                    task.setStatus("Failed");
+                                    xttsTaskRepository.save(task);
+                                }
+                            },
+                            error -> {
+                                log.error("Lỗi gọi luồng SSE XTTS cho task: " + taskId, error);
+                                task.setStatus("Failed");
+                                xttsTaskRepository.save(task);
+                            },
+                            () -> {
+                                log.info("Task {}: Đóng luồng kết nối SSE.", taskId);
+                            }
+                    );
 
         } catch (Exception e) {
-            log.error("Lỗi khi xử lý XTTS cho task: " + task.getId(), e);
+            log.error("Lỗi khởi tạo gọi XTTS cho task: " + task.getId(), e);
             task.setStatus("Failed");
             xttsTaskRepository.save(task);
         }

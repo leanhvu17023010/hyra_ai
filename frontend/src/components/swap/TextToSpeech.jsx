@@ -133,22 +133,22 @@ function TextToSpeech() {
 
         try {
             setIsLoading(true);
-            setProgress(10);
+            setProgress(2);
             setMessage('Đang khởi tạo tác vụ hoán đổi giọng nói...');
 
             const createRes = await xttsService.createTtsTask();
             const taskId = createRes.result;
             if (!taskId) throw new Error('Không khởi tạo được task XTTS');
 
-            setProgress(30);
+            setProgress(5);
             setMessage('Đang tải tệp âm thanh mẫu lên hệ thống...');
             await xttsService.uploadVoiceToTtsTask(audioFile, taskId);
 
-            setProgress(50);
+            setProgress(10);
             setMessage('Bắt đầu xử lý nhân bản giọng nói AI...');
             await xttsService.processTtsTask(taskId, text, 'vi');
 
-            setProgress(70);
+            setProgress(15);
             setMessage('Hệ thống AI đang tạo file âm thanh của bạn...');
             
             let pollAttempts = 0;
@@ -166,6 +166,11 @@ function TextToSpeech() {
                 try {
                     const statusRes = await xttsService.getTtsTaskStatus(taskId);
                     const taskData = statusRes.result;
+
+                    // Cập nhật thanh tiến trình nếu có
+                    if (taskData.progress !== undefined && taskData.progress > 0) {
+                        setProgress(taskData.progress);
+                    }
 
                     if (taskData.status === 'Complete') {
                         clearInterval(pollInterval);
@@ -194,7 +199,8 @@ function TextToSpeech() {
                         setError('Tác vụ nhân bản giọng nói thất bại trên máy chủ AI.');
                     } else {
                         // Vẫn đang xử lý (Pending / Processing)
-                        setMessage(`Đang sinh âm thanh... Vui lòng đợi (${pollAttempts}s)`);
+                        let currentProgress = taskData.progress || 0;
+                        setMessage(`Đang sinh âm thanh... ${currentProgress}%`);
                     }
                 } catch (pollErr) {
                     console.error('Lỗi khi kiểm tra trạng thái XTTS:', pollErr);
