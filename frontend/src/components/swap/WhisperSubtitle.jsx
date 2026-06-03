@@ -245,7 +245,7 @@ function WhisperSubtitle() {
                 </div>
 
                 {/* Cột phải: Kết quả */}
-                <div className="w-full lg:w-[400px] w-500 xl:w-[700px] shrink-0 flex flex-col gap-6">
+                <div className="w-full lg:w-[480px] xl:w-[520px] shrink-0 flex flex-col gap-6">
                     <div className="flex-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 overflow-hidden flex flex-col shadow-xl rounded-3xl min-h-[380px]">
                         <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800/60 flex justify-between items-center bg-slate-50/50 dark:bg-slate-950/20">
                             <span className="text-sm font-bold text-slate-700 dark:text-slate-200">Kết quả trích xuất văn bản</span>

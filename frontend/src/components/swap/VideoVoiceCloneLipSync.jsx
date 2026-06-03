@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { FiUploadCloud, FiLogIn, FiVideo, FiImage } from 'react-icons/fi';
+import { FiUploadCloud, FiLogIn, FiVideo } from 'react-icons/fi';
 import swapService from '../../services/swapService';
 import megaWorkflowService from '../../services/megaWorkflowService';
 import api from '../../services/api';
@@ -92,8 +92,8 @@ function VideoVoiceCloneLipSync() {
     const [voiceSampleName, setVoiceSampleName] = useState('');
     const [voiceSampleUrl, setVoiceSampleUrl] = useState(null);
 
-    const [sourceFace, setSourceFace] = useState(null);
-    const [sourceFaceUrl, setSourceFaceUrl] = useState(null);
+    // const [sourceFace, setSourceFace] = useState(null);
+    // const [sourceFaceUrl, setSourceFaceUrl] = useState(null);
 
     // Subtitle / Caption System
     const [subtitleText, setSubtitleText] = useState('');
@@ -118,15 +118,15 @@ function VideoVoiceCloneLipSync() {
     // Refs
     const videoInputRef = useRef(null);
     const voiceInputRef = useRef(null);
-    const faceInputRef = useRef(null);
+    // const faceInputRef = useRef(null);
     const resultVideoRef = useRef(null);
 
     // Clean up temporary object URLs on unmount/reset
     const revokeUrls = useCallback(() => {
         if (targetVideoUrl) URL.revokeObjectURL(targetVideoUrl);
         if (voiceSampleUrl) URL.revokeObjectURL(voiceSampleUrl);
-        if (sourceFaceUrl) URL.revokeObjectURL(sourceFaceUrl);
-    }, [targetVideoUrl, voiceSampleUrl, sourceFaceUrl]);
+        // if (sourceFaceUrl) URL.revokeObjectURL(sourceFaceUrl);
+    }, [targetVideoUrl, voiceSampleUrl]);
 
     // Auto cleanup of urls on unmount
     useEffect(() => {
@@ -149,12 +149,12 @@ function VideoVoiceCloneLipSync() {
         if (voiceInputRef.current) voiceInputRef.current.value = '';
     };
 
-    const handleClearSourceFace = () => {
-        setSourceFace(null);
-        if (sourceFaceUrl) URL.revokeObjectURL(sourceFaceUrl);
-        setSourceFaceUrl(null);
-        if (faceInputRef.current) faceInputRef.current.value = '';
-    };
+    // const handleClearSourceFace = () => {
+    //     setSourceFace(null);
+    //     if (sourceFaceUrl) URL.revokeObjectURL(sourceFaceUrl);
+    //     setSourceFaceUrl(null);
+    //     if (faceInputRef.current) faceInputRef.current.value = '';
+    // };
 
     // Định nghĩa hàm render phụ đề
     const renderSubtitles = () => {
@@ -266,7 +266,7 @@ function VideoVoiceCloneLipSync() {
             const response = await megaWorkflowService.uploadAndStart(
                 targetVideo,
                 voiceSample,
-                sourceFace, // Có thể có hoặc null
+                null, // Bỏ phần hoán đổi khuôn mặt theo yêu cầu
                 subtitleText
             );
 
@@ -292,7 +292,7 @@ function VideoVoiceCloneLipSync() {
         setTargetVideoUrl(null);
         setSubtitleText('');
         handleClearVoiceSample();
-        handleClearSourceFace();
+        // handleClearSourceFace();
         setIsLoading(false);
         setProgress(0);
         setMessage('');
@@ -319,8 +319,8 @@ function VideoVoiceCloneLipSync() {
         <div className="flex flex-col lg:flex-row gap-8 items-stretch w-full">
             {/* Cột trái: Nhập liệu (Workspace) */}
             <div className="flex-1 flex flex-col gap-6">
-                {/* 3 Upload Boxes bên cạnh nhau */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 flex-1">
+                {/* 2 Upload Boxes bên cạnh nhau */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
                     <UploadBox
                         label="1. Video gốc cần xử lý"
                         icon={<FiVideo size={22} />}
@@ -340,6 +340,7 @@ function VideoVoiceCloneLipSync() {
                         hint="Hỗ trợ MP4, WebM"
                     />
                     
+                    {/* 
                     <UploadBox
                         label="2. Khuôn mặt cần đổi (Tùy chọn)"
                         icon={<FiImage size={22} />}
@@ -357,9 +358,10 @@ function VideoVoiceCloneLipSync() {
                         accept="image/*"
                         hint="Ảnh khuôn mặt mới .PNG, .JPG"
                     />
+                    */}
 
                     <UploadBox
-                        label="3. File giọng nói mẫu"
+                        label="2. File giọng nói mẫu"
                         icon={<FiUploadCloud size={22} />}
                         preview={voiceSampleUrl}
                         isAudio
@@ -383,7 +385,7 @@ function VideoVoiceCloneLipSync() {
                 <div className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-3xl p-6 flex flex-col gap-4 shadow-xl">
                     <div className="flex flex-col gap-2">
                         <div className="flex justify-between items-center">
-                            <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200">4. Văn bản muốn lồng tiếng & chạy phụ đề</h3>
+                            <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200">3. Văn bản muốn lồng tiếng & chạy phụ đề</h3>
                             <span className={`text-[10px] font-semibold ${subtitleText.length > MAX_CHARS * 0.9 ? 'text-red-500' : 'text-slate-400'}`}>
                                 {subtitleText.length}/{MAX_CHARS}
                             </span>
@@ -400,7 +402,7 @@ function VideoVoiceCloneLipSync() {
                         <div className="text-left flex-1">
                             <h3 className="text-base font-bold text-slate-800 dark:text-white">Cấu hình Mega Workflow</h3>
                             <p className="text-xs text-slate-500 dark:text-slate-400">
-                                AI tự động đổi mặt, nhân bản giọng lồng tiếng, sinh phụ đề khớp và ghép thành video hoàn chỉnh.
+                                AI tự động nhân bản giọng lồng tiếng, sinh phụ đề khớp và ghép thành video hoàn chỉnh.
                             </p>
                         </div>
                         {error === 'login-required' ? (
@@ -428,7 +430,7 @@ function VideoVoiceCloneLipSync() {
             </div>
 
             {/* Cột phải: Preview & Kết quả */}
-            <div className="w-full lg:w-[400px] w-500 xl:w-[700px] shrink-0 flex flex-col gap-6">
+            <div className="w-full lg:w-[480px] xl:w-[520px] shrink-0 flex flex-col gap-6">
                 <div className="flex-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 overflow-hidden flex flex-col shadow-xl rounded-3xl min-h-[480px]">
                     <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800/60 flex justify-between items-center bg-slate-50/50 dark:bg-slate-950/20">
                         <span className="text-sm font-bold text-slate-700 dark:text-slate-200">Kết quả Video hoàn chỉnh</span>
@@ -439,14 +441,14 @@ function VideoVoiceCloneLipSync() {
 
                     <div className="relative flex-1 min-h-[380px] bg-slate-50 dark:bg-slate-950/30 flex items-center justify-center overflow-hidden">
                         {resultVideoSrc || targetVideoUrl ? (
-                            <div className="relative w-full h-full flex items-center justify-center bg-black">
+                            <div className="relative w-full h-full flex items-center justify-center bg-slate-950 dark:bg-slate-950/80 p-4 rounded-b-3xl">
                                 <video
                                     ref={resultVideoRef}
                                     src={resultVideoSrc || targetVideoUrl}
                                     controls
                                     autoPlay={!!resultVideoSrc}
                                     onTimeUpdate={handleTimeUpdate}
-                                    className="max-w-full max-h-[500px] object-contain animate-fade-in"
+                                    className="max-w-full max-h-[460px] object-contain rounded-2xl shadow-2xl border border-slate-800/20 dark:border-slate-800/80 animate-fade-in"
                                 />
                                 {renderSubtitles()}
                             </div>

@@ -6,7 +6,7 @@ import { resolveMediaUrl } from '../../utils/mediaUrl';
 import swapService from '../../services/swapService';
 import SwapProcessingOverlay from './SwapProcessingOverlay';
 import { useXttsTaskPolling } from '../../hooks/useXttsTaskPolling';
-import voiceNhu from '../../assets/voices/voiceNhu.mp3';
+// import voiceNhu from '../../assets/voices/voiceNhu.mp3';
 
 const MAX_CHARS = 1000;
 
@@ -16,7 +16,7 @@ function TextToSpeech() {
     const [error, setError] = useState('');
     const [swapDone, setSwapDone] = useState(false); // đánh dấu swap đã hoàn tất
     
-    // Voice Swap / Voice Clone States (Giọng mẫu cố định voiceNhu.mp3)
+    // Voice Swap / Voice Clone States (Giọng mẫu cố định từ backend)
     const [audioFile, setAudioFile] = useState(null);
     const isRecording = false;
     const [resultAudioUrl, setResultAudioUrl] = useState('');
@@ -51,11 +51,12 @@ function TextToSpeech() {
     useEffect(() => {
         const loadDefaultVoice = async () => {
             try {
-                const res = await fetch(voiceNhu);
+                const defaultVoiceUrl = resolveMediaUrl('/uploads/defaults/default_voice.wav');
+                const res = await fetch(defaultVoiceUrl);
                 const blob = await res.blob();
-                const file = new File([blob], 'voiceNhu.mp3', { type: 'audio/mpeg' });
+                const file = new File([blob], 'default_voice.wav', { type: 'audio/wav' });
                 setAudioFile(file);
-                // setAudioFileName('voiceNhu.mp3');
+                // setAudioFileName('default_voice.wav');
                 // setRecordedUrl(URL.createObjectURL(blob));
             } catch (err) {
                 console.error("Lỗi khi tải giọng mẫu cố định:", err);
@@ -227,7 +228,7 @@ function TextToSpeech() {
         setSwapDone(false);
         setResultAudioUrl('');
         setProgress(0);
-        // handleClearAudio(); // Giữ lại giọng mẫu cố định voiceNhu.mp3
+        // handleClearAudio(); // Giữ lại giọng mẫu cố định default_voice.wav
     };
 
     return (
