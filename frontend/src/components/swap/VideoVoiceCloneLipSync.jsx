@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { FiUploadCloud, FiLogIn, FiVideo, FiImage } from 'react-icons/fi';
+import { FiUploadCloud, FiLogIn, FiVideo, FiImage, FiTrash2, FiDownload, FiRefreshCw } from 'react-icons/fi';
 import swapService from '../../services/swapService';
 import megaWorkflowService from '../../services/megaWorkflowService';
 import api from '../../services/api';
@@ -46,10 +46,22 @@ const parseSRT = (srtText) => {
     return subs;
 };
 
-function UploadBox({ label, icon, preview, isVideo, isAudio, audioName, onClick, inputRef, onChange, accept, hint }) {
+function UploadBox({ label, icon, preview, isVideo, isAudio, audioName, onClick, inputRef, onChange, accept, hint, onClear }) {
     return (
-        <div className="rounded-3xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-5 shadow-lg flex flex-col flex-1">
-            <p className="mb-3 text-sm font-bold text-slate-700 dark:text-slate-200">{label}</p>
+        <div className="rounded-3xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-5 shadow-lg flex flex-col flex-1 relative">
+            <div className="flex justify-between items-center mb-3">
+                <p className="text-sm font-bold text-slate-700 dark:text-slate-200">{label}</p>
+                {preview && onClear && (
+                    <button 
+                        type="button" 
+                        onClick={(e) => { e.stopPropagation(); onClear(); }}
+                        className="p-1.5 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg transition-colors cursor-pointer dark:bg-red-950/30 dark:hover:bg-red-950/50"
+                        title="Bỏ chọn"
+                    >
+                        <FiTrash2 size={14} />
+                    </button>
+                )}
+            </div>
             <div
                 className="flex-1 min-h-[180px] border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl bg-slate-50 dark:bg-slate-950/40 flex flex-col items-center justify-center cursor-pointer hover:border-[#5b6ef7] dark:hover:border-[#a78bfa] hover:bg-slate-100/50 dark:hover:bg-slate-950/60 transition-all duration-300 overflow-hidden"
                 onClick={onClick}
@@ -92,9 +104,6 @@ function VideoVoiceCloneLipSync() {
     const [voiceSampleName, setVoiceSampleName] = useState('');
     const [voiceSampleUrl, setVoiceSampleUrl] = useState(null);
 
-    const [sourceFace, setSourceFace] = useState(null);
-    const [sourceFaceUrl, setSourceFaceUrl] = useState(null);
-
     // Subtitle / Caption System
     const [subtitleText, setSubtitleText] = useState('');
     const [currentTime, setCurrentTime] = useState(0);
@@ -118,15 +127,13 @@ function VideoVoiceCloneLipSync() {
     // Refs
     const videoInputRef = useRef(null);
     const voiceInputRef = useRef(null);
-    const faceInputRef = useRef(null);
     const resultVideoRef = useRef(null);
 
     // Clean up temporary object URLs on unmount/reset
     const revokeUrls = useCallback(() => {
         if (targetVideoUrl) URL.revokeObjectURL(targetVideoUrl);
         if (voiceSampleUrl) URL.revokeObjectURL(voiceSampleUrl);
-        if (sourceFaceUrl) URL.revokeObjectURL(sourceFaceUrl);
-    }, [targetVideoUrl, voiceSampleUrl, sourceFaceUrl]);
+    }, [targetVideoUrl, voiceSampleUrl]);
 
     // Auto cleanup of urls on unmount
     useEffect(() => {
@@ -141,19 +148,19 @@ function VideoVoiceCloneLipSync() {
         }
     };
 
+    const handleClearTargetVideo = () => {
+        setTargetVideo(null);
+        if (targetVideoUrl) URL.revokeObjectURL(targetVideoUrl);
+        setTargetVideoUrl(null);
+        if (videoInputRef.current) videoInputRef.current.value = '';
+    };
+
     const handleClearVoiceSample = () => {
         setVoiceSample(null);
         setVoiceSampleName('');
         if (voiceSampleUrl) URL.revokeObjectURL(voiceSampleUrl);
         setVoiceSampleUrl(null);
         if (voiceInputRef.current) voiceInputRef.current.value = '';
-    };
-
-    const handleClearSourceFace = () => {
-        setSourceFace(null);
-        if (sourceFaceUrl) URL.revokeObjectURL(sourceFaceUrl);
-        setSourceFaceUrl(null);
-        if (faceInputRef.current) faceInputRef.current.value = '';
     };
 
     // Định nghĩa hàm render phụ đề
@@ -266,7 +273,7 @@ function VideoVoiceCloneLipSync() {
             const response = await megaWorkflowService.uploadAndStart(
                 targetVideo,
                 voiceSample,
-                sourceFace, // Có thể có hoặc null
+                null, // Không dùng face swap ở module này nữa
                 subtitleText
             );
 
@@ -288,11 +295,9 @@ function VideoVoiceCloneLipSync() {
     const handleReset = () => {
         stopPolling();
         revokeUrls();
-        setTargetVideo(null);
-        setTargetVideoUrl(null);
+        handleClearTargetVideo();
         setSubtitleText('');
         handleClearVoiceSample();
-        handleClearSourceFace();
         setIsLoading(false);
         setProgress(0);
         setMessage('');
@@ -320,7 +325,7 @@ function VideoVoiceCloneLipSync() {
             {/* Cột trái: Nhập liệu (Workspace) */}
             <div className="flex-1 flex flex-col gap-6">
                 {/* 3 Upload Boxes bên cạnh nhau */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 flex-1">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
                     <UploadBox
                         label="1. Video gốc cần xử lý"
                         icon={<FiVideo size={22} />}
@@ -328,6 +333,7 @@ function VideoVoiceCloneLipSync() {
                         isVideo
                         onClick={() => videoInputRef.current?.click()}
                         inputRef={videoInputRef}
+                        onClear={handleClearTargetVideo}
                         onChange={(e) => {
                             if (e.target.files?.[0]) {
                                 const file = e.target.files[0];
@@ -339,33 +345,16 @@ function VideoVoiceCloneLipSync() {
                         accept="video/*"
                         hint="Hỗ trợ MP4, WebM"
                     />
-                    
-                    <UploadBox
-                        label="2. Khuôn mặt cần đổi (Tùy chọn)"
-                        icon={<FiImage size={22} />}
-                        preview={sourceFaceUrl}
-                        onClick={() => faceInputRef.current?.click()}
-                        inputRef={faceInputRef}
-                        onChange={(e) => {
-                            if (e.target.files?.[0]) {
-                                const file = e.target.files[0];
-                                if (sourceFaceUrl) URL.revokeObjectURL(sourceFaceUrl);
-                                setSourceFace(file);
-                                setSourceFaceUrl(URL.createObjectURL(file));
-                            }
-                        }}
-                        accept="image/*"
-                        hint="Ảnh khuôn mặt mới .PNG, .JPG"
-                    />
 
                     <UploadBox
-                        label="3. File giọng nói mẫu"
+                        label="2. File giọng nói mẫu"
                         icon={<FiUploadCloud size={22} />}
                         preview={voiceSampleUrl}
                         isAudio
                         audioName={voiceSampleName}
                         onClick={() => voiceInputRef.current?.click()}
                         inputRef={voiceInputRef}
+                        onClear={handleClearVoiceSample}
                         onChange={(e) => {
                             const file = e.target.files?.[0];
                             if (file) {
@@ -469,55 +458,53 @@ function VideoVoiceCloneLipSync() {
                     </div>
 
                     {resultVideoSrc && (
-                        <div className="p-5 border-t border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-950/20 flex flex-col gap-4">
-                            {/* Danh sách các nút tải độc lập tài nguyên */}
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() => swapService.downloadResult(downloadUrls.finalResult, 'final_video.mp4')}
-                                    className="py-2 rounded-lg text-[10px] font-semibold bg-[#5b6ef7]/10 text-[#5b6ef7] dark:text-[#a78bfa] hover:bg-[#5b6ef7]/20 transition-colors text-center border border-dashed border-[#5b6ef7]/40 cursor-pointer"
-                                >
-                                    🎬 Video hoàn chỉnh
-                                </button>
-                                {downloadUrls.swapResult && (
+                        <div className="p-6 border-t border-slate-100 dark:border-slate-800/60 bg-gradient-to-b from-slate-50 to-slate-100/50 dark:from-slate-900/50 dark:to-slate-900 flex flex-col gap-6 relative z-10">
+                            <div className="flex flex-col gap-3">
+                                <p className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                    <span className="w-2 h-2 rounded-full bg-[#5b6ef7]"></span>
+                                    Tải xuống tài nguyên
+                                </p>
+                                <div className="grid grid-cols-2 gap-3">
                                     <button
                                         type="button"
-                                        onClick={() => swapService.downloadResult(downloadUrls.swapResult, 'swap_video.mp4')}
-                                        className="py-2 rounded-lg text-[10px] font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-650 dark:text-slate-350 transition-colors text-center border border-slate-300 dark:border-slate-700 cursor-pointer"
+                                        onClick={() => swapService.downloadResult(downloadUrls.finalResult, 'final_video.mp4')}
+                                        className="col-span-2 flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-bold bg-gradient-to-r from-[#5b6ef7] to-[#a78bfa] text-white hover:opacity-90 transition-all cursor-pointer shadow-lg shadow-[#5b6ef7]/25 hover:-translate-y-0.5"
                                     >
-                                        👤 Video Swap Mặt
+                                        <FiDownload size={16} /> Tải Video Hoàn Chỉnh
                                     </button>
-                                )}
-                                <button
-                                    type="button"
-                                    onClick={() => swapService.downloadResult(downloadUrls.xttsResult, 'audio_voice.wav')}
-                                    className="py-2 rounded-lg text-[10px] font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-650 dark:text-slate-350 transition-colors text-center border border-slate-300 dark:border-slate-700 cursor-pointer"
-                                >
-                                    🎵 File Audio XTTS
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => swapService.downloadResult(downloadUrls.srtResult, 'subtitles.srt')}
-                                    className="py-2 rounded-lg text-[10px] font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-650 dark:text-slate-350 transition-colors text-center border border-slate-300 dark:border-slate-700 cursor-pointer"
-                                >
-                                    📝 File Phụ Đề SRT
-                                </button>
+                                    
+                                    {downloadUrls.swapResult && (
+                                        <button
+                                            type="button"
+                                            onClick={() => swapService.downloadResult(downloadUrls.swapResult, 'swap_video.mp4')}
+                                            className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-[11px] font-semibold bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750 transition-all cursor-pointer shadow-sm hover:-translate-y-0.5"
+                                        >
+                                            <FiDownload size={13} className="text-[#5b6ef7]" /> Video Swap
+                                        </button>
+                                    )}
+                                    <button
+                                        type="button"
+                                        onClick={() => swapService.downloadResult(downloadUrls.xttsResult, 'audio_voice.wav')}
+                                        className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-[11px] font-semibold bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750 transition-all cursor-pointer shadow-sm hover:-translate-y-0.5"
+                                    >
+                                        <FiDownload size={13} className="text-[#a78bfa]" /> Audio XTTS
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => swapService.downloadResult(downloadUrls.srtResult, 'subtitles.srt')}
+                                        className="col-span-2 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750 transition-all cursor-pointer shadow-sm hover:-translate-y-0.5"
+                                    >
+                                        <FiDownload size={14} className="text-emerald-500" /> Phụ Đề SRT
+                                    </button>
+                                </div>
                             </div>
 
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={() => swapService.downloadResult(resultVideoSrc, 'lipsync-result.mp4')}
-                                    className="flex-1 py-2.5 rounded-xl text-xs font-semibold border border-[#5b6ef7] text-[#5b6ef7] hover:bg-[#5b6ef7]/10 dark:text-[#a78bfa] dark:border-[#a78bfa] dark:hover:bg-[#a78bfa]/10 transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
-                                >
-                                    Tải video hoàn chỉnh (Blob)
-                                </button>
-                                <button
-                                    onClick={handleReset}
-                                    className="flex-1 py-2.5 rounded-xl text-xs font-semibold border border-slate-300 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:border-slate-700 dark:hover:bg-slate-800 transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
-                                >
-                                    Làm mới
-                                </button>
-                            </div>
+                            <button
+                                onClick={handleReset}
+                                className="w-full py-3 rounded-xl text-xs font-bold bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-all cursor-pointer flex items-center justify-center gap-2 border border-slate-300 dark:border-slate-600 shadow-inner"
+                            >
+                                <FiRefreshCw size={14} /> Tạo Dự Án Mới
+                            </button>
                         </div>
                     )}
                 </div>
