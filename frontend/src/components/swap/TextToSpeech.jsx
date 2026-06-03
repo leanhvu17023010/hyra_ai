@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
-import { FiPlay, FiSquare, FiRefreshCw, FiVolume2, FiMic, FiUploadCloud, FiTrash2, FiCpu, FiLogIn } from 'react-icons/fi';
+import { FiPlay, FiRefreshCw, FiVolume2, FiCpu, FiLogIn } from 'react-icons/fi';
+// import { FiSquare, FiMic, FiUploadCloud, FiTrash2 } from 'react-icons/fi'; // Uncomment when restoring upload
 import xttsService from '../../services/xttsService';
 import { resolveMediaUrl } from '../../utils/mediaUrl';
 import swapService from '../../services/swapService';
 import SwapProcessingOverlay from './SwapProcessingOverlay';
 import { useXttsTaskPolling } from '../../hooks/useXttsTaskPolling';
+import voiceNhu from '../../assets/voices/voiceNhu.mp3';
 
 const MAX_CHARS = 1000;
 
@@ -14,36 +16,56 @@ function TextToSpeech() {
     const [error, setError] = useState('');
     const [swapDone, setSwapDone] = useState(false); // đánh dấu swap đã hoàn tất
     
-    // Voice Swap / Voice Clone States
-    const [sourceType, setSourceType] = useState('upload'); // 'upload' | 'record'
+    // Voice Swap / Voice Clone States (Giọng mẫu cố định voiceNhu.mp3)
     const [audioFile, setAudioFile] = useState(null);
-    const [audioFileName, setAudioFileName] = useState('');
-    const [isRecording, setIsRecording] = useState(false);
-    const [recordingTime, setRecordingTime] = useState(0);
-    const [recordedUrl, setRecordedUrl] = useState(null);
+    const isRecording = false;
     const [resultAudioUrl, setResultAudioUrl] = useState('');
+    
+    // Unused states/refs (Commented out for restoring upload functionality)
+    // const [sourceType, setSourceType] = useState('upload'); // 'upload' | 'record'
+    // const [audioFileName, setAudioFileName] = useState('');
+    // const [recordedUrl, setRecordedUrl] = useState(null);
+    // const [recordingTime, setRecordingTime] = useState(0);
+    // const fileInputRef = useRef(null);
+    // const mediaRecorderRef = useRef(null);
+    // const audioChunksRef = useRef([]);
+    // const timerRef = useRef(null);
     
     // AI Processing States
     const [isLoading, setIsLoading] = useState(false);
     const [progress, setProgress] = useState(0);
     const [message, setMessage] = useState('');
 
-    const fileInputRef = useRef(null);
-    const mediaRecorderRef = useRef(null);
-    const audioChunksRef = useRef([]);
-    const timerRef = useRef(null);
     const audioPlayerRef = useRef(null);
 
+    // Unused cleanup effect (Commented out for restoring upload functionality)
+    // useEffect(() => {
+    //     return () => {
+    //         if (timerRef.current) clearInterval(timerRef.current);
+    //         if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+    //             mediaRecorderRef.current.stop();
+    //         }
+    //     };
+    // }, []);
+
     useEffect(() => {
-        return () => {
-            if (timerRef.current) clearInterval(timerRef.current);
-            if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-                mediaRecorderRef.current.stop();
+        const loadDefaultVoice = async () => {
+            try {
+                const res = await fetch(voiceNhu);
+                const blob = await res.blob();
+                const file = new File([blob], 'voiceNhu.mp3', { type: 'audio/mpeg' });
+                setAudioFile(file);
+                // setAudioFileName('voiceNhu.mp3');
+                // setRecordedUrl(URL.createObjectURL(blob));
+            } catch (err) {
+                console.error("Lỗi khi tải giọng mẫu cố định:", err);
             }
         };
+        loadDefaultVoice();
     }, []);
 
-    // File Upload Handlers
+    // Unused File Upload and Recording Handlers (Commented out for restoring upload functionality)
+    /*
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -64,7 +86,6 @@ function TextToSpeech() {
         if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
-    // Recording Handlers
     const startRecording = async () => {
         try {
             setError('');
@@ -116,6 +137,7 @@ function TextToSpeech() {
         const secs = seconds % 60;
         return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     };
+    */
 
     // Trigger Auth Modal
     const handleOpenLogin = () => {
@@ -205,7 +227,7 @@ function TextToSpeech() {
         setSwapDone(false);
         setResultAudioUrl('');
         setProgress(0);
-        handleClearAudio();
+        // handleClearAudio(); // Giữ lại giọng mẫu cố định voiceNhu.mp3
     };
 
     return (
@@ -231,14 +253,13 @@ function TextToSpeech() {
                     />
                 </div>
 
-                {/* 2. Chọn giọng mẫu (Tải file hoặc Ghi âm) */}
-                <div className="rounded-3xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-5 shadow-xl">
+                {/* 2. Chọn giọng mẫu (Tải file hoặc Ghi âm) - ĐÃ ẨN & DÙNG GIỌNG MẪU CỐ ĐỊNH */}
+                {/* <div className="rounded-3xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-5 shadow-xl">
                     <p className="mb-3 text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
                         <FiMic className="text-[#5b6ef7] dark:text-[#a78bfa]" size={16} />
                         2. Giọng đọc mẫu
                     </p>
                     
-                    {/* Tabs switch */}
                     <div className="flex bg-slate-100 dark:bg-slate-950 p-1 rounded-xl mb-4 border border-slate-205 dark:border-slate-800">
                         <button
                             type="button"
@@ -252,21 +273,8 @@ function TextToSpeech() {
                         >
                             Tải file giọng mẫu
                         </button>
-                        <button
-                            type="button"
-                            disabled={isLoading}
-                            onClick={() => { setSourceType('record'); handleClearAudio(); }}
-                            className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
-                                sourceType === 'record'
-                                    ? 'bg-white dark:bg-slate-800 shadow-sm text-[#5b6ef7] dark:text-[#a78bfa]'
-                                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-750'
-                            }`}
-                        >
-                            Tự ghi âm giọng
-                        </button>
                     </div>
 
-                    {/* Content Upload */}
                     {sourceType === 'upload' ? (
                         <div>
                             {!audioFile ? (
@@ -310,7 +318,6 @@ function TextToSpeech() {
                             )}
                         </div>
                     ) : (
-                        // Content Recording
                         <div className="flex flex-col items-center">
                             {!audioFile && !isRecording ? (
                                 <button
@@ -362,7 +369,7 @@ function TextToSpeech() {
                             )}
                         </div>
                     )}
-                </div>
+                </div> */}
 
                 {/* Panel cấu hình hoán đổi / phát lệnh */}
                 <div className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-3xl p-6 flex flex-col gap-4 shadow-xl">
