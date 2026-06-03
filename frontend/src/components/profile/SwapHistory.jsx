@@ -5,12 +5,25 @@ import api from '../../services/api';
 import { resolveMediaUrl, isVideoResultUrl } from '../../utils/mediaUrl';
 
 function SwapHistory({ history }) {
+    // Chỉ giữ lại các task chưa hết hạn và có thời gian tạo không quá 3 ngày
+    const activeHistory = (history || []).filter((item) => {
+        if (item.status === 'EXPIRED') return false;
+        if (item.createdAt) {
+            const created = new Date(item.createdAt);
+            const diffTime = new Date() - created;
+            const diffDays = diffTime / (1000 * 60 * 60 * 24);
+            if (diffDays > 3) return false;
+        }
+        return true;
+    });
+
     const [previewItem, setPreviewItem] = useState(null);
     const [previewTextContent, setPreviewTextContent] = useState('');
     const [textLoading, setTextLoading] = useState(false);
     const [previewMediaUrl, setPreviewMediaUrl] = useState('');
     const [mediaLoading, setMediaLoading] = useState(false);
 
+    // Tai nội dung xem trước khi chọn một mục lịch sử
     useEffect(() => {
         if (!previewItem) {
             setTimeout(() => {
@@ -29,6 +42,7 @@ function SwapHistory({ history }) {
             setTimeout(() => {
                 setTextLoading(true);
                 setPreviewTextContent('');
+                // Gọi API để lấy nội dung text từ URL kết quả, giúp xem trước mà không cần tải về máy
                 api.get(previewItem.resultUrl, { responseType: 'text' })
                     .then((res) => {
                         setPreviewTextContent(res.data);
@@ -45,6 +59,7 @@ function SwapHistory({ history }) {
             setTimeout(() => {
                 setMediaLoading(true);
                 setPreviewMediaUrl('');
+                // Goii API để lấy URL Blob tạm thời cho media, giúp xem trước mà không cần tải về máy
                 swapService.getResultBlobUrlFromPath(previewItem.resultUrl)
                     .then((blobUrl) => {
                         setPreviewMediaUrl(blobUrl);
@@ -167,21 +182,26 @@ function SwapHistory({ history }) {
                 </div>
             )}
 
-            <div className="mb-10 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <div className="h-10 w-2 bg-green-500 rounded-full" />
-                    <h2 className="text-3xl font-black text-slate-800 dark:text-white uppercase tracking-wider">
-                        Lịch sử Hoạt động
-                    </h2>
+            <div className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex flex-col gap-1.5">
+                    <div className="flex items-center gap-4">
+                        <div className="h-10 w-2 bg-green-500 rounded-full" />
+                        <h2 className="text-3xl font-black text-slate-800 dark:text-white uppercase tracking-wider">
+                            Lịch sử Hoạt động
+                        </h2>
+                    </div>
+                    <p className="text-xs font-semibold text-amber-600 dark:text-amber-450 ml-6 flex items-center gap-1.5">
+                        * Máy chủ tự động dọn dẹp các tệp kết quả và hết hạn sau 3 ngày lưu trữ để tối ưu hóa bộ nhớ.
+                    </p>
                 </div>
-                <span className="text-sm rounded-full bg-slate-150/60 dark:bg-slate-800 px-4 py-1.5 font-bold text-slate-500 dark:text-slate-400">
-                    {history.length} mục đã lưu
+                <span className="text-sm rounded-full bg-slate-150/60 dark:bg-slate-800 px-4 py-1.5 font-bold text-slate-500 dark:text-slate-400 self-start md:self-auto">
+                    {activeHistory.length} mục đã lưu
                 </span> 
             </div>
 
-            {history.length > 0 ? (
+            {activeHistory.length > 0 ? (
                 <div className="grid gap-8 sm:grid-cols-2">
-                    {history.map((item) => {
+                    {activeHistory.map((item) => {
                         const isVideo =
                             item.mediaType === 'video' ||
                             isVideoResultUrl(item.resultUrl);
