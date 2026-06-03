@@ -3,6 +3,8 @@ import { FiPlay, FiSquare, FiRefreshCw, FiVolume2, FiMic, FiUploadCloud, FiTrash
 import xttsService from '../../services/xttsService';
 import { resolveMediaUrl } from '../../utils/mediaUrl';
 import swapService from '../../services/swapService';
+import SwapProcessingOverlay from './SwapProcessingOverlay';
+import { useXttsTaskPolling } from '../../hooks/useXttsTaskPolling';
 
 const MAX_CHARS = 1000;
 
@@ -23,6 +25,7 @@ function TextToSpeech() {
     
     // AI Processing States
     const [isLoading, setIsLoading] = useState(false);
+    const [progress, setProgress] = useState(0);
     const [message, setMessage] = useState('');
 
     const fileInputRef = useRef(null);
@@ -119,6 +122,39 @@ function TextToSpeech() {
         window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'login' }));
     };
 
+    const { startPolling, stopPolling } = useXttsTaskPolling({
+        onProgress: (pct) => {
+            setProgress(pct);
+            setMessage(`AI đang nhân bản giọng nói... ${pct}%`);
+        },
+        onComplete: async (taskId, task) => {
+            setMessage('Hoàn tất hoán đổi giọng đọc AI!');
+            swapService.saveCompletedTaskToHistory(taskId, task.resultUrl, 'audio');
+
+            setTimeout(() => {
+                setIsLoading(false);
+                setSwapDone(true);
+                setResultAudioUrl(task.resultUrl);
+                
+                // Phát âm thanh tự động
+                setTimeout(() => {
+                    if (audioPlayerRef.current) {
+                        audioPlayerRef.current.play().catch(e => console.log('Auto-play error:', e));
+                        setIsPlaying(true);
+                    }
+                }, 200);
+            }, 500);
+        },
+        onFailed: () => {
+            setIsLoading(false);
+            setError('Tác vụ nhân bản giọng nói thất bại trên máy chủ AI.');
+        },
+        onTimeout: () => {
+            setIsLoading(false);
+            setError('Quá thời gian xử lý tác vụ (timeout). Vui lòng thử lại.');
+        }
+    });
+
     // Core execution handler
     const handleExecute = async () => {
         // Kiểm tra điều kiện: phải có text
@@ -132,10 +168,7 @@ function TextToSpeech() {
 
         try {
             setIsLoading(true);
-<<<<<<< HEAD
-=======
-            setProgress(2);
->>>>>>> feature/upload-be
+            setProgress(0);
             setMessage('Đang khởi tạo tác vụ hoán đổi giọng nói...');
 
             // tạo task XTTS mới và upload file âm thanh mẫu
@@ -143,95 +176,25 @@ function TextToSpeech() {
             const taskId = createRes.result;
             if (!taskId) throw new Error('Không khởi tạo được task XTTS');
 
-<<<<<<< HEAD
             setMessage('Đang tải tệp âm thanh mẫu lên hệ thống...');
             await xttsService.uploadVoiceToTtsTask(audioFile, taskId);
 
             setMessage('Bắt đầu xử lý nhân bản giọng nói AI...');
             await xttsService.processTtsTask(taskId, text, 'vi');
 
-=======
-            setProgress(5);
-            setMessage('Đang tải tệp âm thanh mẫu lên hệ thống...');
-            await xttsService.uploadVoiceToTtsTask(audioFile, taskId);
-
-            setProgress(10);
-            setMessage('Bắt đầu xử lý nhân bản giọng nói AI...');
-            await xttsService.processTtsTask(taskId, text, 'vi');
-
-            setProgress(15);
->>>>>>> feature/upload-be
-            setMessage('Hệ thống AI đang tạo file âm thanh của bạn...');
-            
-            let pollAttempts = 0;
-            const maxPollAttempts = 120; // 3 phút tối đa
-            
-            const pollInterval = setInterval(async () => {
-                pollAttempts++;
-                if (pollAttempts > maxPollAttempts) {
-                    clearInterval(pollInterval);
-                    setIsLoading(false);
-                    setError('Quá thời gian xử lý tác vụ (timeout). Vui lòng thử lại.');
-                    return;
-                }
-
-                try {
-                    const statusRes = await xttsService.getTtsTaskStatus(taskId);
-                    const taskData = statusRes.result;
-
-                    // Cập nhật thanh tiến trình nếu có
-                    if (taskData.progress !== undefined && taskData.progress > 0) {
-                        setProgress(taskData.progress);
-                    }
-
-                    if (taskData.status === 'Complete') {
-                        clearInterval(pollInterval);
-                        setMessage('Hoàn tất hoán đổi giọng đọc AI!');
-                        
-                        // Lưu lịch sử
-                        swapService.saveCompletedTaskToHistory(taskId, taskData.resultUrl, 'audio');
-
-                        setTimeout(() => {
-                            setIsLoading(false);
-                            setSwapDone(true);
-                            setResultAudioUrl(taskData.resultUrl);
-                            
-                            // Phát âm thanh tự động
-                            setTimeout(() => {
-                                if (audioPlayerRef.current) {
-                                    audioPlayerRef.current.play().catch(e => console.log('Auto-play error:', e));
-                                    setIsPlaying(true);
-                                }
-                            }, 200);
-                        }, 500);
-                    } else if (taskData.status === 'Failed') {
-                        clearInterval(pollInterval);
-                        setIsLoading(false);
-                        setError('Tác vụ nhân bản giọng nói thất bại trên máy chủ AI.');
-                    } else {
-                        // Vẫn đang xử lý (Pending / Processing)
-<<<<<<< HEAD
-                        setMessage('Đang sinh âm thanh... Vui lòng đợi');
-=======
-                        let currentProgress = taskData.progress || 0;
-                        setMessage(`Đang sinh âm thanh... ${currentProgress}%`);
->>>>>>> feature/upload-be
-                    }
-                } catch (pollErr) {
-                    console.error('Lỗi khi kiểm tra trạng thái XTTS:', pollErr);
-                }
-            }, 1500);
+            setMessage('Hệ thống AI đang tạo file âm thanh của bạn... 0%');
+            startPolling(taskId);
 
         } catch (err) {
+            stopPolling();
             console.error('Lỗi quy trình XTTS:', err);
             setIsLoading(false);
             setError(err.response?.data?.message || 'Xử lý tác vụ XTTS thất bại. Vui lòng thử lại.');
         }
     };
 
-
-
     const handleReset = () => {
+        stopPolling();
         if (audioPlayerRef.current) {
             audioPlayerRef.current.pause();
             audioPlayerRef.current.currentTime = 0;
@@ -241,6 +204,7 @@ function TextToSpeech() {
         setIsPlaying(false);
         setSwapDone(false);
         setResultAudioUrl('');
+        setProgress(0);
         handleClearAudio();
     };
 
@@ -477,13 +441,7 @@ function TextToSpeech() {
                     
                     <div className="relative flex-1 min-h-[360px] bg-slate-50 dark:bg-slate-950/30 flex flex-col items-center justify-center p-6 text-center">
                         {isLoading ? (
-                            <div className="flex flex-col items-center gap-4 animate-pulse">
-                                <div className="w-14 h-14 border-4 border-[#5b6ef7]/20 border-t-[#5b6ef7] dark:border-t-[#a78bfa] rounded-full animate-spin shadow-md" />
-                                <div>
-                                    <h4 className="text-sm font-bold text-slate-850 dark:text-white">AI Đang xử lý</h4>
-                                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 max-w-[240px] leading-relaxed">{message}</p>
-                                </div>
-                            </div>
+                            <SwapProcessingOverlay progress={progress} label={message} />
                         ) : swapDone && resultAudioUrl ? (
                             // Audio visualizer illustration
                             <div className="w-full flex flex-col items-center gap-6">
