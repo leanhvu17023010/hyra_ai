@@ -21,6 +21,7 @@ import java.time.Duration;
 public class FFmpegService {
     private final WebClient ffmpegWebClient;
     private final MegaTaskRepository megaTaskRepository;
+    private final com.hyra_ai.backend.service.impl.CloudflareStorageService cloudflareStorageService;
 
     public void mergeMediaFiles(MegaTask megaTask) {
         try {
@@ -29,14 +30,17 @@ public class FFmpegService {
             megaTask.setProgress(70);
             megaTaskRepository.save(megaTask);
 
-            Path videoFile = Paths.get("uploads", megaTask.getSwapResultUrl().substring(9));
-            Path audioFile = Paths.get("uploads", megaTask.getXttsResultUrl().substring(9));
-            Path srtFile = Paths.get("uploads", megaTask.getSrtResultUrl().substring(9));
+            Path videoFile = cloudflareStorageService.downloadToTempFile(megaTask.getSwapResultUrl());
+            Path audioFile = cloudflareStorageService.downloadToTempFile(megaTask.getXttsResultUrl());
+            Path srtFile = cloudflareStorageService.downloadToTempFile(megaTask.getSrtResultUrl());
 
             MultipartBodyBuilder builder = new MultipartBodyBuilder();
-            builder.part("video_file", new FileSystemResource(videoFile));
-            builder.part("audio_file", new FileSystemResource(audioFile));
-            builder.part("subtitle_file", new FileSystemResource(srtFile));
+            builder.part("video_file", new FileSystemResource(videoFile))
+                   .filename(videoFile.getFileName().toString());
+            builder.part("audio_file", new FileSystemResource(audioFile))
+                   .filename(audioFile.getFileName().toString());
+            builder.part("subtitle_file", new FileSystemResource(srtFile))
+                   .filename(srtFile.getFileName().toString());
 
             byte[] videoBytes = ffmpegWebClient.post()
                     .uri("/api/v1/process-mobile")
@@ -45,6 +49,10 @@ public class FFmpegService {
                     .retrieve()
                     .bodyToMono(byte[].class)
                     .block(Duration.ofMinutes(10));
+                    
+            Files.deleteIfExists(videoFile);
+            Files.deleteIfExists(audioFile);
+            Files.deleteIfExists(srtFile);
 
             if (videoBytes == null || videoBytes.length == 0) {
                 throw new IllegalStateException("Dữ liệu video trả về từ FFmpeg bị trống");
@@ -52,16 +60,11 @@ public class FFmpegService {
 
             String userId = megaTask.getUser().getId();
             String taskId = megaTask.getId();
-            Path resultsDir = Paths.get("uploads", userId, "MegaTask", taskId);
-            if (!Files.exists(resultsDir)) {
-                Files.createDirectories(resultsDir);
-            }
             String finalFileName = "final_mega_" + taskId + ".mp4";
-            Path resultPath = resultsDir.resolve(finalFileName);
             
-            Files.write(resultPath, videoBytes);
+            String r2Url = cloudflareStorageService.uploadBytes(videoBytes, userId + "/MegaTask/" + taskId, finalFileName);
 
-            megaTask.setFinalResultUrl("/uploads/" + userId + "/MegaTask/" + taskId + "/" + finalFileName);
+            megaTask.setFinalResultUrl(r2Url);
             megaTask.setProgress(100);
             megaTask.setStatus("COMPLETED");
             megaTaskRepository.save(megaTask);

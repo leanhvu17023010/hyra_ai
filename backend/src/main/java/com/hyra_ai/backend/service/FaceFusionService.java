@@ -28,6 +28,7 @@ import java.util.Map;
 public class FaceFusionService {
     private final WebClient faceFusionWebClient;
     private final SwapTaskRepository swapTaskRepository;
+    private final com.hyra_ai.backend.service.impl.CloudflareStorageService cloudflareStorageService;
 
     @Async
     public void sendtoFaceFusion(SwapTask swapTask) {
@@ -35,29 +36,31 @@ public class FaceFusionService {
             log.info("==> Bắt đầu quy trình FaceFusion cho Task: {}", swapTask.getId());
 
             // 1. Lấy đường dẫn file vật lý (Ưu tiên Audio nếu có, nếu không thì lấy Ảnh)
-            String sourceRelativePath;
+            String sourceUrl;
             String processorType;
 
             if (swapTask.getAudioMedia() != null) {
-                sourceRelativePath = swapTask.getAudioMedia().getUrl().substring(9); // Cắt bỏ "/uploads/"
+                sourceUrl = swapTask.getAudioMedia().getUrl();
                 processorType = "lip_syncer";
                 log.info("Chế độ: Lip Sync (Audio)");
             } else {
-                sourceRelativePath = swapTask.getSourceImage().getUrl().substring(9);
+                sourceUrl = swapTask.getSourceImage().getUrl();
                 processorType = "face_swapper";
                 log.info("Chế độ: Face Swap (Image)");
             }
             
-            String targetRelativePath = swapTask.getTargetMedia().getUrl().substring(9);
+            String targetUrl = swapTask.getTargetMedia().getUrl();
 
-            Path sourceFile = Paths.get("uploads", sourceRelativePath);
-            Path targetFile = Paths.get("uploads", targetRelativePath);
+            Path sourceFile = cloudflareStorageService.downloadToTempFile(sourceUrl);
+            Path targetFile = cloudflareStorageService.downloadToTempFile(targetUrl);
 
             // 2. Gửi task sang máy FaceFusion
             MultipartBodyBuilder builder = new MultipartBodyBuilder();
-            builder.part("source_file", new FileSystemResource(sourceFile));
-            builder.part("target_file", new FileSystemResource(targetFile));
-            // Truyền đúng processor (Tuy Backend của bạn có thể tự động nhận diện, nhưng truyền tường minh vẫn an toàn hơn)
+            builder.part("source_file", new FileSystemResource(sourceFile))
+                   .filename(sourceFile.getFileName().toString());
+            builder.part("target_file", new FileSystemResource(targetFile))
+                   .filename(targetFile.getFileName().toString());
+            // Truyền đúng processor
             builder.part("processors", processorType);
 
             ProcessResponse response = faceFusionWebClient.post()
@@ -67,6 +70,10 @@ public class FaceFusionService {
                     .retrieve()
                     .bodyToMono(ProcessResponse.class)
                     .block(Duration.ofMinutes(2));
+            
+            // Xóa file tạm sau khi đã gửi đi
+            Files.deleteIfExists(sourceFile);
+            Files.deleteIfExists(targetFile);
 
             if (response == null || !StringUtils.hasText(response.getTaskId())) {
                 throw new IllegalStateException("Không nhận được phản hồi hợp lệ từ máy FaceFusion");
@@ -286,19 +293,14 @@ public class FaceFusionService {
         String userId = swapTask.getUser().getId();
         String taskId = swapTask.getId();
 
-        Path resultsDir = Paths.get("uploads", userId, "SwapTask", taskId);
-        if (!Files.exists(resultsDir)) {
-            Files.createDirectories(resultsDir);
-        }
-
-        // Lưu file kết quả
         String extension = swapTask.getTargetMedia().getFileType().equalsIgnoreCase("IMAGE") ? ".jpg" : ".mp4";
         String resultFileName = "final_result_" + taskId + extension;
-        Path resultPath = resultsDir.resolve(resultFileName);
-        Files.write(resultPath, bytes);
+        
+        // Tải kết quả lên Cloudflare R2
+        String r2Url = cloudflareStorageService.uploadBytes(bytes, userId + "/SwapTask/" + taskId, resultFileName);
 
         // Cập nhật thông tin đường dẫn mới vào DB
-        swapTask.setResultUrl("/uploads/" + userId + "/SwapTask/" + taskId + "/" + resultFileName);
+        swapTask.setResultUrl(r2Url);
         swapTask.setStatus("Complete");
         swapTaskRepository.save(swapTask);
 

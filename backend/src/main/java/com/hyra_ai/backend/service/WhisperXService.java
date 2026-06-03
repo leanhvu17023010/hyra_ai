@@ -39,6 +39,7 @@ public class WhisperXService {
     private final MegaTaskRepository megaTaskRepository;
     private final WhisperTaskRepository whisperTaskRepository;
     private final UserRepository userRepository;
+    private final com.hyra_ai.backend.service.impl.CloudflareStorageService cloudflareStorageService;
 
     public WhisperTask createTask() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -105,18 +106,14 @@ public class WhisperXService {
             }
 
             String audioUrl = task.getAudioMedia().getUrl();
-            String relativePath = audioUrl.substring(9); // Cắt bỏ "/uploads/"
-            Path audioFile = Paths.get("uploads", relativePath);
+            Path audioFile = cloudflareStorageService.downloadToTempFile(audioUrl);
 
             String userId = task.getUser().getId();
             String taskId = task.getId();
-            Path taskDir = Paths.get("uploads", userId, "WhisperTask", taskId);
-            if (!Files.exists(taskDir)) {
-                Files.createDirectories(taskDir);
-            }
 
             MultipartBodyBuilder builder = new MultipartBodyBuilder();
-            builder.part("file", new FileSystemResource(audioFile)); // Sửa "audio_file" thành "file" theo API docs
+            builder.part("file", new FileSystemResource(audioFile))
+                   .filename(audioFile.getFileName().toString());
 
             byte[] zipBytes = whisperXWebClient.post()
                     .uri("/transcribe")
@@ -126,27 +123,32 @@ public class WhisperXService {
                     .bodyToMono(byte[].class)
                     .block(Duration.ofMinutes(10));
 
+            // Dọn dẹp temp file
+            Files.deleteIfExists(audioFile);
+
             if (zipBytes == null || zipBytes.length == 0) {
                 throw new IllegalStateException("Dữ liệu trả về từ WhisperX bị trống");
             }
 
-            // Xử lý giải nén file ZIP
+            // Xử lý giải nén file ZIP và ném lên R2
             try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(zipBytes))) {
                 ZipEntry entry;
                 while ((entry = zis.getNextEntry()) != null) {
                     if (!entry.isDirectory()) {
                         String fileName = Paths.get(entry.getName()).getFileName().toString();
-                        Path filePath = taskDir.resolve(fileName);
-                        Files.copy(zis, filePath, StandardCopyOption.REPLACE_EXISTING);
+                        byte[] fileData = zis.readAllBytes();
+                        
+                        String r2Url = cloudflareStorageService.uploadBytes(fileData, userId + "/WhisperTask/" + taskId, fileName);
                         
                         if (fileName.endsWith(".srt")) {
-                            task.setResultSrtUrl("/uploads/" + userId + "/WhisperTask/" + taskId + "/" + fileName);
+                            task.setResultSrtUrl(r2Url);
                         } else if (fileName.endsWith(".txt")) {
-                            task.setResultTxtUrl("/uploads/" + userId + "/WhisperTask/" + taskId + "/" + fileName);
+                            task.setResultTxtUrl(r2Url);
                         }
                     }
                 }
             }
+            
             
             task.setStatus("Complete");
             task.setProgress(100);
@@ -167,11 +169,11 @@ public class WhisperXService {
             megaTask.setProgress(30); // Giả lập tiến độ
             megaTaskRepository.save(megaTask);
 
-            String wavRelativePath = megaTask.getXttsResultUrl().substring(9); // Cắt bỏ "/uploads/"
-            Path wavFile = Paths.get("uploads", wavRelativePath);
+            Path wavFile = cloudflareStorageService.downloadToTempFile(megaTask.getXttsResultUrl());
 
             MultipartBodyBuilder builder = new MultipartBodyBuilder();
-            builder.part("file", new FileSystemResource(wavFile));
+            builder.part("file", new FileSystemResource(wavFile))
+                   .filename(wavFile.getFileName().toString());
 
             if (megaTask.getInputText() != null && !megaTask.getInputText().trim().isEmpty()) {
                 builder.part("text", megaTask.getInputText());
@@ -185,28 +187,26 @@ public class WhisperXService {
                     .bodyToMono(byte[].class)
                     .block(Duration.ofMinutes(5));
 
+            Files.deleteIfExists(wavFile);
+
             if (zipBytes == null || zipBytes.length == 0) {
                 throw new IllegalStateException("Dữ liệu trả về từ WhisperX bị trống");
             }
 
             String userId = megaTask.getUser().getId();
             String taskId = megaTask.getId();
-            Path resultsDir = Paths.get("uploads", userId, "MegaTask", taskId);
-            if (!Files.exists(resultsDir)) {
-                Files.createDirectories(resultsDir);
-            }
             
-            // Xử lý giải nén file ZIP
+            // Xử lý giải nén file ZIP và đẩy lên R2
             try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(zipBytes))) {
                 ZipEntry entry;
                 while ((entry = zis.getNextEntry()) != null) {
                     if (!entry.isDirectory()) {
                         String fileName = Paths.get(entry.getName()).getFileName().toString();
-                        Path filePath = resultsDir.resolve(fileName);
-                        Files.copy(zis, filePath, StandardCopyOption.REPLACE_EXISTING);
+                        byte[] fileData = zis.readAllBytes();
+                        String r2Url = cloudflareStorageService.uploadBytes(fileData, userId + "/MegaTask/" + taskId, fileName);
                         
                         if (fileName.endsWith(".srt")) {
-                            megaTask.setSrtResultUrl("/uploads/" + userId + "/MegaTask/" + taskId + "/" + fileName);
+                            megaTask.setSrtResultUrl(r2Url);
                         }
                     }
                 }

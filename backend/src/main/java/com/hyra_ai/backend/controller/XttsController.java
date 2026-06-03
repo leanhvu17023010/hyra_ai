@@ -64,7 +64,7 @@ public class XttsController {
 
     @PostMapping("/upload-and-start")
     public ApiResponse<String> uploadAndStart(
-            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "file", required = false) MultipartFile file,
             @RequestParam("text") String text,
             @RequestParam(value = "language", defaultValue = "vi") String language) {
         
@@ -75,13 +75,18 @@ public class XttsController {
             // 1. Tạo task mới
             XttsTask task = xttsService.createTask();
             
-            // 2. Lưu file upload
-            String filePath = storageService.store(file, folder);
-            Media voiceMedia = mediaRepository.save(Media.builder()
-                    .fileName(file.getOriginalFilename())
-                    .fileType("AUDIO")
-                    .url("/uploads/" + filePath)
-                    .build());
+            // 2. Lưu file upload (Nếu có file)
+            Media voiceMedia = null;
+            if (file != null && !file.isEmpty()) {
+                String filePath = storageService.store(file, folder);
+                String url = filePath.startsWith("http") ? filePath : "/uploads/" + filePath;
+                
+                voiceMedia = mediaRepository.save(Media.builder()
+                        .fileName(file.getOriginalFilename())
+                        .fileType("AUDIO")
+                        .url(url)
+                        .build());
+            }
                     
             // 3. Gắn Media vào Task và bắt đầu xử lý ngầm
             xttsService.attachAndProcess(task.getId(), text, language, voiceMedia);

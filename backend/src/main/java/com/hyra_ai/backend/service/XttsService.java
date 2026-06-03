@@ -40,6 +40,7 @@ public class XttsService {
     XttsTaskRepository xttsTaskRepository;
     UserRepository userRepository;
     WebClient xttsWebClient;
+    com.hyra_ai.backend.service.impl.CloudflareStorageService cloudflareStorageService;
 
     public XttsTask createTask() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -113,27 +114,30 @@ public class XttsService {
             task.setProgress(0);
             xttsTaskRepository.save(task);
 
-            Path voiceFile;
+            Path voiceFile = null;
+            Path tempFileToDelete = null;
+
             if (task.getSpeakerWav() == null) {
-                log.info("Task {}: Không có file giọng mẫu, tự động sử dụng uploads/defaults/default_voice.wav", task.getId());
+                log.info("Task {}: Không có file giọng mẫu, tự động sử dụng file mặc định cục bộ", task.getId());
+                // Sử dụng file tĩnh lưu cục bộ trên máy chủ Backend
                 voiceFile = Paths.get("uploads", "defaults", "default_voice.wav");
+                
                 if (!Files.exists(voiceFile)) {
-                    throw new IllegalStateException("Hệ thống yêu cầu giọng mẫu, nhưng file mặc định (uploads/defaults/default_voice.wav) không tồn tại!");
+                    throw new IllegalStateException("Không tìm thấy file default_voice.wav tại " + voiceFile.toAbsolutePath());
                 }
+                // File mặc định KHÔNG được phép xóa
+                tempFileToDelete = null;
             } else {
-                // 1. Lấy đường dẫn file vật lý của speaker_wav
+                // 1. Tải file từ Cloudflare về máy chủ Java (Temp file)
                 String speakerWavUrl = task.getSpeakerWav().getUrl();
-                String relativePath = speakerWavUrl.substring(9); // Cắt bỏ "/uploads/"
-                voiceFile = Paths.get("uploads", relativePath);
+                voiceFile = cloudflareStorageService.downloadToTempFile(speakerWavUrl);
+                // File tạm từ Cloudflare CẦN phải được xóa sau khi xử lý xong
+                tempFileToDelete = voiceFile;
             }
 
-            // 2. Tạo thư mục tạm thời cho task nếu chưa có
+            // (Không cần tạo thư mục uploads cục bộ nữa)
             String userId = task.getUser().getId();
             String taskId = task.getId();
-            Path taskDir = Paths.get("uploads", userId, "XttsTask", taskId);
-            if (!Files.exists(taskDir)) {
-                Files.createDirectories(taskDir);
-            }
 
             // 3. Lấy text
             String textContent = task.getText() != null ? task.getText() : "";
@@ -192,10 +196,10 @@ public class XttsService {
                                                             audioBytes -> {
                                                                 try {
                                                                     if (audioBytes != null && audioBytes.length > 0) {
-                                                                        Path resultPath = taskDir.resolve("result.wav");
-                                                                        Files.write(resultPath, audioBytes);
+                                                                        // Tải thẳng lên Cloudflare R2
+                                                                        String r2ResultUrl = cloudflareStorageService.uploadBytes(audioBytes, userId + "/XttsTask/" + taskId, "result.wav");
 
-                                                                        task.setResultUrl("/uploads/" + userId + "/XttsTask/" + taskId + "/result.wav");
+                                                                        task.setResultUrl(r2ResultUrl);
                                                                         task.setStatus("Complete");
                                                                         xttsTaskRepository.save(task);
                                                                         log.info("==> XTTS hoàn tất, file âm thanh được lưu tại: {}", task.getResultUrl());
@@ -203,7 +207,7 @@ public class XttsService {
                                                                         log.error("Không thể tải byte[] từ Python (file trống)");
                                                                     }
                                                                 } catch (Exception ex) {
-                                                                    log.error("Lỗi khi ghi file wav: ", ex);
+                                                                    log.error("Lỗi khi ghi kết quả XTTS lên R2: ", ex);
                                                                 }
                                                             },
                                                             err -> {
@@ -228,6 +232,18 @@ public class XttsService {
                                 log.info("Task {}: Đóng luồng kết nối SSE.", taskId);
                             }
                     );
+
+            // Dọn dẹp file tạm sau khi đã ném request vào luồng Async
+            final Path fileToDelete = tempFileToDelete;
+            if (fileToDelete != null) {
+                java.util.concurrent.CompletableFuture.runAsync(() -> {
+                    try {
+                        // Delay 1 chút để WebClient kịp đọc file gửi đi trước khi xoá
+                        Thread.sleep(5000);
+                        Files.deleteIfExists(fileToDelete);
+                    } catch (Exception ignored) {}
+                });
+            }
 
         } catch (Exception e) {
             log.error("Lỗi khởi tạo gọi XTTS cho task: " + task.getId(), e);

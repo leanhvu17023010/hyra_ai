@@ -85,10 +85,10 @@ public class MediaController {
             }
         }
 
-            // BƯỚC 3: Lưu file xuống ổ cứng
+            // BƯỚC 3: Lưu file xuống storage
             String filePath = storageService.store(file, folder);
 
-            String url = "/uploads/" + filePath;
+            String url = filePath.startsWith("http") ? filePath : "/uploads/" + filePath;
 
             Media media = Media.builder()
                     .fileName(file.getOriginalFilename())

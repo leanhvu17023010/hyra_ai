@@ -66,3 +66,11 @@ logging:
 github:
 client-id: "Ov23li9gzj8XBdJI3dxw"
 client-secret: "d1090f9c88573ca3e2a9fa6f1087e30c3837010f"
+
+cloudflare:
+  r2:
+    access-key: ${CLOUDFLARE_R2_ACCESS_KEY_ID:}
+    secret-key: ${CLOUDFLARE_R2_SECRET_ACCESS_KEY:}
+    endpoint: ${CLOUDFLARE_R2_ENDPOINT:}
+    bucket: ${CLOUDFLARE_R2_BUCKET:}
+    public-url: ${CLOUDFLARE_R2_URL:}

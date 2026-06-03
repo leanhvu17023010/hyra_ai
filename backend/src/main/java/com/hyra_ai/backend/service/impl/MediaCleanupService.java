@@ -28,6 +28,7 @@ public class MediaCleanupService {
     com.hyra_ai.backend.repository.WhisperTaskRepository whisperTaskRepository;
     com.hyra_ai.backend.repository.MegaTaskRepository megaTaskRepository;
     MediaRepository mediaRepository;
+    com.hyra_ai.backend.service.impl.CloudflareStorageService cloudflareStorageService;
 
     // Chạy lúc 00:00 mỗi ngày
     @Scheduled(cron = "0 0 0 * * ?")
@@ -58,8 +59,8 @@ public class MediaCleanupService {
 
             try {
                 if (task.getUser() != null) {
-                    Path taskFolder = Paths.get("uploads", task.getUser().getId(), task.getId());
-                    FileSystemUtils.deleteRecursively(taskFolder.toFile());
+                    String prefix = task.getUser().getId() + "/SwapTask/" + task.getId() + "/";
+                    cloudflareStorageService.deletePrefix(prefix);
                 }
 
                 var sourceImage = task.getSourceImage();
@@ -102,8 +103,8 @@ public class MediaCleanupService {
 
             try {
                 if (task.getUser() != null) {
-                    Path taskFolder = Paths.get("uploads", task.getUser().getId(), "XttsTask", task.getId());
-                    FileSystemUtils.deleteRecursively(taskFolder.toFile());
+                    String prefix = task.getUser().getId() + "/XttsTask/" + task.getId() + "/";
+                    cloudflareStorageService.deletePrefix(prefix);
                 }
 
                 var speakerWav = task.getSpeakerWav();
@@ -140,8 +141,8 @@ public class MediaCleanupService {
 
             try {
                 if (task.getUser() != null) {
-                    Path taskFolder = Paths.get("uploads", task.getUser().getId(), "WhisperTask", task.getId());
-                    FileSystemUtils.deleteRecursively(taskFolder.toFile());
+                    String prefix = task.getUser().getId() + "/WhisperTask/" + task.getId() + "/";
+                    cloudflareStorageService.deletePrefix(prefix);
                 }
 
                 var audioMedia = task.getAudioMedia();
@@ -179,8 +180,8 @@ public class MediaCleanupService {
 
             try {
                 if (task.getUser() != null) {
-                    Path taskFolder = Paths.get("uploads", task.getUser().getId(), "MegaTask", task.getId());
-                    FileSystemUtils.deleteRecursively(taskFolder.toFile());
+                    String prefix = task.getUser().getId() + "/MegaTask/" + task.getId() + "/";
+                    cloudflareStorageService.deletePrefix(prefix);
                 }
 
                 var sourceFace = task.getSourceFace();
