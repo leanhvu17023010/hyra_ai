@@ -67,6 +67,8 @@ public class XttsService {
         XttsTask task = xttsTaskRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy task XTTS với ID: " + taskId));
 
+
+
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         if (task.getUser() == null || !task.getUser().getEmail().equals(email)) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
