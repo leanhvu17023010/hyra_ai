@@ -72,10 +72,11 @@ public class WhisperController {
 
             // 2. Lưu file upload
             String filePath = storageService.store(file, folder);
+            String url = filePath.startsWith("http") ? filePath : "/uploads/" + filePath;
             Media audioMedia = mediaRepository.save(Media.builder()
                     .fileName(file.getOriginalFilename())
                     .fileType("AUDIO")
-                    .url("/uploads/" + filePath)
+                    .url(url)
                     .build());
 
             // 3. Gắn Media vào Task và bắt đầu xử lý ngầm

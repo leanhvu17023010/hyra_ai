@@ -106,6 +106,11 @@ public class CloudflareStorageService implements StorageService {
      */
     public java.nio.file.Path downloadToTempFile(String fileUrl) {
         try {
+            // Khắc phục lỗi URL bị lưu sai trong database do lỗi trước đó
+            if (fileUrl != null && fileUrl.startsWith("/uploads/http")) {
+                fileUrl = fileUrl.substring("/uploads/".length());
+            }
+            
             URL url = new URL(fileUrl);
             String extension = fileUrl.contains(".") ? fileUrl.substring(fileUrl.lastIndexOf(".")) : ".tmp";
             

@@ -9,10 +9,10 @@ spring:
       max-file-size: 200MB
       max-request-size: 200MB
   datasource:
-    url: "jdbc:mysql://172.16.2.4:3306/hyra_gen_ai?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
+    url: "jdbc:mysql://YOUR_DB_HOST:3306/YOUR_DB_NAME?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
     driverClassName: com.mysql.cj.jdbc.Driver
-    username: "hyra_gen_ai"
-    password: "OIpNEgHuFBHn4BWk"
+    username: "YOUR_DB_USERNAME"
+    password: "YOUR_DB_PASSWORD"
   jpa:
     hibernate:
       ddl-auto: update
@@ -27,9 +27,9 @@ spring:
 
 brevo:
   api:
-    key: "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"
+    key: "YOUR_BREVO_API_KEY"
   sender:
-    email: "leanhvu4002@gmail.com"
+    email: "YOUR_BREVO_SENDER_EMAIL"
 
 facefusion:
   base-url: http://172.16.1.75:8000
@@ -46,7 +46,7 @@ ffmpeg:
     url: http://172.16.0.207:8000
 
 jwt:
-  signerKey: "sc0YbTdiDmYOMA40iBkUujJw7Oec0hBHO4bKSeCH+1kPlCLu0ZGWz5vGt//Npqhs"
+  signerKey: "YOUR_JWT_SECRET_KEY"
   valid-duration: 7200
   refreshable-duration: 360000
 
@@ -64,13 +64,13 @@ logging:
     io.netty.channel: WARN
 
 github:
-client-id: "Ov23li9gzj8XBdJI3dxw"
-client-secret: "d1090f9c88573ca3e2a9fa6f1087e30c3837010f"
+client-id: "YOUR_GITHUB_CLIENT_ID"
+client-secret: "YOUR_GITHUB_CLIENT_SECRET"
 
 cloudflare:
   r2:
-    access-key: "a0cb34e36dea79536db1659bef78363c"
-    secret-key: "a5d53e6625b3643de246ffcca24e9bd493b2364806cbc673ed8221fdca91b118"
-    endpoint: "https://7d3e44c92f488a193cecc4717b21319d.r2.cloudflarestorage.com"
-    bucket: "hyra-gen-ai-beta"
-    public-url: "https://cdn.hyra-gen-ai-beta.hyrateksolution.com"
+    access-key: "YOUR_CLOUDFLARE_R2_ACCESS_KEY"
+    secret-key: "YOUR_CLOUDFLARE_R2_SECRET_KEY"
+    endpoint: "YOUR_CLOUDFLARE_R2_ENDPOINT"
+    bucket: "YOUR_CLOUDFLARE_R2_BUCKET"
+    public-url: "YOUR_CLOUDFLARE_R2_PUBLIC_URL"

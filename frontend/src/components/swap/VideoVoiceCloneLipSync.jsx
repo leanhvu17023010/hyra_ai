@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { FiUploadCloud, FiLogIn, FiVideo } from 'react-icons/fi';
+import { FiUploadCloud, FiLogIn, FiVideo, FiX } from 'react-icons/fi';
 import swapService from '../../services/swapService';
 import megaWorkflowService from '../../services/megaWorkflowService';
 import api from '../../services/api';
@@ -46,10 +46,24 @@ const parseSRT = (srtText) => {
     return subs;
 };
 
-function UploadBox({ label, icon, preview, isVideo, isAudio, audioName, onClick, inputRef, onChange, accept, hint }) {
+function UploadBox({ label, icon, preview, isVideo, isAudio, audioName, onClick, inputRef, onChange, accept, hint, onClear }) {
     return (
         <div className="rounded-3xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-5 shadow-lg flex flex-col flex-1">
-            <p className="mb-3 text-sm font-bold text-slate-700 dark:text-slate-200">{label}</p>
+            <div className="flex justify-between items-center mb-3">
+                <p className="text-sm font-bold text-slate-700 dark:text-slate-200">{label}</p>
+                {preview && onClear && (
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onClear();
+                        }}
+                        className="w-7 h-7 rounded-full bg-red-100 dark:bg-red-900/30 text-red-500 hover:bg-red-500 hover:text-white transition-colors flex items-center justify-center cursor-pointer"
+                        title="Xóa tệp"
+                    >
+                        <FiX size={14} />
+                    </button>
+                )}
+            </div>
             <div
                 className="flex-1 min-h-[180px] border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl bg-slate-50 dark:bg-slate-950/40 flex flex-col items-center justify-center cursor-pointer hover:border-[#5b6ef7] dark:hover:border-[#a78bfa] hover:bg-slate-100/50 dark:hover:bg-slate-950/60 transition-all duration-300 overflow-hidden"
                 onClick={onClick}
@@ -139,6 +153,13 @@ function VideoVoiceCloneLipSync() {
         if (resultVideoRef.current) {
             setCurrentTime(resultVideoRef.current.currentTime);
         }
+    };
+
+    const handleClearTargetVideo = () => {
+        setTargetVideo(null);
+        if (targetVideoUrl) URL.revokeObjectURL(targetVideoUrl);
+        setTargetVideoUrl(null);
+        if (videoInputRef.current) videoInputRef.current.value = '';
     };
 
     const handleClearVoiceSample = () => {
@@ -336,6 +357,7 @@ function VideoVoiceCloneLipSync() {
                                 setTargetVideoUrl(URL.createObjectURL(file));
                             }
                         }}
+                        onClear={handleClearTargetVideo}
                         accept="video/*"
                         hint="Hỗ trợ MP4, WebM"
                     />
@@ -376,6 +398,7 @@ function VideoVoiceCloneLipSync() {
                                 setVoiceSampleUrl(URL.createObjectURL(file));
                             }
                         }}
+                        onClear={handleClearVoiceSample}
                         accept="audio/*"
                         hint="Hỗ trợ MP3, WAV, M4A"
                     />

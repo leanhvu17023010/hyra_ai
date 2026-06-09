@@ -122,28 +122,31 @@ public class MegaWorkflowController {
 
             // Lưu Target Video
             String videoPath = storageService.store(targetVideoFile, folder);
+            String videoUrl = videoPath.startsWith("http") ? videoPath : "/uploads/" + videoPath;
             Media targetVideo = mediaRepository.save(Media.builder()
                     .fileName(targetVideoFile.getOriginalFilename())
                     .fileType("VIDEO")
-                    .url("/uploads/" + videoPath)
+                    .url(videoUrl)
                     .build());
 
             // Lưu Voice Sample
             String voicePath = storageService.store(voiceSampleFile, folder);
+            String voiceUrl = voicePath.startsWith("http") ? voicePath : "/uploads/" + voicePath;
             Media voiceSample = mediaRepository.save(Media.builder()
                     .fileName(voiceSampleFile.getOriginalFilename())
                     .fileType("AUDIO")
-                    .url("/uploads/" + voicePath)
+                    .url(voiceUrl)
                     .build());
 
             // Lưu Source Face (nếu có)
             Media sourceFace = null;
             if (sourceFaceFile != null && !sourceFaceFile.isEmpty()) {
                 String facePath = storageService.store(sourceFaceFile, folder);
+                String faceUrl = facePath.startsWith("http") ? facePath : "/uploads/" + facePath;
                 sourceFace = mediaRepository.save(Media.builder()
                         .fileName(sourceFaceFile.getOriginalFilename())
                         .fileType("IMAGE")
-                        .url("/uploads/" + facePath)
+                        .url(faceUrl)
                         .build());
             }
 
