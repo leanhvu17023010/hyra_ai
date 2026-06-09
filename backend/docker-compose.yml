@@ -31,7 +31,8 @@ services:
     environment:
       TZ: Asia/Ho_Chi_Minh
       # Ghi đè URL kết nối DB để trỏ về container mysql thay vì localhost trong .env
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${DB_NAME:-hyra_ai}?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true
+      # (Đã comment lại để code ăn theo application.yaml hoặc biến DBMS_CONNECTION)
+      # SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${DB_NAME:-hyra_ai}?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true
       
       # Ghi đè các biến môi trường khi deploy nếu cần
       # APP_FRONTEND_BASE_URL: "https://your-frontend-domain.com"

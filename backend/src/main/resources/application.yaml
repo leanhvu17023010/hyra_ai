@@ -9,10 +9,10 @@ spring:
       max-file-size: 200MB
       max-request-size: 200MB
   datasource:
-    url: ${DBMS_CONNECTION:jdbc:mysql://localhost:3306/hyra_ai?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
+    url: ${DBMS_CONNECTION:jdbc:mysql://172.16.2.4:3306/hyra_gen_ai?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
     driverClassName: com.mysql.cj.jdbc.Driver
-    username: ${DBMS_USERNAME:root}
-    password: ${DBMS_PASSWORD:root}
+    username: ${DBMS_USERNAME:hyra_gen_ai}
+    password: ${DBMS_PASSWORD:OIpNEgHuFBHn4BWk}
   jpa:
     hibernate:
       ddl-auto: update
