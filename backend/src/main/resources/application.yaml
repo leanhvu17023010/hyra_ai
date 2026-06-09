@@ -35,7 +35,7 @@ facefusion:
   base-url: http://172.16.1.75:8000
 
 xtts:
-  base-url: https://hyra-gen-ai-text-to-speech-beta.hyrateksolution.com/
+  base-url: http://172.16.1.75:8020
 
 whisperx:
   api:
